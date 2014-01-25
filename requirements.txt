@@ -21,11 +21,9 @@ SQLAlchemy==0.9.1
 WTForms==1.0.5
 Werkzeug==0.9.4
 argparse==1.2.1
-configobj==4.7.2
 distribute==0.7.3
 httplib2==0.8
 ipython==1.1.0
-itsdangerous==0.23
 rpyc==3.2.3
 six==1.4.1
 sqlsoup==0.9.0
