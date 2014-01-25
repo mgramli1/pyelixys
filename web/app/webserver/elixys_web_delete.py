@@ -18,7 +18,7 @@ from flask import Blueprint
 from flask import current_app 
 from flask import request
 # import basic user auth
-from app.userauth.basicauth import requires_auth
+from web.app.userauth.basicauth import requires_auth
 
 # import the db and sequence manager from elixysweb.py
 # import utility that obtains the client state

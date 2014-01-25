@@ -19,7 +19,7 @@ sys.path.append("/var/www/wsgi")
 import CoreServerProxy
 from CoreServer import InitialRunState
 import DBComm as DBComm_old
-from database.dbcomm import DBComm
+from web.database.dbcomm import DBComm
 import SequenceManager
 import Exceptions
 

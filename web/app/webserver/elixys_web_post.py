@@ -11,7 +11,7 @@ from flask import Blueprint
 from flask import current_app 
 from flask import request
 # import basic user auth
-from app.userauth.basicauth import requires_auth
+from web.app.userauth.basicauth import requires_auth
 
 # import access to coreserver proxy
 # and DB objects.

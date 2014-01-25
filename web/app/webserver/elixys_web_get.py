@@ -15,7 +15,7 @@ from flask import request
 import sys
 # import flask class struct implmentation
 # import basic user auth
-from app.userauth.basicauth import requires_auth
+from web.app.userauth.basicauth import requires_auth
 
 # import access to coreserver proxy
 # and DB objects.

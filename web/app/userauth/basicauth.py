@@ -6,7 +6,7 @@ import hashlib
 # import logging
 from flask import current_app
 # import db comm layer
-from database.dbcomm import DBComm
+from web.database.dbcomm import DBComm
 
 def check_auth(username, password):
     """
