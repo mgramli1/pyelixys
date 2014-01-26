@@ -78,6 +78,15 @@ permissions to execute.
 sudo python runserver.py
 ```
 
+The webserver shall handle all web requests to and 
+from the Elixys server. To access the webserver, open
+a browser and visit the URL: `localhost`. You will be
+required to enter your creditionals.
+Examples of URLs to visit include:
+`localhost/state`
+`localhost/config`
+`localhost/runstate`
+
 [mbedlink]: http://mbed.org/
 [sofiebiolink]: http://sofiebio.com/
 [elixyslink]: http://sofiebio.com/products/chemistry/
