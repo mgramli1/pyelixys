@@ -7,7 +7,11 @@ development board][mbedlink].  It communicates with the hardware using the
 
 Developing with pyelixys
 ------------------------
-First you should install python and virtualenv.
+First, install pip.
+```bash
+sudo apt-get install python-setuptools
+```
+Next, install the virtual environment - virtualenv.
 ```bash
 pip install virtualenv
 ```
@@ -62,6 +66,17 @@ python -m pyelixys.hal.tests.testelixyshw
 The hardware simulator object and all corresponding
 status information is accessible from the variable
 `e`.
+
+Starting the Webserver
+------------------------------------------
+To run the Elixys web server, perform the following
+command in the root of the virtual environment. The
+runserver shall run on port 80 and requires sudo
+permissions to execute.
+
+```bash
+sudo python runserver.py
+```
 
 [mbedlink]: http://mbed.org/
 [sofiebiolink]: http://sofiebio.com/
