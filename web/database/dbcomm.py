@@ -660,7 +660,7 @@ class DBComm:
             roles_array = []
             for role in roles:
                 roles_array.append(
-                        role.to_dict())
+                        role.as_dict())
         return roles_array
         
         # Raise an exception since role name was invalid.
@@ -692,7 +692,7 @@ class DBComm:
         # Check if resultset is valid (Non-null)
         if role != None and role != []:
             session.close()
-            return role.to_dict()
+            return role.as_dict()
         # Raise an exception since role name was invalid.
         session.close()
         log.error("Couldn't get the role for '" + str(role_name) + "'.")
@@ -740,7 +740,7 @@ class DBComm:
                     Flags = int(flags)).first()
         if role != None:
             session.close()
-            return role.to_dict()
+            return role.as_dict()
         # Raise an exception since role name was invalid.
         session.rollback()
         session.close()
@@ -791,7 +791,7 @@ class DBComm:
                     Flags = str(updated_flags)).first()
         if role != None:
             session.close()
-            return role.to_dict()
+            return role.as_dict()
         
         # Raise an exception since role name was invalid.
         session.rollback()
@@ -880,7 +880,7 @@ class DBComm:
         # add it to 'accesslevel' on the dictionary object.
         user_array = []
         for user in users:
-            user_dict = user.to_dict()
+            user_dict = user.as_dict()
             role_id = int(user_dict['accesslevel'])
             # Obtain the information from RoleID in the
             # Roles table and get the RoleName.
@@ -927,7 +927,7 @@ class DBComm:
         # and not a RoleName. We shall first convert a user
         # row to a dictionary then query for the RoleID and
         # add it to 'accesslevel' on the dictionary object.
-        user_dict = user.to_dict()
+        user_dict = user.as_dict()
         role_id = int(user_dict['accesslevel'])
         # Obtain the information from RoleID in the
         # Roles table and get the RoleName.
@@ -1164,7 +1164,7 @@ class DBComm:
             raise Exception("User " + str(updated_role_name) + " not found")
         # Close session and return formatted dict
         session.close()
-        return user.to_dict()
+        return user.as_dict()
         #old: return self.__CallStoredProcedure("UpdateUser", (sUsername, 
 
     def update_user_password(self, username, password_hash):
@@ -1225,7 +1225,7 @@ class DBComm:
         session.close()
         user = session.query(User).filter_by(
                     Username = str(username)).first()
-        return user.to_dict()
+        return user.as_dict()
         # old: self.__CallStoredProcedure(
         # "UpdateUserPassword", (sUsername, sPasswordHash))
 
@@ -1457,7 +1457,7 @@ class DBComm:
         # row to a dictionary.
         seq_array = []
         for sequence in sequences:
-            sequence_dict = sequence.to_dict()            
+            sequence_dict = sequence.as_dict()            
             # Need to obtain the user name from the UserID
             seq_user_name = session.query(User).filter_by(
                     UserID = int(sequence.UserID))
@@ -1513,7 +1513,7 @@ class DBComm:
         seq_array = []
         for sequence in sequences:
             print str(sequences)
-            comp_dict = sequence.to_dict()            
+            comp_dict = sequence.as_dict()            
             # Need to obtain the user name from the UserID
             seq_user_name = session.query(User).filter_by(
                     UserID = sequence.UserID).first().Username
@@ -1569,7 +1569,7 @@ class DBComm:
         seq_array = []
         for sequence in sequences:
             print str(sequences)
-            comp_dict = sequence.to_dict()        
+            comp_dict = sequence.as_dict()        
             # Need to obtain the user name from the UserID
             seq_user_name = session.query(User).filter_by(
                 UserID = sequence.UserID).first().Username
@@ -1615,7 +1615,7 @@ class DBComm:
 
         # The query is valid, We shall first convert a seq
         # row to a dictionary.
-        comp_dict = sequence.to_dict() 
+        comp_dict = sequence.as_dict() 
         
         # Need to obtain the user name from the UserID
         seq_user_name = session.query(User).filter_by(
@@ -1931,7 +1931,7 @@ class DBComm:
         # return as a dictionary object
         # format it
         session.close() 
-        return component.to_dict()
+        return component.as_dict()
 
     def get_previous_component(self, component_id):
         '''
@@ -1973,7 +1973,7 @@ class DBComm:
         # return as a dictionary object
         # format it
         session.close() 
-        return prev_component.to_dict() 
+        return prev_component.as_dict() 
 
     def get_next_component(self, component_id):
         '''
@@ -2014,7 +2014,7 @@ class DBComm:
         # return as a dictionary object
         # format it
         session.close() 
-        return next_component.to_dict()
+        return next_component.as_dict()
 
     def get_components_by_sequence(self, sequence_id):
         '''
@@ -2397,7 +2397,7 @@ class DBComm:
         component = component[int(cassette_number)]
         # return as a dictionary object & format it
         session.close() 
-        return component.to_dict()
+        return component.as_dict()
 
     def get_last_component_id(self, session):
         '''
@@ -2475,10 +2475,10 @@ class DBComm:
 
         # return as a dictionary object
         # format it
-        # TODO: call component.to_dict()
+        # TODO: call component.as_dict()
         
         session.close() 
-        return reagent.to_dict()
+        return reagent.as_dict()
 
     def get_reagents_by_sequence(self, sequence_id):
         '''
@@ -2506,7 +2506,7 @@ class DBComm:
         # add each reagent dictionary to an array
         reagent_array = []
         for reagent in reagents:
-            reagent_array.append(reagent.to_dict())
+            reagent_array.append(reagent.as_dict())
         
         session.close()
         return reagent_array
@@ -2539,7 +2539,7 @@ class DBComm:
         # add each reagent dictionary to an array
         reagent_array = []
         for reagent in reagents:
-            reagent_array.append(reagent.to_dict())
+            reagent_array.append(reagent.as_dict())
         
         session.close()
         return reagent_array

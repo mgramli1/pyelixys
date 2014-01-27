@@ -34,7 +34,7 @@ class Component(Base):
     def __repr__(self):
         return '<Component(%d,%d)>' % (self.ComponentID, self.SequenceID)
 
-    def to_dict(self):
+    def as_dict(self):
         """
         Function shall return the
         Components class attributes as a
@@ -83,7 +83,7 @@ class Reagents(Base):
     def __repr__(self):
         return '<Reagent(%d,%s)>' % (self.ReagentID, self.Name)
 
-    def to_dict(self):
+    def as_dict(self):
         """
         Function shall convert the
         reagent's properties as a 
@@ -123,7 +123,7 @@ class Roles(Base):
     def __repr__(self):
         return '<Roles(%d,%s)>' % (self.RoleID, self.RoleName)
 
-    def to_dict(self):
+    def as_dict(self):
         """
         Function shall format the Roles
         class attributes as a Python dictionary.
@@ -446,7 +446,7 @@ class Sequence(Base):
     def __repr__(self):
         return '<Sequence(%d,%s)>' % (self.SequenceID, self.Name)
 
-    def to_dict(self):
+    def as_dict(self):
         """
         Function shall return the
         Sequences class attributes as a
@@ -502,7 +502,7 @@ class User(Base):
          self.FirstName,
          self.LastName)
 
-    def to_dict(self):
+    def as_dict(self):
         """
         Function shall return the
         Users class attributes as a
