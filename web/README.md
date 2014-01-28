@@ -22,7 +22,8 @@ source bin/activate
 ```
 Clone the repository
 ```bash
-git clone git@github.com:henryeherman/pyelixys.git
+git clone git@github.com:LuisFuentes/pyelixys.git
+
 cd pyelixys
 ```
 Install the python dependencies using pip
@@ -38,30 +39,6 @@ run the following command.
 ```bash
 sudo apt-get install python2.7-dev
 ```
-
-Working with the HAL & the Hardware Simulator
----------------------------------------------
-To run the Elixys host server and gain access
-to system object, which gives access to all
-features the Elixys Robot, run the following
-command from the root of the virtual environment.
-The system object will be loaded as the variable
-`s`.
-
-```bash
-python -m pyelixys.hal.system
-```
-
-To run the Elixys hardware simulator, run this
-command from the root of the Elixys virtual
-environment.
-```bash
-python -m pyelixys.hal.tests.testelixyshw
-```
-
-The hardware simulator object and all corresponding
-status information is accessible from the variable
-`e`.
 
 [mbedlink]: http://mbed.org/
 [sofiebiolink]: http://sofiebio.com/
