@@ -8,13 +8,14 @@ and read 2 ADCs.
 import os
 import time
 import math
+import re
 import serial
 from serial import SerialException
 from pyelixys.hal.elixysobject import ElixysObject
 from pyelixys.logs import hallog as log
 from pyelixys.elixysexceptions import ElixysComportError, \
                                       ElixysCBoxError
-import re
+
 
 class ControlBoxSystem(ElixysObject):
     """ The ControlBoxStatus gives access to the features of
@@ -35,6 +36,12 @@ class ControlBoxSystem(ElixysObject):
             raise ElixysComportError("Could not "
                     "determine platform for port")
         self._baud = self.conf['baud']
+
+        if self.sysconf['Simulator']['controlbox']:
+            log.debug("Loading the control box simulator")
+            from pyelixys.hal.tests.testcontrolbox import CBoxSim
+            self.serial = CBoxSim()
+            return
 
         try:
             self.serial = serial.Serial(port=self._port,
