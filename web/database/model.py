@@ -5,6 +5,8 @@ from sqlalchemy import Column, Integer, String, Float, DateTime, Boolean, create
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship, backref
 from sqlalchemy.orm import sessionmaker
+from sqlalchemy.schema import ForeignKeyConstraint
+
 engine = create_engine('mysql://root@127.0.0.1/Elixys', echo=True)
 Base = declarative_base(engine)
 
@@ -21,6 +23,8 @@ class Component(Base):
     Note = Column(String(length=64))
     Details = Column(String(length=2048))
     runlogs = relationship('RunLog', backref='runlogs')
+    sequence = relationship('Sequence', backref='components',
+            foreign_keys=[SequenceID])
 
     def __init__(self, seqID, previousSeqID, nextSeqID, seq_type, note, details, componentID = None):
         self.ComponentID = componentID
@@ -58,6 +62,10 @@ class Component(Base):
         comp_dict['type'] = str(details['type'])
         return comp_dict
 
+    def get_details(self):
+        return json.loads(self.Details)
+    
+    details = property(get_details)
 
 class Reagents(Base):
     """
@@ -431,6 +439,7 @@ class Sequence(Base):
     ComponentCount = Column(Integer)
     Valid = Column(Boolean, default=False)
     Dirty = Column(Boolean, default=False)
+    first_component = relationship('Component', foreign_keys=[FirstComponentID])
 
     def __init__(self, name, comment, type_, creationData, userID, firstComponentID, componentCount, valid, dirty):
         self.Name = name
@@ -521,13 +530,11 @@ class User(Base):
         user_dict['messagelevel'] = int(self.MessageLevel)
         return user_dict
 
-
+metadata = Base.metadata
+Session = sessionmaker(bind=engine)
+    
 def loadSession():
-    metadata = Base.metadata
-    Session = sessionmaker(bind=engine)
-    session = Session()
-    return session
-
+    return Session()
 
 if __name__ == '__main__':
     session = loadSession()

@@ -22,6 +22,18 @@ hwsimlog.setLevel(logging.DEBUG)
 hwsimlog.addHandler(hdlr)
 
 
+seqlog = logging.getLogger("elixys.seq")
+seqlog.setLevel(logging.DEBUG)
+seqlog.addHandler(hdlr)
+
+weblog = logging.getLogger("elixys.web")
+weblog.setLevel(logging.DEBUG)
+weblog.addHandler(hdlr)
+
+dblog = logging.getLogger("elixys.db")
+dblog.setLevel(logging.DEBUG)
+dblog.addHandler(hdlr)
+
 wsfhdlr = logging.FileHandler("wsserver.log",mode='a')
 wsfhdlr.setLevel(logging.DEBUG)
 wsslog = logging.getLogger("elixys.wsserver")
