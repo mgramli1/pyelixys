@@ -40,6 +40,13 @@ class ControlBoxSystem(ElixysObject):
             self.serial = serial.Serial(port=self._port,
                                     baudrate=self._baud,
                                     timeout=0.2)
+	    if os.name == 'posix':
+		self.serial.close()
+		self.serial.baudrate = 115200
+                self.serial.baudrate = self._baud
+		self.serial.open()
+		self.serial.baudrate = 115200
+		self.serial.baudrate = self._baud
         except SerialException:
             log.error("Failed to open comport %s", self._port)
             raise ElixysComportError("Serial COM port not available at %s."
@@ -62,8 +69,10 @@ class ControlBoxSystem(ElixysObject):
                        "(?P<adc0>[0-9A-Fa-f]*), "
                        "(?P<adc1>[0-9A-Fa-f]*)")
         mtch = regex.match(resp)
-        adcval0 = int(mtch.group('adc0'), 16) * self.conf['ADCCONST0']
-        adcval1 = int(mtch.group('adc1'), 16) * self.conf['ADCCONST1']
+        adcval0 = (int(mtch.group('adc0'), 16) - self.conf['ADCOFFSET0']) * \
+			self.conf['ADCCONST0']
+        adcval1 = (int(mtch.group('adc1'), 16) - self.conf['ADCOFFSET1']) * \
+			self.conf['ADCCONST1']
         return adcval0, adcval1
 
     def get_adc0(self):
