@@ -7,9 +7,11 @@ development board][mbedlink].  It communicates with the hardware using the
 
 Developing with pyelixys
 ------------------------
-First, install pip.
+First, install pip, python-dev, and mysqlclient.
 ```bash
 sudo apt-get install python-setuptools
+sudo apt-get install python-dev
+sudo apt-get install libmysqlclient-dev
 ```
 Next, install the virtual environment - virtualenv.
 ```bash
