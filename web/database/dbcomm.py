@@ -14,7 +14,7 @@ import sys
 import os
 
 # Import the DB connection object from SQLAlchemy
-from sqlalchemy import create_engine
+from pyelixys.web.database.model import engine
 
 # Import from Model all ORM objects
 from model import Component
@@ -141,14 +141,14 @@ class DBComm:
     def __init__(self):
         '''
         Constructor for the DBComm object.
-        Function expects a string for a configuration .ini filename 
+        Function expects a string for a configuration .ini filename
         to be passed in as a parameter. If no config or an invalid
         filename is provided, function will raise an exception.
         Function doesn't return an object.
         Function shall store various values from the .ini file
         to values on the DBComm object.
         '''
-        
+
         self.database = None
         self.database_lock = TimedLock.TimedLock()
 
@@ -172,23 +172,23 @@ class DBComm:
                 self.system_configuration["DeliveryPositionsPerReactor"])
         self.configuration["reactorlayoutdimensions"] = (
                 parse_point(self.system_configuration["ReactorLayoutDimensions"]))
-        
+
         self.configuration["reactorreagentpositions"] = []
         for index in range(1, self.configuration["reagentsperreactor"] + 1):
             self.configuration["reactorreagentpositions"].append(
                     parse_point(self.system_configuration["ReactorReagent" +
                             str(index)]))
-        
+
         self.configuration["reactordeliverypositions"] = []
         for index in range(1, self.configuration["deliverypositionsperreactor"] + 1):
             self.configuration["reactordeliverypositions"].append(
-                    parse_point(self.system_configuration["ReactorDelivery" + 
+                    parse_point(self.system_configuration["ReactorDelivery" +
                             str(index)]))
-        
+
         self.configuration["reactorelutepositions"] = []
         for index in range(1, self.configuration["elutepositionsperreactor"] + 1):
             self.configuration["reactorelutepositions"].append(
-                    parse_point(self.system_configuration["ReactorElute" + 
+                    parse_point(self.system_configuration["ReactorElute" +
                             str(index)]))
 
         # Interpret the log level
@@ -215,21 +215,7 @@ class DBComm:
         to the database, it shall log it and raise an exception.
         Note that SQLAlchemy will auto commit for us.
         """
-        try:
-            # Connect to the database
-            # Set up an engine to connect to DB.
-            if host == 'localhost':
-                engine = create_engine('mysql://root@127.0.0.1/Elixys', 
-                        echo=True)
-                self.database = engine.connect() 
-            else: 
-                engine = create_engine('mysql://root@' + str(host) + '/Elixys',
-                        echo=True)
-                self.database = engine.connect()
-        except:
-            log.error("Traceback:\r\n%s\r\n" % traceback.format_exc())
-            raise Exception("Unable to connect to SQL database" +
-                    "\nTraceback: " + str(traceback.format_exc()))
+        self.database = engine.connect()
 
     def disconnect(self):
         """
@@ -239,7 +225,7 @@ class DBComm:
         Function shall check if there exists a
         database object attached to the DBComm class
         and close the connection.
-        
+
         """
         # Disconnect from the database
         if self.database != None:
@@ -247,7 +233,7 @@ class DBComm:
             self.database = None
 
     ### Configuration functions ###
-    
+
     def get_configuration(self):
         """
         Function shall get the configuration object
@@ -258,7 +244,7 @@ class DBComm:
         """
         log.debug("DBComm.GetConfiguration()")
         return self.configuration
-    
+
     def get_supported_operations(self):
         """
         Function shall get the support unit operations from
@@ -320,7 +306,7 @@ class DBComm:
         # above the logging level
         if int(level) > self.log_level:
             raise Exception('Invalid level')
-        # load a new session            
+        # load a new session
         session = loadSession()
         # obtain the user id from the username
         user_id = session.query(User).filter_by(
@@ -356,7 +342,7 @@ class DBComm:
         # above the logging level
         if int(level) > self.log_level:
             raise Exception('Invalid level')
-        # load a new session            
+        # load a new session
         session = loadSession()
         # obtain the user id from the username
         user_id = session.query(User).filter_by(
@@ -376,7 +362,7 @@ class DBComm:
         session.commit()
         session.close()
         return str(message)
- 
+
     def status_log(self,
             vacuum_system_on,
             vacuum_system_pressure,
@@ -438,10 +424,10 @@ class DBComm:
             reactor1_collet2_actual_temperature,
             reactor1_collet3_on,
             reactor1_collet3_set_temperature,
-            reactor1_collet3_actual_temperature, 
-            reactor1_stir_motor, 
-            reactor1_raditation_detector, 
-            
+            reactor1_collet3_actual_temperature,
+            reactor1_stir_motor,
+            reactor1_raditation_detector,
+
             reactor2_set_position,
             reactor2_actual_position,
             reactor2_set_y,
@@ -465,10 +451,10 @@ class DBComm:
             reactor2_collet2_actual_temperature,
             reactor2_collet3_on,
             reactor2_collet3_set_temperature,
-            reactor2_collet3_actual_temperature, 
-            reactor2_stir_motor, 
-            reactor2_raditation_detector, 
-            
+            reactor2_collet3_actual_temperature,
+            reactor2_stir_motor,
+            reactor2_raditation_detector,
+
             reactor3_set_position,
             reactor3_actual_position,
             reactor3_set_y,
@@ -492,8 +478,8 @@ class DBComm:
             reactor3_collet2_actual_temperature,
             reactor3_collet3_on,
             reactor3_collet3_set_temperature,
-            reactor3_collet3_actual_temperature, 
-            reactor3_stir_motor, 
+            reactor3_collet3_actual_temperature,
+            reactor3_stir_motor,
             reactor3_raditation_detector):
         '''
         '''
@@ -561,10 +547,10 @@ class DBComm:
                 reactor1_collet2_actual_temperature,
                 reactor1_collet3_on,
                 reactor1_collet3_set_temperature,
-                reactor1_collet3_actual_temperature, 
-                reactor1_stir_motor, 
-                reactor1_raditation_detector, 
-                
+                reactor1_collet3_actual_temperature,
+                reactor1_stir_motor,
+                reactor1_raditation_detector,
+
                 reactor2_set_position,
                 reactor2_actual_position,
                 reactor2_set_y,
@@ -588,10 +574,10 @@ class DBComm:
                 reactor2_collet2_actual_temperature,
                 reactor2_collet3_on,
                 reactor2_collet3_set_temperature,
-                reactor2_collet3_actual_temperature, 
-                reactor2_stir_motor, 
-                reactor2_raditation_detector, 
-                
+                reactor2_collet3_actual_temperature,
+                reactor2_stir_motor,
+                reactor2_raditation_detector,
+
                 reactor3_set_position,
                 reactor3_actual_position,
                 reactor3_set_y,
@@ -615,8 +601,8 @@ class DBComm:
                 reactor3_collet2_actual_temperature,
                 reactor3_collet3_on,
                 reactor3_collet3_set_temperature,
-                reactor3_collet3_actual_temperature, 
-                reactor3_stir_motor, 
+                reactor3_collet3_actual_temperature,
+                reactor3_stir_motor,
                 reactor3_raditation_detector)
         session.add(status_log)
         session.commit()
@@ -638,7 +624,7 @@ class DBComm:
         """
         Function shall return all user roles on the database.
         Function expects no parameters to be passed in.
-        
+
         Function returns an array of dictionary objects for
         all roles on the database.
 
@@ -650,9 +636,9 @@ class DBComm:
         log.debug("DBComm.GetAllRoles()")
         # Create a new session, query for all roles, and close session.
         session = loadSession()
-        # Query for all roles 
+        # Query for all roles
         roles = session.query(Roles)
-        
+
         # Verify that it is valid resultset, then format to
         # a dictionary.
         if roles.all() != None or roles.all() != []:
@@ -662,14 +648,14 @@ class DBComm:
                 roles_array.append(
                         role.as_dict())
         return roles_array
-        
+
         # Raise an exception since role name was invalid.
         session.close()
         log.error("Couldn't get all roles - raising Exception.")
         raise Exception("Role " + str(role_name) + " not found")
-        
+
         # OLD: roles_raw = self.call_stored_procedure("GetAllRoles", ())
-        
+
     def get_role(self, role_name):
         """
         Function returns a specified role.
@@ -698,7 +684,7 @@ class DBComm:
         log.error("Couldn't get the role for '" + str(role_name) + "'.")
         raise Exception("Role " + str(role_name) + " not found")
         #OLD: roles = roles.filter_by(Roles.RoleName = role_name).first()
-    
+
     def create_role(self, role_name, flags):
         """
         Function shall create a new specified role
@@ -706,7 +692,7 @@ class DBComm:
         Function expects a string to be passed in
         as a parameter from a role name and an integer
         flags.
-        
+
         Function returns the newly created role as
         an array of the dictionary object of the new
         role object.
@@ -722,7 +708,7 @@ class DBComm:
             raise Exception("Invalid Role name.")
         if int(flags) < 1:
             raise Exception("Invalid Flag value.")
-        
+
         # Create a new session & query for the role
         session = loadSession()
         new_role = Roles(
@@ -732,7 +718,7 @@ class DBComm:
         session.add(new_role)
         session.commit()
         # Check if resultset is valid (Non-null)
-        # If non null, then insertion was successful 
+        # If non null, then insertion was successful
         # and return the role object that was inserted.
         # If not, raise an exception.
         role = session.query(Roles).filter_by(
@@ -752,7 +738,7 @@ class DBComm:
 
     def update_role(self, role_name, updated_role_name, updated_flags):
         """
-        Function shall updated the specified role 
+        Function shall updated the specified role
         with the given parameters passed in.
         Function expects a string to be passed in
         as a parameter from the role name to update,
@@ -766,7 +752,7 @@ class DBComm:
         name is not an element on the column on the database,
         the function shall raise an exception.
         """
-        log.debug("DBComm.UpdateRole(%s, %s, %i)" 
+        log.debug("DBComm.UpdateRole(%s, %s, %i)"
                 %(role_name, updated_role_name, updated_flags))
         # Create a new session & query for the role
         session = loadSession()
@@ -778,13 +764,13 @@ class DBComm:
             session.close()
             log.error("Couldn't get the role for '" + str(role_name) + "'.")
             raise Exception("Role " + str(role_name) + " not found")
-        
+
         # If no error, then update row with new values via ORM
         role.update(
                 {'RoleName': str(updated_role_name),
                 'Flags': int(updated_flags)})
         session.commit()
-        
+
         # Verify there exists the new element on the DB
         role = session.query(Roles).filter_by(
                     RoleName = str(updated_role_name),
@@ -792,19 +778,19 @@ class DBComm:
         if role != None:
             session.close()
             return role.as_dict()
-        
+
         # Raise an exception since role name was invalid.
         session.rollback()
         session.close()
         log.error("Couldn't get the updated role for '" + str(updated_role_name) + "'.")
         raise Exception("Role " + str(updated_role_name) + " not found")
 
-        # OLD: return self.call_stored_procedure("UpdateRole", 
+        # OLD: return self.call_stored_procedure("UpdateRole",
         # (role_name, update_role_name, updated_flags))
 
     def delete_role(self, role_name):
         """
-        Function shall delete the specified role 
+        Function shall delete the specified role
         with the given parameter passed in.
         Function expects a string to be passed in
         as a parameter from the role name to delete.
@@ -812,11 +798,11 @@ class DBComm:
 
         Function shall check if the passed in role
         name is an element on the database before deleting the
-        row. If role name is not an element on the column 
+        row. If role name is not an element on the column
         on the database, the function shall raise an exception.
         """
         log.debug("DBComm.DeleteRole(%s)" % (role_name))
-        # Create a new session & query for the role  
+        # Create a new session & query for the role
         session = loadSession()
         role = session.query(Roles).filter_by(
                     RoleName = str(role_name))
@@ -826,12 +812,12 @@ class DBComm:
             session.close()
             log.error("Couldn't get the role for '" + str(role_name) + "'.")
             raise Exception("Role " + str(role_name) + " not found")
-        
+
         # Delete the role
         role.delete()
         session.commit()
         # old: return self.call_stored_procedure("DeleteRole", (role_name, ))
-    
+
     def get_last_role_id(self, session):
         '''
         Function shall obtain the last id of
@@ -854,7 +840,7 @@ class DBComm:
 
         Function shall return all users on the database.
         Function expects no parameters to be passed in.
-        
+
         Function returns an array of dictionary objects for
         all users on the database.
 
@@ -873,7 +859,7 @@ class DBComm:
             session.close()
             log.error("Couldn't get all roles - raising Exception.")
             raise Exception("Users not found")
-            
+
         # The query is valid, but the RoleID is an index
         # and not a RoleName. We shall first convert a user
         # row to a dictionary then query for the RoleID and
@@ -890,7 +876,7 @@ class DBComm:
             user_array.append(user_dict)
         session.close()
         return user_array
-        
+
         # OLD: pUsersRaw = self.__CallStoredProcedure("GetAllUsers", ())
 
     def get_user(self, username):
@@ -901,7 +887,7 @@ class DBComm:
         on the parameters passed into the function.
         Function expects a string username to look up
         on the database.
-        
+
         Function returns an array of dictionary objects for
         the user on the database.
 
@@ -941,15 +927,15 @@ class DBComm:
     def get_user_password_hash(self, username):
         """
         Returns the password hash of the specified user
-        
-        Function shall return a user's password on the database 
+
+        Function shall return a user's password on the database
         based on the parameters passed into the function. The
         returned password will be hashed for security.
 
         Function expects a string username to look up
         on the database.
-        
-        Function returns a string for the user's password 
+
+        Function returns a string for the user's password
         as a hash on the database.
 
         Function shall check if the resultset of the query
@@ -975,7 +961,7 @@ class DBComm:
         # OLD: pPasswordHash = self.__CallStoredProcedure(
         #       "GetUserPasswordHash", (sUsername, ))
 
-    def create_user(self, new_username, new_password_hash, new_first_name, new_last_name, 
+    def create_user(self, new_username, new_password_hash, new_first_name, new_last_name,
             new_role_name, new_email, new_phone, new_message_level):
         """
         Creates a new user
@@ -983,12 +969,12 @@ class DBComm:
         Function shall create a new specified user
         with the given parameters passed in.
         Function expects:
-        -a string to be passed in as a parameter for a 
+        -a string to be passed in as a parameter for a
         username, hashed password, first name, last name,
         role name, and phone number.
         -an integer to be passed in as a parameter for
         the message level.
-        
+
         Function returns the newly created user as
         an array of the dictionary object of the new
         user object.
@@ -1006,7 +992,7 @@ class DBComm:
         if type(new_message_level) != int:
             raise Exception("Invalid New Message Level type.")
 
-        log.debug("DBComm.CreateUser(%s, %s, %s, %s, %s, %s, %s, %i)" 
+        log.debug("DBComm.CreateUser(%s, %s, %s, %s, %s, %s, %s, %i)"
                % (new_username, new_password_hash,
                     new_first_name, new_last_name,
                     new_role_name, new_email,
@@ -1073,29 +1059,29 @@ class DBComm:
         if username != None:
             session.close()
             return self.get_user(username)
-        
+
         # Raise an exception since role name was invalid.
         session.rollback()
         session.close()
-        log.error("Couldn't create user." + 
+        log.error("Couldn't create user." +
             "Couldn't find new username on database")
         raise Exception("User " + str(username) + " not found")
         # OLD: return self.__CallStoredProcedure(
-        # "CreateUser", (sUsername, sPasswordHash, 
+        # "CreateUser", (sUsername, sPasswordHash,
 
     def update_user(self, username,
-            new_username, firstname, 
-            lastname, rolename, email, 
+            new_username, firstname,
+            lastname, rolename, email,
             phone, message_level):
         """
         Function shall update an existing user
         with the given parameters passed in.
-        Function expects: 
+        Function expects:
         -A string for username, firstname,
-        lastname, rolename, email, and 
-        phone number. 
+        lastname, rolename, email, and
+        phone number.
         -An integer for the message level
-        
+
         Function returns the newly created user as
         a dictionary object.
 
@@ -1115,7 +1101,7 @@ class DBComm:
         log.debug("DBComm.UpdateUser(%s, %s, %s, %s, %s, %s, %i)"
                 % (username, firstname, lastname, rolename,
                     email, phone, message_level))
-        
+
         # Before inserting the new user, need to
         # take the 'new_role_name' value and convert
         # it into a RoleID for the attribute of the
@@ -1129,7 +1115,7 @@ class DBComm:
             session.close()
             log.error("Couldn't get all roles - raising Exception.")
             raise Exception("Users not found")
-        
+
         role_id = role_id.RoleID
         # Create a query for the User
         user = session.query(User).filter_by(
@@ -1140,7 +1126,7 @@ class DBComm:
             session.close()
             log.error("Couldn't get the user for '" + str(username) + "'.")
             raise Exception("User " + str(username) + " not found")
-        
+
         # If no error, then update row with new values via ORM
         # Obtain the row object and perform an update
         user.update(
@@ -1165,7 +1151,7 @@ class DBComm:
         # Close session and return formatted dict
         session.close()
         return user.as_dict()
-        #old: return self.__CallStoredProcedure("UpdateUser", (sUsername, 
+        #old: return self.__CallStoredProcedure("UpdateUser", (sUsername,
 
     def update_user_password(self, username, password_hash):
         """
@@ -1174,10 +1160,10 @@ class DBComm:
         Function shall update an existing user's
         password as a hash with the given parameters
         passed in.
-        
+
         Function expects a string for the username
         and the password to update on the database.
-        
+
         Function returns the new updated password.
 
         Function shall check if the passed in user
@@ -1186,14 +1172,14 @@ class DBComm:
         the function shall raise an exception.
         """
         log.debug("DBComm.UpdateUserPassword(%s, %s)" % (username, password_hash))
-        
+
         # Check if vital values to insert are valid
         if str(username) == '':
             raise Exception("Invalid Username.")
 
         session = loadSession()
 
-        # Query for the new object and check it.     
+        # Query for the new object and check it.
         # If no error, then update row with new values via ORM
         # Obtain the row object and perform an update
         new_user = session.query(User).filter_by(
@@ -1204,9 +1190,9 @@ class DBComm:
             session.close()
             log.error("Couldn't get the user for '" + str(username) + "'.")
             raise Exception("User " + str(username) + " not found")
-       
+
        # Update the password & commit to database.
-        new_user.update({'Password': str(password_hash)}) 
+        new_user.update({'Password': str(password_hash)})
         session.commit()
         # Verify there exists the new element on the DB
         user = session.query(User).filter_by(
@@ -1217,9 +1203,9 @@ class DBComm:
             session.rollback()
             session.close()
             log.error("Couldn't get the updated user's password for '" + str(password_hash) + "'.")
-            raise Exception("Coudln't find password" + str(password) + 
+            raise Exception("Coudln't find password" + str(password) +
                     " for user " + str(username))
-        
+
         # Close session, obtain new user object,
         # and return formatted dict
         session.close()
@@ -1231,21 +1217,21 @@ class DBComm:
 
     def delete_user(self, username):
         """
-        Function shall delete an existing user 
+        Function shall delete an existing user
         with the given parameter passed in.
-        
+
         Function expects a string to be passed in
         as a parameter from the username to delete.
         Function returns the no object.
 
         Function shall check if the passed in user
         name is an element on the database before deleting the
-        row. If username is not an element on the column 
+        row. If username is not an element on the column
         on the database, the function shall raise an exception.
         """
         log.debug("DBComm.DeleteUser(%s)" % (username))
-        
-        # Create a new session & query for the role  
+
+        # Create a new session & query for the role
         session = loadSession()
         user = session.query(User).filter_by(
                     Username = str(username))
@@ -1255,7 +1241,7 @@ class DBComm:
             session.close()
             log.error("Couldn't get the username for '" + str(username) + "'.")
             raise Exception("Username " + str(username) + " not found")
-        
+
         # If not, delete the user
         user.delete()
         session.commit()
@@ -1280,7 +1266,7 @@ class DBComm:
         the database.
         Function expects a string for the username to be
         passed in as a parameter.
-        
+
         Function returns the client state as a dictionary object.
 
         Function shall check if the resultset of the query
@@ -1331,7 +1317,7 @@ class DBComm:
             raise Exception("Invalid Username.")
 
         log.debug("DBComm.UpdateUserClientState(%s, %s)" % (username, new_client_state))
-        session = loadSession() 
+        session = loadSession()
         # Create a query for the User
         user = session.query(User).filter_by(
                     Username = str(username))
@@ -1341,7 +1327,7 @@ class DBComm:
             session.close()
             log.error("Couldn't get the user for '" + str(username) + "'.")
             raise Exception("User " + str(username) + " not found")
-        
+
         # If no error, then update row with new values via ORM
         # Obtain the row object and perform an update to
         # the client state.
@@ -1351,7 +1337,7 @@ class DBComm:
         # Verify there exists the new element on the DB
         user = session.query(User).filter_by(
             Username = str(username)).first()
-        
+
         # Check if resultset is valid (Non-null)
         if user == None:
             # Raise an exception since username was invalid.
@@ -1359,7 +1345,7 @@ class DBComm:
             session.close()
             log.error("Couldn't get the updated user for '" + str(username) + "'.")
             raise Exception("User " + str(username) + " not found")
-       
+
         # Close session and return formatted dict
         session.close()
         return user.ClientState
@@ -1388,10 +1374,10 @@ class DBComm:
             return True
         # if not, then not on the database
         return False
-    
+
     def is_valid_login(self, username, password_hash):
         '''
-        Function shall check if the username and 
+        Function shall check if the username and
         password combination is valid.
         Function expects a string for the username
         and the password as a hash.
@@ -1414,7 +1400,7 @@ class DBComm:
         # is invalid
         session.close()
         return False
-        
+
     ### Sequence functions ###
 
     def get_sequences_by_name(self, sequence_name):
@@ -1422,13 +1408,13 @@ class DBComm:
         Function returns sequence data based on sequence_name.
         Returns all sequences with the same name field as
         sequence_name that are of type 'Saved'
-               
-        Function shall return all 'Saved' sequences on the 
+
+        Function shall return all 'Saved' sequences on the
         database based on the parameters passed into the
         function.
         Function expects a string sequence_name to look up
         on the database.
-        
+
         Function returns an array of dictionary objects for
         the user on the database.
 
@@ -1444,7 +1430,7 @@ class DBComm:
         sequences = session.query(Sequence).filter_by(
                         Name = str(sequence_name),
                         Type = 'Saved').all()
-        
+
         # Check if query was successful
         if sequences == None:
             # Raise an exception since role name was invalid.
@@ -1457,7 +1443,7 @@ class DBComm:
         # row to a dictionary.
         seq_array = []
         for sequence in sequences:
-            sequence_dict = sequence.as_dict()            
+            sequence_dict = sequence.as_dict()
             # Need to obtain the user name from the UserID
             seq_user_name = session.query(User).filter_by(
                     UserID = int(sequence.UserID))
@@ -1471,17 +1457,17 @@ class DBComm:
         return seq_array
         # comp_dictsRaw = self.__CallStoredProcedure(
         # "GetAllSequencesByName", (sName, ))
-        
+
     def get_sequences_history_by_name(self, sequence_name):
         '''
         Function returns sequence data based on the sequence
-        name passed into the funciton. This function only returns 
+        name passed into the funciton. This function only returns
         sequences that have been ran previously
         (or have a type of "History")
 
         Function expects a string as the passed in parameter
         for the sequence name to look up.
-              
+
         Function shall return the all sequences of type 'History'
         with the same name as 'sequence_name' as a dictionary
         object. Function returns an array of dictionary objects for
@@ -1491,7 +1477,7 @@ class DBComm:
         is valid (non-null) and return the resultset. If
         the queried resultset is empty, function shall raise
         an exception.
-        
+
         '''
         log.debug("DBComm.GetAllHistorySequencesByName(%s)" % (sequence_name, ))
         # Create a new session & query for all sequences of type 'History'
@@ -1499,7 +1485,7 @@ class DBComm:
         sequences = session.query(Sequence).filter_by(
                         Type = 'History',
                         Name = str(sequence_name)).all()
-        
+
         # Check if query was successful
         if sequences == None or sequences == []:
             # Raise an exception since sequence was invalid.
@@ -1513,7 +1499,7 @@ class DBComm:
         seq_array = []
         for sequence in sequences:
             print str(sequences)
-            comp_dict = sequence.as_dict()            
+            comp_dict = sequence.as_dict()
             # Need to obtain the user name from the UserID
             seq_user_name = session.query(User).filter_by(
                     UserID = sequence.UserID).first().Username
@@ -1525,16 +1511,16 @@ class DBComm:
         return seq_array
         # comp_dictsRaw = self.__CallStoredProcedure(
         # "GetAllHistorySequencesByName", (sName, ))
-        
+
     def get_all_sequences(self, sequence_type):
         """
         Function returns all sequences data based on the sequence
-        type passed into the funciton. This function shall only return 
+        type passed into the funciton. This function shall only return
         sequences of either type 'Saved' or 'History'.
 
         Function expects a string as the passed in parameter
         for the sequence type to query on.
-              
+
         Function shall return the all sequences of the same type
         as 'sequence_type as a dictionary object.
         Function returns an array of dictionary objects for
@@ -1555,7 +1541,7 @@ class DBComm:
         session = loadSession()
         sequences = session.query(Sequence).filter_by(
                         Type = str(sequence_type)).all()
-        
+
         # Check if query was successful
         if sequences == None:
             # Raise an exception since role name was invalid.
@@ -1569,11 +1555,11 @@ class DBComm:
         seq_array = []
         for sequence in sequences:
             print str(sequences)
-            comp_dict = sequence.as_dict()        
+            comp_dict = sequence.as_dict()
             # Need to obtain the user name from the UserID
             seq_user_name = session.query(User).filter_by(
                 UserID = sequence.UserID).first().Username
-            
+
             # Update and append to the new dict object
             comp_dict['creator'] = str(seq_user_name)
             seq_array.append(comp_dict)
@@ -1584,10 +1570,10 @@ class DBComm:
         """
         Function returns a sequence's metadata based on sequence_id
         that is passed into the function.
-             
+
         Function expects an integer sequence_id to look up
         on the database.
-        
+
         Function returns an array of the dictionary object for
         the sequnece's metadata on the database.
 
@@ -1599,12 +1585,12 @@ class DBComm:
 
         # Log the function call and get the sequence data
         log.debug("DBComm.GetSequenceMetadata(%i)" % (sequence_id ))
-        
+
         # Create a new session & query for all sequences of type 'History'
         session = loadSession()
         sequence = session.query(Sequence).filter_by(
                         SequenceID = int(sequence_id)).first()
-        
+
         # Check if query was successful
         if sequence == None:
             # Raise an exception since role name was invalid.
@@ -1615,12 +1601,12 @@ class DBComm:
 
         # The query is valid, We shall first convert a seq
         # row to a dictionary.
-        comp_dict = sequence.as_dict() 
-        
+        comp_dict = sequence.as_dict()
+
         # Need to obtain the user name from the UserID
         seq_user_name = session.query(User).filter_by(
             UserID = sequence.UserID).first().Username
-        
+
         # Update and append to the new dict object
         comp_dict['creator'] = str(seq_user_name)
         # Removed undeed keys
@@ -1639,10 +1625,10 @@ class DBComm:
         """
         Function returns a sequence's data based on sequence_id
         that is passed into the function.
-             
+
         Function expects an integer sequence_id to look up
         on the database.
-        
+
         Function returns a dictionary object for
         the sequnece's data on the database.
 
@@ -1656,7 +1642,7 @@ class DBComm:
         session = loadSession()
         sequence = session.query(Sequence).filter_by(
             SequenceID = int(sequence_id)).first()
-        
+
         # Check if query was successful
         if sequence == None:
             # Raise an exception since role name was invalid.
@@ -1676,19 +1662,19 @@ class DBComm:
 
         session.close()
         return seq_dict
-    
+
         #pSequenceRaw = self.__CallStoredProcedure("GetSequence", (nSequenceID, ))
         # Load the sequence
         #pSequence = {"type":"sequence"}
         #pSequence["metadata"] = self.GetSequenceMetadata(sCurrentUsername, nSequenceID)
         #pSequence["components"] = self.GetComponentsBySequence(sCurrentUsername, nSequenceID)
-  
+
     def create_sequence(self, seq_name, username, comment, seq_type, cassettes, reagents):
         '''
         Function shall create a new sequence and
         return the newly created sequence as a dictionary
         object.
-        
+
         Function expects parameters to be passed in:
         -strings for sequence name, user, comment, type
         -integers for number of cassettes and reagents to
@@ -1710,7 +1696,7 @@ class DBComm:
         if int(reagents) <= 0:
             raise Exception("Invalid number of Reagents.")
 
-        log.debug("DBComm.CreateSequence(%s, %s, %s, %s, %i, %i)" % 
+        log.debug("DBComm.CreateSequence(%s, %s, %s, %s, %i, %i)" %
                 (seq_name, username, comment,
                 seq_type, cassettes, reagents))
         # Start a new session
@@ -1791,23 +1777,23 @@ class DBComm:
         sequence name, and comment.
         -an integer for the sequence id
         -a boolean for the valid flag.
-        
+
         Function doesn't return an object.
         '''
         # Check the values to be valid
-        
+
         # load a new session
         session = loadSession()
-        
+
         # obtain the sequence
         sequence = session.query(Sequence).filter_by(
                 SequenceID = int(sequence_id))
         # obtain the user's id using the username
         user = session.query(User).filter_by(
                 Username = str(username))
-        
+
         # check if querys are valid
-        if sequence.first() == None: 
+        if sequence.first() == None:
             # Raise an exception since sequence was invalid.
             session.close()
             log.error("Couldn't find sequence ID:'" + str(sequence_id) + \
@@ -1826,7 +1812,7 @@ class DBComm:
                 'Name': str(sequence_name),
                 'Comment': str(comment),
                 'Valid': bool(valid)})
-        
+
         # update and commit
         session.commit()
         session.close()
@@ -1840,13 +1826,13 @@ class DBComm:
         '''
         # load a new session
         session = loadSession()
-        
+
         # obtain the sequence
         sequence = session.query(Sequence).filter_by(
                 SequenceID = int(sequence_id))
-        
+
         # check if querys are valid
-        if sequence.first() == None: 
+        if sequence.first() == None:
             # Raise an exception since sequence was invalid.
             session.close()
             log.error("Couldn't find sequence ID:'" + str(sequence_id) + \
@@ -1855,7 +1841,7 @@ class DBComm:
 
         # update the sequence's values
         sequence.update({'Dirty': bool(dirty_flag)})
-        
+
         # update and commit
         session.commit()
         session.close()
@@ -1899,13 +1885,13 @@ class DBComm:
         '''
         sequences = session.query(
                 Sequence).all()
-        
+
         last_sequence_id = 1
         for sequence in sequences:
             last_sequence_id = sequence.SequenceID
 
         return last_sequence_id
-    
+
    ### Component functions ###
 
     def get_component(self, component_id):
@@ -1930,13 +1916,13 @@ class DBComm:
 
         # return as a dictionary object
         # format it
-        session.close() 
+        session.close()
         return component.as_dict()
 
     def get_previous_component(self, component_id):
         '''
         Function shall get the component, obtain the
-        previous component's information, and return 
+        previous component's information, and return
         the object as a dictionary.
         Function expects an integer for the component
         id to be passed in.
@@ -1949,7 +1935,7 @@ class DBComm:
         prev_component_id = session.query(
                 Component).filter_by(
                         ComponentID = int(component_id)).first()
-        
+
         # Check if query was successful.
         if prev_component_id == None:
             # Raise an exception since role name was invalid.
@@ -1972,13 +1958,13 @@ class DBComm:
 
         # return as a dictionary object
         # format it
-        session.close() 
-        return prev_component.as_dict() 
+        session.close()
+        return prev_component.as_dict()
 
     def get_next_component(self, component_id):
         '''
         Function shall get the component, obtain the
-        next component's information, and return 
+        next component's information, and return
         the object as a dictionary.
         Function expects an integer for the component
         id to be passed in.
@@ -2013,7 +1999,7 @@ class DBComm:
 
         # return as a dictionary object
         # format it
-        session.close() 
+        session.close()
         return next_component.as_dict()
 
     def get_components_by_sequence(self, sequence_id):
@@ -2057,12 +2043,12 @@ class DBComm:
             comp_dict["id"] = int(component.ComponentID)
             comp_dict["sequenceid"] = int(component.SequenceID)
             comp_dict["note"] = str(component.Note)
-            # obtain data from 'Details' column via 
+            # obtain data from 'Details' column via
             # a dict lookup
             # Check if Details contains several elements (might not)
             details = json.loads(str(component.Details))
             comp_dict.update(details)
-                       
+
             comp_array.append(comp_dict)
         session.close()
         return comp_array
@@ -2078,10 +2064,10 @@ class DBComm:
         -strings for the component type, sequence note
         -a string for content but the format of the string
         should be in a dictionary-like format
-        
+
         Function shall return the Component ID of the newly
         created component.
-        
+
         Function shall check if the resultset of the query
         is valid (non-null) and return the resultset. If
         the queried resultset is empty, function shall raise
@@ -2089,9 +2075,9 @@ class DBComm:
         '''
         if int(sequence_id) <= 0:
             raise Exception('Sequence id is not valid.')
-        log.debug("DBComm.CreateComponent(%i, %s, %s, %s)" % 
+        log.debug("DBComm.CreateComponent(%i, %s, %s, %s)" %
                 (sequence_id, component_type, note, content))
-        
+
         # Create new session
         session = loadSession()
         # Need to obtain the last component of the sequence
@@ -2106,7 +2092,7 @@ class DBComm:
             log.error("Couldn't find any sequences ID '" + str(sequence_id) + \
                     "'  - raising Exception.")
             raise Exception("No Sequences found")
-        
+
         # Save the first component id
         seq_first_component_id = int(sequence.first().FirstComponentID)
         # If the sequence's first component id is 0, then
@@ -2123,10 +2109,10 @@ class DBComm:
                 str(self.get_last_component_id(session) + 1) )
             # add new element to database
             session.add(new_component)
-            
+
             # Update component count for the sequence
             sequence.update(
-                    {'ComponentCount': int(sequence.first().ComponentCount) + 1}) 
+                    {'ComponentCount': int(sequence.first().ComponentCount) + 1})
             # Map the first component id to sequence's 'FirstComponentID'
             # Update the component count to the number of cassettes/components
             # that were added.
@@ -2137,7 +2123,7 @@ class DBComm:
             new_component_id = str(new_component.ComponentID)
             session.close()
             return new_component_id
-        
+
         # else, there's a previous component
         # Query for a componenet with a matching sequence ID
         # and no next component ID (this would be the last component).
@@ -2146,7 +2132,7 @@ class DBComm:
                 NextComponentID = 0)
         # Store the last component's ID.
         last_component_id = int(prev_component.first().ComponentID)
-        
+
         # Create a new component object
         new_component = Component(
             int(sequence_id),
@@ -2167,7 +2153,7 @@ class DBComm:
                 {'NextComponentID': int(new_component.ComponentID)})
         # Update component count for the sequence
         sequence.update(
-                {'ComponentCount': int(sequence.first().ComponentCount) + 1}) 
+                {'ComponentCount': int(sequence.first().ComponentCount) + 1})
         session.commit()
         new_comp_id = int(new_component.ComponentID)
         session.close()
@@ -2212,7 +2198,7 @@ class DBComm:
                 self.get_last_component_id(session) + 1)
         session.add(component)
         session.commit()
-        
+
         # Update the sequence's component count
         sequence = session.query(Sequence).filter_by(
                 SequenceID = int(sequence_id))
@@ -2228,7 +2214,7 @@ class DBComm:
         Function shall update a row with the
         same component id as the passed in
         parameters.
-        
+
         Function expects:
         -a string for the component type
         and note
@@ -2245,9 +2231,9 @@ class DBComm:
         session = loadSession()
         component = session.query(Component).filter_by(
                 ComponentID = int(component_id))
-        
+
         # check if query are valid
-        if component.first() == None: 
+        if component.first() == None:
             # Raise an exception since component was invalid.
             session.close()
             log.error("Couldn't find component with ID:'" + str(component_id) + \
@@ -2259,7 +2245,7 @@ class DBComm:
                 {'Type': str(comp_type),
                 'Note': str(note),
                 'Details': str(details)})
-        
+
         # update and commit
         session.commit()
         session.close()
@@ -2268,7 +2254,7 @@ class DBComm:
         '''
         Function shall move a component and change its previous id
         to the passed in parameter.
-        
+
         Function expects:
         -an integer for the component id and a previous id
         (the previous id would be the value for previous
@@ -2287,7 +2273,7 @@ class DBComm:
         session = loadSession()
         component = session.query(Component).filter_by(
                 ComponentID = int(component_id))
-        
+
         # Check if valid query
         if component.first() == None:
             # Raise an exception since component id was invalid.
@@ -2307,7 +2293,7 @@ class DBComm:
         component table. Function shall also update
         the component count of the sequence and remap
         the previous index.
-        
+
         Function expects an integer for the component's
         ID to delete from the table.
         Function doesn't return an object.
@@ -2315,7 +2301,7 @@ class DBComm:
         if int(component_id) <= 0:
             raise Exception('Invalid component ID.')
         log.debug("DBComm.DeleteComponent(%i)" % (component_id))
-        # Create a new session & query for the component 
+        # Create a new session & query for the component
         session = loadSession()
         component = session.query(Component).filter_by(
                 ComponentID = int(component_id))
@@ -2325,7 +2311,7 @@ class DBComm:
             session.close()
             log.error("Couldn't get the component for id'" + str(component_id) + "'.")
             raise Exception("Component " + str(component_id) + " not found")
-        
+
         # Save the previous & next component id of the deleted component
         previous_component_id = int(component.first().PreviousComponentID)
         next_component_id = int(component.first().NextComponentID)
@@ -2343,7 +2329,7 @@ class DBComm:
         if next_component.first() != None:
             # there exists a next comp, update/remap it.
             next_component.update({'PreviousComponentID': previous_component_id})
-        
+
         # update the sequence's component count, first try to obtain
         # a matching sequence with the id
         sequence = session.query(Sequence).filter_by(
@@ -2356,7 +2342,7 @@ class DBComm:
                     str(component_id) + "'.")
             raise Exception("Component " + str(component_id) + " not found")
         # update the count by -1
-        sequence.update({'ComponentCount': int(sequence.first().ComponentCount)-1}) 
+        sequence.update({'ComponentCount': int(sequence.first().ComponentCount)-1})
         # finally, delete component and commit to db
         component.delete()
         session.commit()
@@ -2382,7 +2368,7 @@ class DBComm:
         component = session.query(
                 Component.ComponentID,
                 Component.SequenceID,
-                Component.Note, 
+                Component.Note,
                 Component.Type,
                 Component.Details).filter_by(
                         SequenceID = int(sequence_id)).all()
@@ -2396,7 +2382,7 @@ class DBComm:
         # Obtain the cassette value by the number passed in.
         component = component[int(cassette_number)]
         # return as a dictionary object & format it
-        session.close() 
+        session.close()
         return component.as_dict()
 
     def get_last_component_id(self, session):
@@ -2408,13 +2394,13 @@ class DBComm:
         '''
         components = session.query(
                 Component).all()
-        
+
         last_component_id = 1
         for component in components:
             last_component_id = int(component.ComponentID)
 
         return last_component_id
- 
+
     def create_default_component_details(self,
             sequence_id, component_id,
             first_reagent_id, cassette_num):
@@ -2424,7 +2410,7 @@ class DBComm:
         Function expects an integer for the
         sequence id, component id, the
         reagent id of the first reagent created,
-        and the cassette number to represent the 
+        and the cassette number to represent the
         reactor the cassette is located in.
         Function returns a dictionary of the
         newly created component's details (default details)
@@ -2446,7 +2432,7 @@ class DBComm:
         component_details['reagentids'] = []
         for reagent_id in range(int(first_reagent_id), int(first_reagent_id) + 12):
             component_details['reagentids'].append(reagent_id)
-    
+
         return component_details
 
     ### Reagent functions ###
@@ -2476,8 +2462,8 @@ class DBComm:
         # return as a dictionary object
         # format it
         # TODO: call component.as_dict()
-        
-        session.close() 
+
+        session.close()
         return reagent.as_dict()
 
     def get_reagents_by_sequence(self, sequence_id):
@@ -2496,7 +2482,7 @@ class DBComm:
         session = loadSession()
         reagents = session.query(Reagents).filter_by(
                 SequenceID = int(sequence_id)).all()
-        
+
         if reagents == None:
             # Raise an exception since reagents was invalid.
             session.close()
@@ -2507,7 +2493,7 @@ class DBComm:
         reagent_array = []
         for reagent in reagents:
             reagent_array.append(reagent.as_dict())
-        
+
         session.close()
         return reagent_array
 
@@ -2518,7 +2504,7 @@ class DBComm:
         Function expects an integer for the
         sequence id and a string for the sequence name
         to be passed in.
-        Function shall return all reagents as an array 
+        Function shall return all reagents as an array
         of dictionary objects.
         '''
         if int(sequence_id) <= 0:
@@ -2528,7 +2514,7 @@ class DBComm:
         reagents = session.query(Reagents).filter_by(
                 SequenceID = int(sequence_id),
                 Name = str(name)).all()
-        
+
         if reagents == None:
             # Raise an exception since reagents was invalid.
             session.close()
@@ -2540,7 +2526,7 @@ class DBComm:
         reagent_array = []
         for reagent in reagents:
             reagent_array.append(reagent.as_dict())
-        
+
         session.close()
         return reagent_array
 
@@ -2556,7 +2542,7 @@ class DBComm:
         a cassette number to select (only cassettes 1-3),
         and a position number for the position location on
         the cassette.
-        
+
         Function shall return a dictionary object for the
         reagent.
         '''
@@ -2567,9 +2553,9 @@ class DBComm:
             raise Exception('Invalid cassette number')
         if int(position_number) < 1 or int(position_number) > 12:
             raise Exception('Invalid position number')
-        
+
         # Load session and obtain all CASSETTE components based by
-        # sequence id. 
+        # sequence id.
         session = loadSession()
         components = session.query(Component).filter_by(
                 SequenceID = int(sequence_id),
@@ -2593,7 +2579,7 @@ class DBComm:
             log.error("Couldn't find any reagents with component id '" +
                     str(component_id) + "' - raising Exception.")
             raise Exception("No Reagents found")
-        
+
         return reagent.to_dict()
 
     def get_reagent_cassette(self, sequence_id, reagent_id):
@@ -2613,9 +2599,9 @@ class DBComm:
             raise Exception('Invalid sequence id')
         if int(reagent_id) <= 0:
             raise Exception('Invalid reagent id')
-        
+
         # Load session and obtain all CASSETTE components based by
-        # sequence id. 
+        # sequence id.
         session = loadSession()
         components = session.query(Component).filter_by(
                 SequenceID = int(sequence_id),
@@ -2627,7 +2613,7 @@ class DBComm:
             log.error("Couldn't find any cassette components with sequence id '" +
                     str(sequence_id) + "' - raising Exception.")
             raise Exception("No Components found")
-        
+
         # Obtain cassettes
         reagents_array = []
         for component in components:
@@ -2639,7 +2625,7 @@ class DBComm:
             # Raise an exception since reagent was invalid.
             session.close()
             raise Exception("No Reagents found")
-        
+
         # Loop through each of the 3 cassettes and their 12 reagents
         # Check if there's a match in reagent id
         # Here, keep track of which cassette and reagent position
@@ -2672,16 +2658,16 @@ class DBComm:
         Function expects:
         -an integer for the reagent id to look up.
         -a string for the name and description.
-        
+
         Function doesn't return an object.
         '''
         # load a new session
         session = loadSession()
-        
+
         # obtain the reagent
         reagent = session.query(Reagents).filter_by(
                 ReagentID = int(reagent_id))
-                
+
         if reagent.first() == None:
             # Raise an exception since reagent was invalid.
             session.close()
@@ -2693,7 +2679,7 @@ class DBComm:
         reagent.update(
                 {'Name': str(name),
                 'Description': str(description)})
-        
+
         # update and commit
         session.commit()
         session.close()
@@ -2710,11 +2696,11 @@ class DBComm:
 
         -an integer for the reagent id to look up.
         -a string for the name and description.
-        
+
         Function doesn't return an object.
         '''
         # Load session and obtain all components based by
-        # sequence id. 
+        # sequence id.
         session = loadSession()
         components = session.query(Component).filter_by(
                 SequenceID = int(sequence_id)).all()
@@ -2725,7 +2711,7 @@ class DBComm:
             log.error("Couldn't find any components with sequence id '" +
                     str(sequence_id) + "' - raising Exception.")
             raise Exception("No Components found")
-        
+
         # Obtain components with
         reagents_array = []
         for component in components:
@@ -2742,8 +2728,8 @@ class DBComm:
         reagent = reagents_array[int(cassette_number) - 1]
         reagent.update(
                 {'Name': str(name),
-                'Description': str(description)}) 
-        
+                'Description': str(description)})
+
         # load a new session
         # update and commit
         session.commit()
@@ -2764,7 +2750,7 @@ class DBComm:
         Function shall return the 'ReagentID' value
         of the newly inserted reagent.
         '''
-        
+
         session = loadSession()
         new_reagent = Reagents(
                 int(sequence_id),
@@ -2789,7 +2775,7 @@ class DBComm:
         '''
         reagents = session.query(
                 Reagents).all()
-        
+
         last_reagent_id = 1
         for reagent in reagents:
             last_reagent_id = int(reagent.ReagentID)

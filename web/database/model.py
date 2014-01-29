@@ -7,7 +7,10 @@ from sqlalchemy.orm import relationship, backref
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.schema import ForeignKeyConstraint
 
-engine = create_engine('mysql://root@127.0.0.1/Elixys', echo=True)
+from pyelixys.web.database.dbconf import config
+
+dburl = config['database_url']
+engine = create_engine(dburl, echo=True)
 Base = declarative_base(engine)
 
 class Component(Base):
@@ -44,7 +47,7 @@ class Component(Base):
         Components class attributes as a
         Python dictionary object.
         Funciton expects no parameters
-        Function returns a Component as a 
+        Function returns a Component as a
         dictionary object.
         """
         comp_dict = {}
@@ -64,7 +67,7 @@ class Component(Base):
 
     def get_details(self):
         return json.loads(self.Details)
-    
+
     details = property(get_details)
 
 class Reagents(Base):
@@ -94,7 +97,7 @@ class Reagents(Base):
     def as_dict(self):
         """
         Function shall convert the
-        reagent's properties as a 
+        reagent's properties as a
         python dictionary and return the
         dictionary.
         Function expects no parameters.
@@ -285,7 +288,116 @@ class StatusLog(Base):
     Reactor3StirMotor = Column(Integer)
     Reactor3RadiationDetector = Column(Float)
 
-    def __init__(self, LogID, Timestamp, VacuumSystemOn, VacuumSystemPressure, CoolingSystemOn, PressureRegulator1SetPressure, PressureRegulator1ActualPressure, PressureRegulator2SetPressure, PressureRegulator2ActualPressure, GasTransferValveOpen, F18LoadValveOpen, HPLCLoadValveOpen, ReagentRobotPositionSet, ReagentRobotPositionActual, ReagentRobotPositionSetX, ReagentRobotPositionSetY, ReagentRobotPositionActualX, ReagentRobotPositionActualY, ReagentRobotStatusX, ReagentRobotStatusY, ReagentRobotErrorX, ReagentRobotErrorY, ReagentRobotControlX, ReagentRobotControlY, ReagentRobotCheckX, ReagentRobotCheckY, GripperSetDown, GripperSetUp, GripperSetOpen, GripperSetClose, GasTransferSetUp, GasTransferSetDown, Reactor1SetPosition, Reactor1ActualPosition, Reactor1SetY, Reactor1ActualY, Reactor1RobotStatus, Reactor1RobotError, Reactor1RobotControl, Reactor1RobotCheck, Reactor1SetUp, Reactor1SetDown, Reactor1Up, Reactor1Down, Reactor1Stopcock1Position, Reactor1Stopcock2Position, Reactor1Stopcock3Position, Reactor1Collet1On, Reactor1ColletSetTemperature, Reactor1ColletActualTemperature, Reactor1Collet2On, Reactor1Collet2SetTemperature, Reactor1Collet2ActualTemperature, Reactor1Collet3On, Reactor1Collet3SetTemperature, Reactor1Collet3ActualTemperature, Reactor1StirMotor, Reactor1RadiationDetector, Reactor2SetPosition, Reactor2ActualPosition, Reactor2SetY, Reactor2ActualY, Reactor2RobotStatus, Reactor2RobotError, Reactor2RobotControl, Reactor2RobotCheck, Reactor2SetUp, Reactor2SetDown, Reactor2Up, Reactor2Down, Reactor2Stopcock1Position, Reactor2Stopcock2Position, Reactor2Stopcock3Position, Reactor2Collet1On, Reactor2ColletSetTemperature, Reactor2ColletActualTemperature, Reactor2Collet2On, Reactor2Collet2SetTemperature, Reactor2Collet2ActualTemperature, Reactor2Collet3On, Reactor2Collet3SetTemperature, Reactor2Collet3ActualTemperature, Reactor2StirMotor, Reactor2RadiationDetector, Reactor3SetPosition, Reactor3ActualPosition, Reactor3SetY, Reactor3ActualY, Reactor3RobotStatus, Reactor3RobotError, Reactor3RobotControl, Reactor3RobotCheck, Reactor3SetUp, Reactor3SetDown, Reactor3Up, Reactor3Down, Reactor3Stopcock1Position, Reactor3Stopcock2Position, Reactor3Stopcock3Position, Reactor3Collet1On, Reactor3ColletSetTemperature, Reactor3ColletActualTemperature, Reactor3Collet2On, Reactor3Collet2SetTemperature, Reactor3Collet2ActualTemperature, Reactor3Collet3On, Reactor3Collet3SetTemperature, Reactor3Collet3ActualTemperature, Reactor3StirMotor, Reactor3RadiationDetector):
+    def __init__(self, LogID,
+            Timestamp,
+            VacuumSystemOn,
+            VacuumSystemPressure, CoolingSystemOn,
+            PressureRegulator1SetPressure,
+            PressureRegulator1ActualPressure,
+            PressureRegulator2SetPressure,
+            PressureRegulator2ActualPressure,
+            GasTransferValveOpen,
+            F18LoadValveOpen,
+            HPLCLoadValveOpen,
+            ReagentRobotPositionSet,
+            ReagentRobotPositionActual,
+            ReagentRobotPositionSetX,
+            ReagentRobotPositionSetY,
+            ReagentRobotPositionActualX,
+            ReagentRobotPositionActualY,
+            ReagentRobotStatusX,
+            ReagentRobotStatusY,
+            ReagentRobotErrorX,
+            ReagentRobotErrorY,
+            ReagentRobotControlX,
+            ReagentRobotControlY,
+            ReagentRobotCheckX,
+            ReagentRobotCheckY,
+            GripperSetDown,
+            GripperSetUp,
+            GripperSetOpen,
+            GripperSetClose,
+            GasTransferSetUp,
+            GasTransferSetDown,
+            Reactor1SetPosition,
+            Reactor1ActualPosition,
+            Reactor1SetY,
+            Reactor1ActualY,
+            Reactor1RobotStatus,
+            Reactor1RobotError,
+            Reactor1RobotControl,
+            Reactor1RobotCheck,
+            Reactor1SetUp,
+            Reactor1SetDown,
+            Reactor1Up,
+            Reactor1Down,
+            Reactor1Stopcock1Position,
+            Reactor1Stopcock2Position,
+            Reactor1Stopcock3Position,
+            Reactor1Collet1On,
+            Reactor1ColletSetTemperature,
+            Reactor1ColletActualTemperature,
+            Reactor1Collet2On,
+            Reactor1Collet2SetTemperature,
+            Reactor1Collet2ActualTemperature,
+            Reactor1Collet3On,
+            Reactor1Collet3SetTemperature,
+            Reactor1Collet3ActualTemperature,
+            Reactor1StirMotor,
+            Reactor1RadiationDetector,
+            Reactor2SetPosition,
+            Reactor2ActualPosition,
+            Reactor2SetY,
+            Reactor2ActualY,
+            Reactor2RobotStatus,
+            Reactor2RobotError,
+            Reactor2RobotControl,
+            Reactor2RobotCheck,
+            Reactor2SetUp,
+            Reactor2SetDown,
+            Reactor2Up,
+            Reactor2Down,
+            Reactor2Stopcock1Position,
+            Reactor2Stopcock2Position,
+            Reactor2Stopcock3Position,
+            Reactor2Collet1On,
+            Reactor2ColletSetTemperature,
+            Reactor2ColletActualTemperature,
+            Reactor2Collet2On,
+            Reactor2Collet2SetTemperature,
+            Reactor2Collet2ActualTemperature,
+            Reactor2Collet3On,
+            Reactor2Collet3SetTemperature,
+            Reactor2Collet3ActualTemperature,
+            Reactor2StirMotor,
+            Reactor2RadiationDetector,
+            Reactor3SetPosition,
+            Reactor3ActualPosition,
+            Reactor3SetY,
+            Reactor3ActualY,
+            Reactor3RobotStatus,
+            Reactor3RobotError,
+            Reactor3RobotControl,
+            Reactor3RobotCheck,
+            Reactor3SetUp,
+            Reactor3SetDown,
+            Reactor3Up,
+            Reactor3Down,
+            Reactor3Stopcock1Position,
+            Reactor3Stopcock2Position,
+            Reactor3Stopcock3Position,
+            Reactor3Collet1On,
+            Reactor3ColletSetTemperature,
+            Reactor3ColletActualTemperature,
+            Reactor3Collet2On,
+            Reactor3Collet2SetTemperature,
+            Reactor3Collet2ActualTemperature,
+            Reactor3Collet3On,
+            Reactor3Collet3SetTemperature,
+            Reactor3Collet3ActualTemperature,
+            Reactor3StirMotor,
+            Reactor3RadiationDetector):
+        """ Stupidest constructor in the whole f**king worls """
         self.LogID = LogID
         self.Timestamp = Timestamp
         self.VacuumSystemOn = VacuumSystemOn
@@ -435,11 +547,14 @@ class Sequence(Base):
     Type = Column(String(length=20))
     CreationDate = Column(DateTime, default=datetime.now)
     UserID = Column(Integer, ForeignKey('Users.UserID'))
-    FirstComponentID = Column(Integer, ForeignKey('Components.ComponentID'))
+    FirstComponentID = Column(Integer)
     ComponentCount = Column(Integer)
     Valid = Column(Boolean, default=False)
     Dirty = Column(Boolean, default=False)
-    first_component = relationship('Component', foreign_keys=[FirstComponentID])
+    first_component = relationship('Component',
+            primaryjoin="Component.ComponentID=="
+            "Sequence.FirstComponentID",
+            foreign_keys=[FirstComponentID])
 
     def __init__(self, name, comment, type_, creationData, userID, firstComponentID, componentCount, valid, dirty):
         self.Name = name
@@ -461,7 +576,7 @@ class Sequence(Base):
         Sequences class attributes as a
         Python dictionary object.
         Funciton expects no parameters
-        Function returns a Sequence as a 
+        Function returns a Sequence as a
         dictionary object.
         """
         comp_dict = {}
@@ -517,7 +632,7 @@ class User(Base):
         Users class attributes as a
         Python dictionary object.
         Funciton expects no parameters
-        Function returns a User as a 
+        Function returns a User as a
         dictionary object.
         """
         user_dict = {'type': 'user'}
@@ -532,11 +647,16 @@ class User(Base):
 
 metadata = Base.metadata
 Session = sessionmaker(bind=engine)
-    
+
 def loadSession():
     return Session()
 
 if __name__ == '__main__':
+    """ If the database and tables don't exist create them! """
+    metadata.create_all(checkfirst=True)
     session = loadSession()
-    session_query = session.query(User.Username, User.Password).all()
+    session_query = session.query(User.Username,
+            User.Password).all()
     print str(session_query)
+    from IPython import embed
+    embed()

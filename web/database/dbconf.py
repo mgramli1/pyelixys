@@ -3,18 +3,11 @@
 from configobj import ConfigObj
 import os
 
+configfile = "pyelixys/web/database/dbconf.ini"
+
 # Open the system configuration
-# Check if an .ini file exists
-if os.path.isfile('database/dbconf.ini'):
-    # Running as a webserver
-    configfile = 'database/dbconf.ini'
-    config = ConfigObj(configfile)
+config = ConfigObj(configfile)
 
-elif os.path.isfile('dbconf.ini'):
-    # Running as a DBComm script
-    configfile = 'dbconf.ini'
-    config = ConfigObj(configfile)
-
-elif os.path.isfile('/opt/elixys/config/SystemConfiguration.ini'):
-    configfile = '/opt/elixys/config/SystemConfiguration.ini'
-    config = ConfigObj(configfile)
+if __name__ == "__main__":
+    from IPython import embed
+    embed()
