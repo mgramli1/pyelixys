@@ -5,6 +5,8 @@ from pyelixys.web.database.model import Sequence
 from pyelixys.web.database.model import loadSession
 from pyelixys.sequence import comp_lookup as component_lookup
 from pyelixys.hal.system import system
+from pyelixys.elixysexceptions import ElixysInvalidSequenceID
+
 
 class SequenceManager(object):
     '''
@@ -21,7 +23,12 @@ class SequenceManager(object):
         self.sequence = session.query(Sequence).filter_by(
                 SequenceID = int(sequence_id)).first()
         self.username = str(username)
-        
+
+        if self.sequence is None:
+            raise ElixysInvalidSequenceID(
+                "Could not locate sequence id=%d" % sequence_id)
+
+
         self.process_components()
 
     def process_components(self):
@@ -55,6 +62,9 @@ class SequenceManager(object):
         pass
 
 if __name__ == '__main__':
-    sm = SequenceManager(1)
+    try:
+        sm = SequenceManager(1)
+    except ElixysInvalidSequenceID:
+        print "No Seqence with that id"
     from IPython import embed
     embed()

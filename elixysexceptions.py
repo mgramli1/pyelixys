@@ -34,3 +34,9 @@ class ElixysCBoxError(ElixysHALError):
 
 class ElixysGasTransferError(ElixysHALError):
     pass
+
+class ElixysDBError(ElixysError):
+    pass
+
+class ElixysInvalidSequenceID(ElixysDBError):
+    pass
