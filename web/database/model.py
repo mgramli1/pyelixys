@@ -647,9 +647,9 @@ class User(Base):
 
 metadata = Base.metadata
 Session = sessionmaker(bind=engine)
-
+session = Session()
 def loadSession():
-    return Session()
+    return session
 
 if __name__ == '__main__':
     """ If the database and tables don't exist create them! """

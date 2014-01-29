@@ -16,7 +16,7 @@ Flask-Classy==0.6.8
 Flask-Login==0.2.7
 Flask-SQLAlchemy==1.0
 Flask-WTF==0.9.3
-MySQL-python==1.2.4
+MySQL-python==1.2.3
 SQLAlchemy==0.9.1
 WTForms==1.0.5
 Werkzeug==0.9.4
