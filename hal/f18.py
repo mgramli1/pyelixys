@@ -34,11 +34,21 @@ class F18(SystemObject):
 
     def _is_on(self):
         """ Is F18 transfer valve on """
-        return self.synth.valve[self._valve_id].on
+        return self.synth.valves[self._valve_id].on
 
     def _is_off(self):
         """ Is F18 transfer valve off """
-        return not self.synth.valve[self._valve_id].on
+        return not self.synth.valves[self._valve_id].on
 
     is_on = property(_is_on)
     is_off = property(_is_off)
+
+    def set_on_off(self, value):
+        """ Set the valve state """
+        self.synth.valves[self._valve_id].on = value
+
+    def get_on_off(self):
+        """ Return the F18 valve state """
+        return self.synth.valves[self._valve_id].on
+
+    on = property(get_on_off, set_on_off)

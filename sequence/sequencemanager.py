@@ -4,10 +4,12 @@
 from pyelixys.web.database.model import Sequence
 from pyelixys.web.database.model import loadSession
 from pyelixys.sequence import comp_lookup as component_lookup
+from pyelixys.hal.system import system
 
 class SequenceManager(object):
     '''
     '''
+    system = system
     def __init__(self, sequence_id, username=None):
         '''
         '''

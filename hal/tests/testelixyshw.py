@@ -11,6 +11,7 @@ import sys
 import time
 import signal
 import thread
+import threading
 import struct
 import Queue
 
@@ -623,19 +624,39 @@ def exit_gracefully(signum, frame):
     print "Exit Gracefully, Ctrl+C pressed"
     sys.exit(0)
 
+
+class Simulator(threading.Thread):
+    """ Runs the websocket client simulator """
+    
+    def __init__(self):
+        """ (Constructor) """
+        #websocket.enableTrace(True) # Enable for websocket trace!
+        super(Simulator, self).__init__()
+        self.ws = websocket.WebSocketApp("ws://localhost:8888/ws",
+                                on_message=on_message,
+                                on_error=on_error,
+                                on_close=on_close)
+        self.ws.on_open = on_open
+    
+    def run(self):
+        self.ws.run_forever()
+
+
 def start_simulator_thread():
     """ Start the simulator in a thread
     create a websocket client and run it in 
     thread.  Also grab the elixys simulator.
     """
     #websocket.enableTrace(True) # Enable for websocket trace!
-    ws = websocket.WebSocketApp("ws://localhost:8888/ws",
-                                on_message=on_message,
-                                on_error=on_error,
-                                on_close=on_close)
-    ws.on_open = on_open
-    hwthread = thread.start_new_thread(ws.run_forever,())
-    return (e, ws, hwthread)
+    #ws = websocket.WebSocketApp("ws://localhost:8888/ws",
+    #                            on_message=on_message,
+    #                            on_error=on_error,
+    #                            on_close=on_close)
+    #ws.on_open = on_open
+    #hwthread = thread.start_new_thread(ws.run_forever,())
+    sim = Simulator()
+    sim.start()
+    return e, sim
 
 
 

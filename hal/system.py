@@ -36,8 +36,8 @@ class System(SystemObject):
             log.info("Starting the HW Simulator")
             from pyelixys.hal.tests.testelixyshw import \
                     start_simulator_thread
-
-            self.simulator, self.wsclient, self.simthread = \
+            time.sleep(2.0)
+            self.simulator, self.simthread = \
                     start_simulator_thread()
 
 
@@ -67,6 +67,7 @@ class System(SystemObject):
         
         self.coolant_pump = CoolantPump(synthesizer)
 
+system = System()
 
 def main():
     """ Main function called when executing this script """
@@ -74,7 +75,7 @@ def main():
     return system
 
 if __name__ == '__main__':
-    s = main()
+    s = system
     from IPython import embed
     embed()
 
