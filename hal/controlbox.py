@@ -290,8 +290,9 @@ class ControlBoxSystem(ElixysObject):
         raise ElixysComportError("Failed to read from CBox, %d retries" % retry)
 
 
+cbox = ControlBoxSystem()
+
 if __name__ == '__main__':
 
-    CBOX = ControlBoxSystem()
     from IPython import embed
     embed()

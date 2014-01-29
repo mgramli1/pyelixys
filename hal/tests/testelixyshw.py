@@ -623,13 +623,11 @@ def exit_gracefully(signum, frame):
     print "Exit Gracefully, Ctrl+C pressed"
     sys.exit(0)
 
-
-
-if __name__ == "__main__":
-
-    # Setup signal callback
-    signal.signal(signal.SIGINT, exit_gracefully)
-
+def start_simulator_thread():
+    """ Start the simulator in a thread
+    create a websocket client and run it in 
+    thread.  Also grab the elixys simulator.
+    """
     #websocket.enableTrace(True) # Enable for websocket trace!
     ws = websocket.WebSocketApp("ws://localhost:8888/ws",
                                 on_message=on_message,
@@ -637,6 +635,15 @@ if __name__ == "__main__":
                                 on_close=on_close)
     ws.on_open = on_open
     hwthread = thread.start_new_thread(ws.run_forever,())
+    return (e, ws, hwthread)
+
+
+
+if __name__ == "__main__":
+
+    # Setup signal callback
+    signal.signal(signal.SIGINT, exit_gracefully)
+    ws, hwthread = start_simulator_thread()
 
     from IPython import embed
     embed()
