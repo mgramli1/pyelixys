@@ -1,3 +1,6 @@
+# Import access to the Sequence ORM model
+# and db session object
+
 from pyelixys.web.database.model import Sequence
 from pyelixys.web.database.model import loadSession
 from pyelixys.sequence import comp_lookup as component_lookup
@@ -21,13 +24,14 @@ class SequenceManager(object):
 
     def process_components(self):
         self.components = []
+        # For each component, append to the components
+        # list the component as an class object of the
+        # component's type.
         for dbcomp in self.sequence.components:
-            print str(dbcomp.details['componenttype'])
             self.components.append(
                     component_lookup[
                         dbcomp.details[
                             'componenttype']](dbcomp))
-
 
     def pause_sequence(self):
         '''

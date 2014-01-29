@@ -2,6 +2,11 @@
 This file shall create a dictionary
 object to be reference from the 
 sequence manager class.
+
+Import each component from the components/
+directory. Then map each component class
+to a dictionary to be used by the sequence
+manager class.
 """
 from pyelixys.sequence.components.add import Add
 from pyelixys.sequence.components.cassette import Cassette
