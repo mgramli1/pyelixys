@@ -14,6 +14,8 @@ from pyelixys.hal.systemobject import SystemObject
 from pyelixys.hal.f18 import F18
 from pyelixys.hal.reactor import Reactor
 from pyelixys.hal.reagentrobot import ReagentRobot
+from pyelixys.hal.pressureregulator import PressureRegulator
+from pyelixys.hal.coolantpump import CoolantPump
 
 
 class System(SystemObject):
@@ -28,6 +30,17 @@ class System(SystemObject):
 
         # Initialize the hw api
         synthesizer = SynthesizerHAL()
+
+        # Should we start the simulator?
+        if self.sysconf['Simulator']['synthesizer']:
+            log.info("Starting the HW Simulator")
+            from pyelixys.hal.tests.testelixyshw import \
+                    start_simulator_thread
+
+            self.simulator, self.wsclient, self.simthread = \
+                    start_simulator_thread()
+
+
 
         # Call the constructor
         super(System, self).__init__(synthesizer)
@@ -44,6 +57,15 @@ class System(SystemObject):
 
         # Give top level system object access to F18 valve
         self.f18 = F18(synthesizer)
+
+        pressreg_config = self.sysconf['PressureRegulators']
+        self.pressure_regulators = []
+        for pressreg_sec in pressreg_config.sections:
+            pressreg_id = pressreg_config[pressreg_sec]['id']
+            self.pressure_regulators.append(
+                    PressureRegulator(pressreg_id, synthesizer))
+        
+        self.coolant_pump = CoolantPump(synthesizer)
 
 
 def main():

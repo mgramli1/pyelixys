@@ -1,32 +1,39 @@
 #!/usr/bin/env python
+"""
+ All set_methods will send commands to hardware to change state
+ they will not return (block( until hardware reflects changes,
+ after timeout exception
+
+ Some set_methods (e.g. temperature controller, axis position)
+ may return IF the command takes time to complete, these
+ commands will have additional flags on the system state they will
+ wait for to let us know they are busy
+ these special type of commands will be wrapped in additional
+ logic that will determine if it fails, i.e. timers, etc.
+
+ All get_methods will read from a special thread safe variable
+ system "status" this status will be updated regularly from
+ the synthesizer which will stream its state!
+
+ Validation with decorators? Later
+"""
+
 import sys
 from pyelixys.hal.hwconf import config
 from pyelixys.logs import hallog as log
 from pyelixys.hal.elixysobject import ElixysObject
-from pyelixys.hal.wsserver import wscomproc, status, cmd_lookup
-
-# All set_methods will send commands to hardware to change state
-# they will not return (block( until hardware reflects changes,
-# after timeout exception
-
-# Some set_methods (e.g. temperature controller, axis position)
-# may return IF the command takes time to complete, these
-# commands will have additional flags on the system state they will
-# wait for to let us know they are busy
-# these special type of commands will be wrapped in additional
-# logic that will determine if it fails, i.e. timers, etc.
-
-# All get_methods will read from a special thread safe variable
-# system "status" this status will be updated regularly from
-# the synthesizer which will stream its state!
-
-# Validation with decorators? Later
+from pyelixys.hal.wsserver import wscomproc, \
+				  status,\
+				  cmd_lookup
+from pyelixys.hal.controlbox import cbox
 
 
 class SynthesizerObject(ElixysObject):
     status = status
     cmd_lookup = cmd_lookup
     comproc = wscomproc
+    cbox = cbox
+
     
     def start_com_proc(self):
         if not self.comproc.is_alive():

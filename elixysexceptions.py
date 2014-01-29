@@ -31,3 +31,6 @@ class ElixysComportError(ElixysCommError):
 
 class ElixysCBoxError(ElixysHALError):
     pass
+
+class ElixysGasTransferError(ElixysHALError):
+    pass
