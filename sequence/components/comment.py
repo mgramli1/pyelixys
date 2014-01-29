@@ -2,6 +2,8 @@
 """ Comment Component
 """
 from pyelixys.sequence.components.component import Component
+# import the component threading module
+from componentthread import ComponentThread
 
 class Comment(Component):
     """ Comment """
@@ -13,3 +15,14 @@ class Comment(Component):
         self.broadcast_flag = dbcomp.details['broadcastflag']
         self.validation_error = dbcomp.details['validationerror']
         self.note = dbcomp.details['note']
+        # Set a thread
+        self.thread = CommentThread()
+class CommentThread(ComponentThread):
+    '''
+    Main Comment Thread point
+    Inherits from ComponentThread which
+    inherits from Thread.
+    '''
+    def __init__(self):
+        super(CommentThread, self).__init__()
+

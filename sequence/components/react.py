@@ -2,6 +2,8 @@
 """ React Component
 """
 from pyelixys.sequence.components.component import Component
+# import the component threading module
+from componentthread import ComponentThread
 
 class React(Component):
     """ React """
@@ -20,4 +22,14 @@ class React(Component):
         self.stop_at_temperature = dbcomp.details['stopattemperature']
         self.validation_error = dbcomp.details['validationerror']
         self.note = dbcomp.details['note']
-       
+        # Set a thread
+        self.thread = ReactThread()
+
+class ReactThread(ComponentThread):
+    '''
+    Main React Thread point
+    Inherits from ComponentThread which
+    inherits from Thread.
+    '''
+    def __init__(self):
+        super(ReactThread, self).__init__()

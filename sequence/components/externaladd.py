@@ -2,6 +2,8 @@
 """ External Add Component
 """
 from pyelixys.sequence.components.component import Component
+# import the component threading module
+from componentthread import ComponentThread
 
 class ExternalAdd(Component):
     """ External Add """
@@ -15,4 +17,14 @@ class ExternalAdd(Component):
         self.message = dbcomp.details['message']
         self.validation_error = dbcomp.details['validationerror']
         self.note = dbcomp.details['note']
+        # Set a thread
+        self.thread = ExternalAddThread()
 
+class ExternalAddThread(ComponentThread):
+    '''
+    Main External Add Thread point
+    Inherits from ComponentThread which
+    inherits from Thread.
+    '''
+    def __init__(self):
+        super(ExternalAddThread, self).__init__()

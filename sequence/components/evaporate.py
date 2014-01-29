@@ -2,6 +2,8 @@
 """ Evaporate Component
 """
 from pyelixys.sequence.components.component import Component
+# import the component threading module
+from componentthread import ComponentThread
 
 class Evaporate(Component):
     """ Evaporate """
@@ -19,4 +21,14 @@ class Evaporate(Component):
         self.validation_error = dbcomp.details['validationerror']
         self.stir_speed = dbcomp.details['stirspeed']
         self.note = dbcomp.details['note']
+        # Set a thread
+        self.thread = EvaporateThread()
 
+class EvaporateThread(ComponentThread):
+    '''
+    Main Evaporate Thread point
+    Inherits from ComponentThread which
+    inherits from Thread.
+    '''
+    def __init__(self):
+        super(EvaporateThread, self).__init__()

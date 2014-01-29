@@ -2,6 +2,8 @@
 """ Mix Component
 """
 from pyelixys.sequence.components.component import Component
+# import the component threading module
+from componentthread import ComponentThread
 
 class Mix(Component):
     """ Mix """
@@ -14,4 +16,14 @@ class Mix(Component):
         self.validation_error = dbcomp.details['validationerror']
         self.stir_speed = dbcomp.details['stirspeed']
         self.note = dbcomp.details['note']
+        # Set a thread
+        self.thread = MixThread()
 
+class MixThread(ComponentThread):
+    '''
+    Main Mix Thread point
+    Inherits from ComponentThread which
+    inherits from Thread.
+    '''
+    def __init__(self):
+        super(MixThread, self).__init__()

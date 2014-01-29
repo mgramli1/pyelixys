@@ -2,7 +2,8 @@
 """ Component Base Class
 """
 from pyelixys.logs import seqlog as log
-
+# import the HAL
+from pyelixys.hal.system import System
 class Component(object):
     """ Base Component Class """
     

@@ -2,6 +2,8 @@
 """ Trap F18 Component
 """
 from pyelixys.sequence.components.component import Component
+# import the component threading module
+from componentthread import ComponentThread
 
 class TrapF18(Component):
     """ Trap F18 """
@@ -15,3 +17,14 @@ class TrapF18(Component):
         self.trap_pressure = dbcomp.details['trappressure']
         self.trap_time = dbcomp.details['traptime']
         self.note = dbcomp.details['note']
+        # Set a thread
+        self.thread = TrapF18Thread()
+
+class TrapF18Thread(ComponentThread):
+    '''
+    Main Add Thread point
+    Inherits from ComponentThread which
+    inherits from Thread.
+    '''
+    def __init__(self):
+        super(TrapF18Thread, self).__init__()

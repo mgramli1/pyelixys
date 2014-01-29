@@ -2,6 +2,8 @@
 """ Transfer Component
 """
 from pyelixys.sequence.components.component import Component
+# import the component threading module
+from componentthread import ComponentThread
 
 class Transfer(Component):
     """ Transfer """
@@ -16,4 +18,14 @@ class Transfer(Component):
         self.target_reactor = dbcomp.details['targetreactor']
         self.validation_error = dbcomp.details['validationerror']
         self.note = dbcomp.details['note']
+        # Set a thread
+        self.thread = TransferThread()
 
+class TransferThread(ComponentThread):
+    '''
+    Main Transfer Thread point
+    Inherits from ComponentThread which
+    inherits from Thread.
+    '''
+    def __init__(self):
+        super(TransferThread, self).__init__()
