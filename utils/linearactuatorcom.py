@@ -21,6 +21,7 @@ article in the January 1992
 issue of Embedded Systems Programming
 
 """
+import struct
 
 ## Packet Description
 
@@ -52,6 +53,61 @@ def calc_crc(values):
     CRC = 0xFFFF
     for value in values:
         CRC = crc_update(CRC, value)
-    return CRC
+    crcbytes = struct.pack('BB',
+            CRC & 0xFF,
+            (CRC & 0xFF00) >> 8)
+    return values + crcbytes
+
+# Page 152
+gwstatus = "\x3f\x03\xf7\x00\x00\x02"
+gwstatus = calc_crc(gwstatus)
+print 'Gateway status query: %s' % gwstatus.encode('hex')
+
+# Page 155
+axis0pos = "\x3f\x03\xf7\x08\x00\x02"
+axis0pos = calc_crc(axis0pos)
+print 'Query Axis 0 pos: %s' % axis0pos.encode('hex')
+
+# Page 158
+axis1alarm = "\x3f\x03\xf7\x12\x00\x01"
+axis1alarm = calc_crc(axis1alarm)
+
+print 'Query Axis 1 alarm: %s' % axis1alarm.encode("hex")
+
+# Page
+resetcmd = "\x3f\x06\xf6\x0b\x00\x08"
+resetcmd = calc_crc(resetcmd)
+
+print 'Reset command: %s' % resetcmd.encode("hex")
+
+
+# Page 184
+axis1dir = '\x3f\x10\xf6\x0c\x00\x08\x10\x3a\x98\x00' \
+            '\x00\x00\x0a\x00\x00\x00\x32\x00\x1e\x00' \
+            '\x00\x00\x11'
+
+axis1dir = calc_crc(axis1dir)
+
+
+print "Axis 1 Direct mode: %s" % axis1dir.encode("hex")
+
+
+# Page 166
+homeretcmd = "\x3f\x06\xf6\x0b\x00\x12"
+homeretcmd = calc_crc(homeretcmd)
+
+print "Home return command: %s" % homeretcmd.encode("hex")
+
+# Page 167
+startcmd = "\x3f\x06\xf6\x0b\x00\x11"
+startcmd = calc_crc(startcmd)
+
+print "Start command: %s" % startcmd.encode("hex")
+
+
+pausecmd = "\x3f\x06\xf6\x0b\x00\x14"
+pausecmd = calc_crc(pausecmd)
+
+print "Pause command: %s" % pausecmd.encode("hex")
 
 
