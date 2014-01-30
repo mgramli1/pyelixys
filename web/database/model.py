@@ -93,8 +93,11 @@ class Reagents(Base):
     Position = Column(String(length=2))
     Name = Column(String(length=64))
     Description = Column(String(length=255))
-    component = relationship('Component',
+    components = relationship('Component',
             primaryjoin="Component.ComponentID==Reagents.ComponentID",
+            uselist=False)
+    sequence = relationship('Sequence',
+            primaryjoin="Sequence.SequenceID==Reagents.SequenceID",
             uselist=False)
 
 
@@ -146,7 +149,9 @@ class Roles(Base):
     RoleID = Column(Integer, primary_key=True)
     RoleName = Column(String(length=30))
     Flags = Column(Integer)
-    users = relationship('User', backref='role')
+    users = relationship('User',
+            primaryjoin="User.RoleID==Roles.RoleID",
+            backref='role')
 
     def __init__(self,
             roleName="",
@@ -594,6 +599,9 @@ class Sequence(Base):
             "Sequence.FirstComponentID",
             foreign_keys=[FirstComponentID],
             uselist=False)
+    component = relationship('Component',
+            primaryjoin="Component.SequenceID=="
+            "Sequence.SequenceID")
 
     def __init__(self,
             name="",

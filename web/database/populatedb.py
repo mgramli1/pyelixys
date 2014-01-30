@@ -60,7 +60,7 @@ def create_user(role_id):
     # Let's create a default user
     # Encrypt the password using md5 and reutrn as hex
     new_user = User()
-    new_user.Username = 'devel113'
+    new_user.Username = 'devel'
     new_user.Password = hashlib.md5('devel').hexdigest()
     new_user.FirstName = 'Sofiebio'
     new_user.LastName = 'Developer'
