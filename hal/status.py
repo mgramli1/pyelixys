@@ -95,7 +95,7 @@ class Status(ElixysObject, collections.MutableMapping):
     def parse_packet(self, pkt):
         """ Maybe the most complicates function, read the config and
         properly parses the binary packet from the hardware accordingly """
-        #Todo: rework this, too complicated!
+        #TODO rework this, too complicated!
         subsystems = self.fmt.subsystems
         data = self.struct.unpack(pkt)
         data_dict = dict()

@@ -15,6 +15,7 @@ import datetime
 
 exit_event = Event()
 
+#TODO move timeout to config file
 pkt_send_timeout = 0.1
 
 class WSHandler(tornado.websocket.WebSocketHandler):
