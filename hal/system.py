@@ -6,6 +6,7 @@ The sub system classes such as the gripper,
 gas transfer, stopcocks, reactors and reagent robots,
 are also locate in this module
 """
+import os
 import time
 from pyelixys.logs import hallog as log
 from pyelixys.hal.hal import SynthesizerHAL
@@ -32,16 +33,6 @@ class System(SystemObject):
         synthesizer = SynthesizerHAL()
 
         # Should we start the simulator?
-        if self.sysconf['Simulator']['synthesizer']:
-            log.info("Starting the HW Simulator")
-            from pyelixys.hal.tests.testelixyshw import \
-                    start_simulator_thread
-            time.sleep(2.0)
-            self.simulator, self.simthread = \
-                    start_simulator_thread()
-
-
-
         # Call the constructor
         super(System, self).__init__(synthesizer)
 
@@ -64,10 +55,24 @@ class System(SystemObject):
             pressreg_id = pressreg_config[pressreg_sec]['id']
             self.pressure_regulators.append(
                     PressureRegulator(pressreg_id, synthesizer))
-        
+
         self.coolant_pump = CoolantPump(synthesizer)
 
-system = System()
+        if self.sysconf['Simulator']['synthesizer']:
+            log.info("Starting the HW Simulator")
+            self.start_simulator()
+
+    def start_simulator(self):
+        """ Run the simulator """
+
+        from pyelixys.hal.tests.testelixyshw import \
+                start_simulator_thread
+        # If not windows wait you websocketserver to start
+        #  before starting the simulator
+        if not os.name == 'nt':
+            time.sleep(2.0)
+        self.simulator, self.simthread = \
+                start_simulator_thread()
 
 def main():
     """ Main function called when executing this script """
@@ -75,7 +80,6 @@ def main():
     return system
 
 if __name__ == '__main__':
-    s = system
+    s = main()
     from IPython import embed
     embed()
-
