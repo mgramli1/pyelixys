@@ -29,17 +29,24 @@ class Component(Base):
     sequence = relationship('Sequence', backref='components',
             foreign_keys=[SequenceID])
 
-    def __init__(self, seqID, previousSeqID, nextSeqID, seq_type, note, details, componentID = None):
+    def __init__(self, 
+            seqID=None,
+            previousCompID=None,
+            nextCompID=None,
+            seq_type="",
+            note="",
+            details="",
+            componentID = None):
         self.ComponentID = componentID
         self.SequenceID = seqID
-        self.PreviousComponentID = previousSeqID
-        self.NextComponentID = nextSeqID
+        self.PreviousComponentID = previousCompID
+        self.NextComponentID = nextCompID
         self.Type = seq_type
         self.Note = note
         self.Details = details
 
     def __repr__(self):
-        return '<Component(%d,%d)>' % (self.ComponentID, self.SequenceID)
+        return '<Component(%s,%s)>' % (self.ComponentID, self.SequenceID)
 
     def as_dict(self):
         """
@@ -70,6 +77,7 @@ class Component(Base):
 
     details = property(get_details)
 
+
 class Reagents(Base):
     """
     Reagent Object
@@ -81,8 +89,19 @@ class Reagents(Base):
     Position = Column(String(length=2))
     Name = Column(String(length=64))
     Description = Column(String(length=255))
+    component = relationship('Component',
+            primaryjoin="Component.ComponentID==Reagents.ComponentID",
+            uselist=False)
 
-    def __init__(self, seqID, componentID, position, name, description, reagentID = None):
+
+    def __init__(self, 
+            seqID=None,
+            componentID=None,
+            position=None, 
+            name="",
+            description="",
+            reagentID = None):
+
         if reagentID is not None:
             self.ReagentID = reagentID
         self.SequenceID = seqID
@@ -92,7 +111,7 @@ class Reagents(Base):
         self.Description = description
 
     def __repr__(self):
-        return '<Reagent(%d,%s)>' % (self.ReagentID, self.Name)
+        return '<Reagent(%s,%s)>' % (self.ReagentID, self.Name)
 
     def as_dict(self):
         """
@@ -125,14 +144,17 @@ class Roles(Base):
     Flags = Column(Integer)
     users = relationship('User', backref='role')
 
-    def __init__(self, roleName, flag, roleID = None):
+    def __init__(self,
+            roleName="",
+            flag=0,
+            roleID = None):
         if roleID is not None:
             self.RoleID = roleID
         self.RoleName = roleName
         self.Flags = flag
 
     def __repr__(self):
-        return '<Roles(%d,%s)>' % (self.RoleID, self.RoleName)
+        return '<Roles(%s,%s)>' % (self.RoleID, self.RoleName)
 
     def as_dict(self):
         """
@@ -162,14 +184,19 @@ class SystemLog(Base):
     UserID = Column(Integer, ForeignKey('Users.UserID'))
     Message = Column(String(length=1024))
 
-    def __init__(self, timestamp, level, userID, message, logID = None):
+    def __init__(self,
+            timestamp=0,
+            level=0,
+            userID=0,
+            message="",
+            logID=None):
         self.Timestamp = timestamp
         self.Level = level
         self.UserID = userID
         self.Message = message
 
     def __repr__(self):
-        return '<SystemLog(%d, %s)>' % (self.LogID, self.Timestamp)
+        return '<SystemLog(%s, %s)>' % (self.LogID, self.Timestamp)
 
 
 class StatusLog(Base):
@@ -523,7 +550,14 @@ class RunLog(Base):
     ComponentID = Column(Integer, ForeignKey('Components.ComponentID'))
     Message = Column(String(length=1024))
 
-    def __init__(self, timestamp, level, userID, seqID, compID, message, logID = None):
+    def __init__(self,
+            timestamp=0,
+            level=0,
+            userID=None,
+            seqID=None,
+            compID=None,
+            message="",
+            logID = None):
         if logID is not None:
             self.LogID = logID
         self.Level = level
@@ -533,7 +567,7 @@ class RunLog(Base):
         self.Message = message
 
     def __repr__(self):
-        return '<RunLog(%d, %s)>' % (self.LogID, self.Timestamp)
+        return '<RunLog(%s, %s)>' % (self.LogID, self.Timestamp)
 
 
 class Sequence(Base):
@@ -554,12 +588,22 @@ class Sequence(Base):
     first_component = relationship('Component',
             primaryjoin="Component.ComponentID=="
             "Sequence.FirstComponentID",
-            foreign_keys=[FirstComponentID])
+            foreign_keys=[FirstComponentID],
+            uselist=False)
 
-    def __init__(self, name, comment, type_, creationData, userID, firstComponentID, componentCount, valid, dirty):
+    def __init__(self,
+            name="",
+            comment="",
+            seq_type="", 
+            creationData="",
+            userID=0,
+            firstComponentID=0,
+            componentCount=0, 
+            valid=False, 
+            dirty=False):
         self.Name = name
         self.Comment = comment
-        self.Type = type_
+        self.Type = seq_type
         self.CreationData = creationData
         self.UserID = userID
         self.FirstComponentID = firstComponentID
@@ -568,7 +612,7 @@ class Sequence(Base):
         self.Dirty = dirty
 
     def __repr__(self):
-        return '<Sequence(%d,%s)>' % (self.SequenceID, self.Name)
+        return '<Sequence(%s,%s)>' % (self.SequenceID, self.Name)
 
     def as_dict(self):
         """
@@ -609,7 +653,17 @@ class User(Base):
     sequences = relationship('Sequence', backref='user')
     runlogs = relationship('RunLog', backref='user')
 
-    def __init__(self, username, passwd, firstname, lastname, roleID, email, phone, messageLevel, clientState):
+    def __init__(self, 
+            username="",
+            passwd="", 
+            firstname="",
+            lastname="",
+            roleID=0,
+            email="",
+            phone="",
+            messageLevel=0,
+            clientState=""):
+        """ User constructor """
         self.Username = username
         self.Password = passwd
         self.FirstName = firstname

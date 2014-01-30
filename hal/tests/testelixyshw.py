@@ -236,7 +236,7 @@ class ElixysSimulator(ElixysObject):
         status and then registers the callbacks to be executed
         when the commands come in from the host/user
         """
-        self.stat = StatusSimulator()
+        self.status = StatusSimulator()
         self.cb_map = {}
 
         log.debug("Initialize the ElixysSimulator, register callbacks")
@@ -373,43 +373,45 @@ class ElixysSimulator(ElixysObject):
     def mixers_set_period(self, devid, period):
         """ Mixer set period callback """
         log.debug("Set mixer %d period = %d", devid, period)
+        self.status.Mixers[devid]['period'] = period
 
     def mixers_set_duty_cycle(self, devid, duty):
         """ Mixer set the duty cycle """
         log.debug("Set mixer %d duty cycle = %f", devid, duty)
+        self.status.Mixers[devid]['duty_cycle'] = duty
 
     def valves_set_state0(self, devid, state):
         """ Set valve state0 """
         log.debug("Set valve state0 = %s", bin(state))
-        self.stat.Valves['state0'] = state
+        self.status.Valves['state0'] = state
         self.update_digital_inputs()
 
     def valves_set_state1(self, devid, state):
         """ Set valve state1 """
         log.debug("Set valve state1 = %s", bin(state))
-        self.stat.Valves['state1'] = state
+        self.status.Valves['state1'] = state
         self.update_digital_inputs()
 
     def valves_set_state2(self, devid, state):
         """ Set valve state2 """
         log.debug("Set valve state2 = %s", bin(state))
-        self.stat.Valves['state2'] = state
+        self.status.Valves['state2'] = state
 
     def tempctrl_set_setpoint(self, devid, value):
         """ Set temperature controller setpoint """
         log.debug("Set temperature controller %d setpoint = %f",
                     devid, value)
-        self.stat.TemperatureControllers[devid]['setpoint'] = value
+        self.status.TemperatureControllers[devid]['setpoint'] = value
 
     def tempctrl_turn_on(self, devid, value=None):
         """ Turn temperature controller on """
         log.debug("Turn on temperture controller %d", devid)
-        self.stat.TemperatureControllers[devid]['error_code'] = '\x01'
+        self.status.TemperatureControllers[devid]['error_code'] = '\x01'
 
     def tempctrl_turn_off(self, devid, value=None):
         """ Turn off temperature controllers """
         log.debug("Turn off temperature controller %d", devid)
-        self.stat.TemperatureControllers[devid]['error_code'] = '\x00'
+        self.status.TemperatureControllers[devid]['error_code'] = '\x00'
 
     def smcinterfaces_set_analog_out(self, devid, value):
         """ SMC Interface set analog out """
@@ -418,10 +420,16 @@ class ElixysSimulator(ElixysObject):
     def fans_turn_on(self, devid, value=None):
         """ Fans turn on """
         log.debug("Turn on Fan %d", devid)
+        state = self.status.Fans['state'] 
+        state |= 1 << devid
+        self.status.Fans['state'] = state 
 
     def fans_turn_off(self, devid, value=None):
         """ Fans turn off """
         log.debug("Turn off Fan %d", devid)
+        state = self.status.Fans['state'] 
+        state &= ~(1 << devid)
+        self.status.Fans['state'] = state
 
     def linacts_set_requested_position(self, devid, position):
         """ Linear Actuator set requested position """
@@ -439,120 +447,120 @@ class ElixysSimulator(ElixysObject):
         """
 
         # Check for Reactor 0 down (DI 0)
-        if ((self.stat['Valves']['state0'] & (1 << 6)) and
-                not(self.stat['Valves']['state1'] & (1 << 6))):
+        if ((self.status['Valves']['state0'] & (1 << 6)) and
+                not(self.status['Valves']['state1'] & (1 << 6))):
             log.debug("Reactor 0 will go down. DI0=True")
             def fxn():
-                self.stat['DigitalInputs']['state'] &= ~(1 << 0)
+                self.status['DigitalInputs']['state'] &= ~(1 << 0)
             Timer(2.0, fxn).start()
-            self.stat['DigitalInputs']['state'] |= (1 << 1)
+            self.status['DigitalInputs']['state'] |= (1 << 1)
 
 
 
         # Check for Reactor 0 up (DI 1)
-        if ((self.stat['Valves']['state1'] & (1 << 6)) and
-                not(self.stat['Valves']['state0'] & (1 << 6))):
+        if ((self.status['Valves']['state1'] & (1 << 6)) and
+                not(self.status['Valves']['state0'] & (1 << 6))):
             log.debug("Reactor 0 will go up. DI1=True")
             def fxn():
-                self.stat['DigitalInputs']['state'] &= ~(1 << 1)
+                self.status['DigitalInputs']['state'] &= ~(1 << 1)
             Timer(2.0,fxn).start()
-            self.stat['DigitalInputs']['state'] |= (1 << 0)
+            self.status['DigitalInputs']['state'] |= (1 << 0)
 
 
         # Check for Reactor 1 down (DI 3)
-        if ((self.stat['Valves']['state0'] & (1 << 5)) and
-                not(self.stat['Valves']['state1'] & (1 << 5))):
+        if ((self.status['Valves']['state0'] & (1 << 5)) and
+                not(self.status['Valves']['state1'] & (1 << 5))):
             log.debug("Reactor 1 will go down. DI3=True")
             def fxn():
-                self.stat['DigitalInputs']['state'] &= ~(1 << 3)
+                self.status['DigitalInputs']['state'] &= ~(1 << 3)
             Timer(2.0, fxn).start()
-            self.stat['DigitalInputs']['state'] |= (1 << 2)
+            self.status['DigitalInputs']['state'] |= (1 << 2)
 
 
 
         # Check for Reactor 1 up (DI 2)
-        if ((self.stat['Valves']['state1'] & (1 << 5)) and
-                not(self.stat['Valves']['state0'] & (1 << 5))):
+        if ((self.status['Valves']['state1'] & (1 << 5)) and
+                not(self.status['Valves']['state0'] & (1 << 5))):
             log.debug("Reactor 1 will go up. DI2=True")
             def fxn():
-                self.stat['DigitalInputs']['state'] &= ~(1 << 2)
+                self.status['DigitalInputs']['state'] &= ~(1 << 2)
             Timer(2.0,fxn).start()
-            self.stat['DigitalInputs']['state'] |= (1 << 3)
+            self.status['DigitalInputs']['state'] |= (1 << 3)
 
 
         # Check for Reactor 2 down (DI 5)
-        if ((self.stat['Valves']['state0'] & (1 << 4)) and
-                not(self.stat['Valves']['state1'] & (1 << 4))):
+        if ((self.status['Valves']['state0'] & (1 << 4)) and
+                not(self.status['Valves']['state1'] & (1 << 4))):
             log.debug("Reactor 1 will go down. DI3=True")
             def fxn():
-                self.stat['DigitalInputs']['state'] &= ~(1 << 5)
+                self.status['DigitalInputs']['state'] &= ~(1 << 5)
             Timer(2.0, fxn).start()
-            self.stat['DigitalInputs']['state'] |= (1 << 4)
+            self.status['DigitalInputs']['state'] |= (1 << 4)
 
 
 
         # Check for Reactor 2 up (DI 4)
-        if ((self.stat['Valves']['state1'] & (1 << 4)) and
-                not(self.stat['Valves']['state0'] & (1 << 4))):
+        if ((self.status['Valves']['state1'] & (1 << 4)) and
+                not(self.status['Valves']['state0'] & (1 << 4))):
             log.debug("Reactor 1 will go up. DI2=True")
             def fxn():
-                self.stat['DigitalInputs']['state'] &= ~(1 << 4)
+                self.status['DigitalInputs']['state'] &= ~(1 << 4)
             Timer(2.0,fxn).start()
-            self.stat['DigitalInputs']['state'] |= (1 << 5)
+            self.status['DigitalInputs']['state'] |= (1 << 5)
 
         # Check for Gripper up (DI 6)
-        if ((self.stat['Valves']['state0'] & (1 << 10)) and
-                not(self.stat['Valves']['state1'] & (1 << 10))):
+        if ((self.status['Valves']['state0'] & (1 << 10)) and
+                not(self.status['Valves']['state1'] & (1 << 10))):
             log.debug("Gripper will go up. DI6=True")
             def fxn():
-                self.stat['DigitalInputs']['state'] &= ~(1 << 6)
+                self.status['DigitalInputs']['state'] &= ~(1 << 6)
             Timer(1.0,fxn).start()
-            self.stat['DigitalInputs']['state'] |= (1 << 7)
+            self.status['DigitalInputs']['state'] |= (1 << 7)
 
         # Check for Gripper lower (DI 7)
-        if ((self.stat['Valves']['state1'] & (1 << 10)) and
-                not(self.stat['Valves']['state0'] & (1 << 10))):
+        if ((self.status['Valves']['state1'] & (1 << 10)) and
+                not(self.status['Valves']['state0'] & (1 << 10))):
             log.debug("Gripper will go down. DI7=True")
             def fxn():
-                self.stat['DigitalInputs']['state'] &= ~(1 << 7)
+                self.status['DigitalInputs']['state'] &= ~(1 << 7)
             Timer(1.0,fxn).start()
-            self.stat['DigitalInputs']['state'] |= (1 << 6)
+            self.status['DigitalInputs']['state'] |= (1 << 6)
 
         # Check for GasTransfer up (DI 9)
-        if ((self.stat['Valves']['state1'] & (1 << 9)) and
-                not(self.stat['Valves']['state0'] & (1 << 9))):
+        if ((self.status['Valves']['state1'] & (1 << 9)) and
+                not(self.status['Valves']['state0'] & (1 << 9))):
             log.debug("GasTransfer will go up. DI9=True")
             def fxn():
-                self.stat['DigitalInputs']['state'] &= ~(1 << 9)
+                self.status['DigitalInputs']['state'] &= ~(1 << 9)
             Timer(1.0,fxn).start()
-            self.stat['DigitalInputs']['state'] |= (1 << 8)
+            self.status['DigitalInputs']['state'] |= (1 << 8)
 
         # Check for GasTransfer lower (DI 8)
-        if ((self.stat['Valves']['state0'] & (1 << 9)) and
-                not(self.stat['Valves']['state1'] & (1 << 9))):
+        if ((self.status['Valves']['state0'] & (1 << 9)) and
+                not(self.status['Valves']['state1'] & (1 << 9))):
             log.debug("GasTransfer will go down. DI9=True")
             def fxn():
-                self.stat['DigitalInputs']['state'] &= ~(1 << 8)
+                self.status['DigitalInputs']['state'] &= ~(1 << 8)
             Timer(1.0,fxn).start()
-            self.stat['DigitalInputs']['state'] |= (1 << 9)
+            self.status['DigitalInputs']['state'] |= (1 << 9)
 
         # Check for Gripper Open  (DI 10)
-        if ((self.stat['Valves']['state1'] & (1 << 8)) and
-                not(self.stat['Valves']['state0'] & (1 << 8))):
+        if ((self.status['Valves']['state1'] & (1 << 8)) and
+                not(self.status['Valves']['state0'] & (1 << 8))):
             log.debug("Gripper will open. DI10=True")
             def fxn():
-                self.stat['DigitalInputs']['state'] &= ~(1 << 10)
+                self.status['DigitalInputs']['state'] &= ~(1 << 10)
             Timer(0.2, fxn).start()
-            self.stat['DigitalInputs']['state'] |= (1 << 11)
+            self.status['DigitalInputs']['state'] |= (1 << 11)
 
         # Check for Gripper Close (DI 11)
-        if ((self.stat['Valves']['state0'] & (1 << 8)) and
-                not(self.stat['Valves']['state1'] & (1 << 8))):
+        if ((self.status['Valves']['state0'] & (1 << 8)) and
+                not(self.status['Valves']['state1'] & (1 << 8))):
             log.debug("Gripper will close. DI11=True")
             def fxn():
-                self.stat['DigitalInputs']['state'] &= ~(1 << 11)
+                self.status['DigitalInputs']['state'] &= ~(1 << 11)
             Timer(0.2, fxn).start()
-            self.stat['DigitalInputs']['state'] |= (1 << 10)
+            self.status['DigitalInputs']['state'] |= (1 << 10)
 
     def run_tempctrls(self):
         while True:
@@ -561,8 +569,8 @@ class ElixysSimulator(ElixysObject):
 
     def manage_tempctrls(self):
         for devid in range(9):
-            tempctrl = self.stat['TemperatureControllers'][devid]
-            thermo = self.stat['Thermocouples'][devid]
+            tempctrl = self.status['TemperatureControllers'][devid]
+            thermo = self.status['Thermocouples'][devid]
             if tempctrl['error_code'] == '\x01':
                 # TempCtrl is on
                 if thermo['temperature'] < tempctrl['setpoint']:
@@ -577,7 +585,7 @@ class ElixysSimulator(ElixysObject):
                     thermo['temperature'] -= 0.05
 
 e = ElixysSimulator()
-simstatus = e.stat
+simstatus = e.status
 
 cmds = Queue.Queue()
 
@@ -609,8 +617,8 @@ def on_open(ws):
     def run(*args):
         i = 0
         while True:
-            #print "Sent packet id: #%d" % i
-            pkt = e.stat.generate_packet()
+            #log.debug("Sent packet id: #%d", i)
+            pkt = e.status.generate_packet()
             ws.send(pkt, ABNF.OPCODE_BINARY)
             time.sleep(.2)
             i+=1
