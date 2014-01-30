@@ -2,8 +2,7 @@
 Populates the SQLite database with
 a user and a sequence with three components.
 '''
-import sys
-print str(sys.path)
+import json
 from pyelixys.web.database.model import session
 from pyelixys.web.database.model import Roles
 from pyelixys.web.database.model import User
@@ -21,9 +20,9 @@ def create_role():
     session.commit()
     return role
 
-def get_default_client_state():
+def get_default_user_client_state():
     """ Silly work around for current webserver """
-    #TODO Remove client defaut state server dependency
+    #TODO Remove client default state server dependency
     return ({"sequenceid": 0,
             "runhistorysort": {"column": "date&time", "type": "sort", "mode": "down"},
             "lastselectscreen": "SAVED",
@@ -38,16 +37,37 @@ def get_default_client_state():
             "type": "clientstate",
             "componentid": 0})
 
+def get_default_component_state(cassette, reactor_count):
+    ''' Silly work around for the current webserver '''
+    #TODO Remove Component state/details dependency
+    # Create a dictionary and append to it the
+    # details needed
+    details_dict = {}
+    details_dict['note'] = cassette.Note
+    details_dict['sequenceid'] = cassette.SequenceID
+    details_dict['reactor'] = reactor_count
+    details_dict['validationerror'] = False
+    details_dict['componenttype'] = cassette.Type
+    details_dict['type'] = 'component'
+    details_dict['id'] = cassette.ComponentID
+    # For all the cassette's reagents, append their ids
+    details_dict['reagent'] = []
+    for reagent in cassette.reagents:
+        details_dict['reagent'].append(reagent.ReagentID)
+    return details_dict
+
 def create_user(role_id):
     # Let's create a default user
     # Encrypt the password using md5 and reutrn as hex
     new_user = User()
-    new_user.Username = 'devel15'
+    new_user.Username = 'devel113'
     new_user.Password = hashlib.md5('devel').hexdigest()
     new_user.FirstName = 'Sofiebio'
     new_user.LastName = 'Developer'
     new_user.Email = 'developer@sofiebio.com'
     new_user.RoleID = role_id
+    new_user.ClientState = json.dumps(
+            get_default_user_client_state())
     session.add(new_user)
     session.commit()
 
@@ -101,7 +121,21 @@ def update_sequence_details(sequence):
             SequenceID = sequence.SequenceID).first().ComponentID
     sequence.FirstComponentID = component_id
     sequence.ComponentCount = 3
+    sequence.Valid = 1
     session.commit()
+
+def update_component_details(cassettes):
+    # Update the details field of each new
+    # cassette component
+    # Keep a reactor count
+    reactor_count = 1
+    for cassette in cassettes:
+        cassette.Details = json.dumps(
+                get_default_component_state(
+                cassette,
+                reactor_count))
+        session.commit()
+        reactor_count += 1
 
 if __name__ == '__main__':
     role = create_role()
@@ -110,4 +144,4 @@ if __name__ == '__main__':
     cassettes = create_cassette_components(sequence.SequenceID)
     create_reagents(sequence.SequenceID, cassettes)
     update_sequence_details(sequence)
-
+    update_component_details(cassettes)

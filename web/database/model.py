@@ -28,6 +28,10 @@ class Component(Base):
     runlogs = relationship('RunLog', backref='runlogs')
     sequence = relationship('Sequence', backref='components',
             foreign_keys=[SequenceID])
+    reagents = relationship('Reagents',
+            primaryjoin="and_" +
+            "(Reagents.ComponentID==Component.ComponentID)",
+            uselist=True)
 
     def __init__(self, 
             seqID=None,
