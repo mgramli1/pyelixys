@@ -12,6 +12,14 @@ on page 141 section 3.9.2
 Link with C code for crc calculation:
 http://www.nongnu.org/avr-libc/user-manual/group__util__crc.html
 
+Link with CRC explanation:
+http://www.barrgroup.com/Embedded-Systems/How-To/CRC-Calculation-C-Code
+
+Further details in:
+Jack Crenshaw's "Implementing CRCs"
+article in the January 1992
+issue of Embedded Systems Programming
+
 """
 
 ## Packet Description
