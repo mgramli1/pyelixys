@@ -20,8 +20,21 @@ Jack Crenshaw's "Implementing CRCs"
 article in the January 1992
 issue of Embedded Systems Programming
 
+Page 70 - 71
+The address map
+
+Servo On
+Home Ctrl
+Send Position
+Send Start Command
+
+PC software edit the parameter
+
+
 """
 import struct
+import serial
+import time
 
 ## Packet Description
 
@@ -75,10 +88,15 @@ axis1alarm = calc_crc(axis1alarm)
 print 'Query Axis 1 alarm: %s' % axis1alarm.encode("hex")
 
 # Page
-resetcmd = "\x3f\x06\xf6\x0b\x00\x08"
-resetcmd = calc_crc(resetcmd)
+resetcmd0 = "\x3f\x06\xf6\x0b\x00\x08"
+resetcmd0 = calc_crc(resetcmd0)
 
-print 'Reset command: %s' % resetcmd.encode("hex")
+print 'Reset command axis 0: %s' % resetcmd0.encode("hex")
+
+resetcmd1 = "\x3f\x06\xf6\x0f\x00\x08"
+resetcmd1 = calc_crc(resetcmd1)
+
+print 'Reset command axis 1: %s' % resetcmd1.encode("hex")
 
 
 # Page 184
@@ -93,21 +111,77 @@ print "Axis 1 Direct mode: %s" % axis1dir.encode("hex")
 
 
 # Page 166
-homeretcmd = "\x3f\x06\xf6\x0b\x00\x12"
-homeretcmd = calc_crc(homeretcmd)
+homeretcmd0 = "\x3f\x06\xf6\x0b\x00\x12"
+homeretcmd0 = calc_crc(homeretcmd0)
 
-print "Home return command: %s" % homeretcmd.encode("hex")
+print "Home return command: %s" % homeretcmd0.encode("hex")
 
 # Page 167
-startcmd = "\x3f\x06\xf6\x0b\x00\x11"
-startcmd = calc_crc(startcmd)
+startcmd0 = "\x3f\x06\xf6\x0b\x00\x11"
+startcmd0 = calc_crc(startcmd0)
 
-print "Start command: %s" % startcmd.encode("hex")
+print "Start command: %s" % startcmd0.encode("hex")
 
 
+# Page 168
 pausecmd = "\x3f\x06\xf6\x0b\x00\x14"
 pausecmd = calc_crc(pausecmd)
 
 print "Pause command: %s" % pausecmd.encode("hex")
 
+# Page 184
+axis0dir = '\x3f\x10\xf6\x08\x00\x08\x10\x3a\x98\x00' \
+            '\x00\x00\x0a\x00\x00\x00\x32\x00\x1e\x00' \
+            '\x00\x00\x11'
+
+axis0dir = calc_crc(axis0dir)
+
+
+print "Axis 0 Direct mode: %s" % axis0dir.encode("hex")
+
+# page 165
+axis0son = '\x3f\x06\xf6\x0b\x00\x10'
+axis0son = calc_crc(axis0son)
+print "Axis 0 Servo on: %s" % axis0son.encode("hex")
+
+# Page 158
+axis2alarm = "\x3f\x03\xf7\x13\x00\x01"
+axis2alarm = calc_crc(axis2alarm)
+print 'Query Axis 2 alarm: %s' % axis2alarm.encode("hex")
+
+
+# Always turn on
+alwayson = "\x3f\x06\xf6\x00\x80\x00"
+alwayson = calc_crc(alwayson)
+print "Always run this: %s" % alwayson.encode("hex").upper()
+
+
+class IAI(object):
+    def __init__(self):
+        self.s = serial.Serial("COM5",
+                                baudrate=230400,
+                                timeout=0.5)
+    def turnon(self):
+        self.s.write(alwayson)
+        time.sleep(0.1)
+        v = self.s.readline().encode('hex').upper()
+        print v
+
+    def start0(self):
+        self.s.write(startcmd0)
+        time.sleep(0.1)
+        v = self.s.readline().encode('hex').upper()
+        print v
+
+    def home0(self):
+        self.s.write(homeretcmd0)
+        time.sleep(0.1)
+        v = self.s.readline().encode('hex').upper()
+        print v
+
+    def reset0(self):
+        self.s.write(resetcmd0)
+        time.sleep(0.1)
+        v = self.s.readline().encode('hex').upper()
+        print v
 
