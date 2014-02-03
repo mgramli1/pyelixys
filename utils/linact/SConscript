@@ -1,0 +1,15 @@
+Import('env')
+
+src = ['linact.c']
+libs = []
+
+libpaths = []
+
+Clean(".","build")
+
+env.Append(CPPPATH = ['.'])
+env.Program(target="linact",CCFLAGS='-g',
+        LIBPATH=libpaths, LIBS=libs,
+        source=src)
+
+
