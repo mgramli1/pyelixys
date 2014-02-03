@@ -1,0 +1,9 @@
+import os
+
+env = Environment(tools=['mingw'])
+build_dir = "build/"
+Clean('.', build_dir)
+
+SConscript('SConscript', variant_dir='build',
+        duplicate=0, exports = ['env', 'build_dir'])
+
