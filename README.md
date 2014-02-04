@@ -7,11 +7,9 @@ development board][mbedlink].  It communicates with the hardware using the
 
 Developing with pyelixys
 ------------------------
-First, install pip, python-dev, and mysqlclient.
+First, install pip.
 ```bash
 sudo apt-get install python-setuptools
-sudo apt-get install python-dev
-sudo apt-get install libmysqlclient-dev
 ```
 Next, install the virtual environment - virtualenv.
 ```bash
@@ -31,12 +29,15 @@ Clone the repository
 git clone git@github.com:henryeherman/pyelixys.git
 cd pyelixys
 ```
-Install the python dependencies using pip
+Install the python dependencies by executing the
+install dependencies script in the root of pyelixys
 ```bash
-pip install -r requirements.txt
+./install_dependencies.sh
 ```
 
 If installing on linux, you will need numpy.
+(This should be installed by running the install
+dependencies script).
 To install numpy in a virtualenv
 requires the python dev
 package. Before installing the requirements with pip
