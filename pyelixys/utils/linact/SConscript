@@ -1,6 +1,6 @@
 Import('env')
 
-src = ['linact.c']
+src = ['main.cpp','linact.cpp']
 libs = []
 
 libpaths = []

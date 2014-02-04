@@ -151,5 +151,35 @@
 #define AXIS_STATUS_HEND    (1<<1)
 #define AXIS_STATUS_PEND    (1<<0)
 
+#define LINACT_BUFLEN       (64)
 
-#endif
+#define TO_HEX(i) (i <= 9 : '0' + i ? 'A' - 10 + i)
+
+namespace IAI {
+
+
+
+  class LinActBuf {
+    public:
+        unsigned int len;
+        unsigned char buf[LINACT_BUFLEN];
+        char strbuf[LINACT_BUFLEN*2];
+        void copy(LinActBuf &other);
+        unsigned int crc_update(unsigned int crc, unsigned char a);
+        void calc_crc();
+        char *as_string();
+  };
+
+  class LinearActuator {
+
+    public:
+        LinearActuator();
+        ~LinearActuator();
+  };
+
+}
+
+
+
+#endif /* LINACT_H */
+

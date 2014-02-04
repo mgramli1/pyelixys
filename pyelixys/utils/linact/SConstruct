@@ -1,6 +1,9 @@
 import os
+if os.name == 'nt':
+    env = Environment(tools=['mingw'])
+else:
+    env = Environment()
 
-env = Environment(tools=['mingw'])
 build_dir = "build/"
 Clean('.', build_dir)
 
