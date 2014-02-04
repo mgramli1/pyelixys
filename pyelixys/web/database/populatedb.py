@@ -138,6 +138,14 @@ def update_component_details(cassettes):
         reactor_count += 1
 
 if __name__ == '__main__':
+    '''
+    Running this file as a script
+    shall execute the following which
+    will create a new role and user.
+    The script shall also create a
+    default sequence with three cassettes
+    that contain no reagents.
+    '''
     role = create_role()
     user = create_user(role.RoleID)
     sequence = create_sequence(user.UserID)
@@ -145,3 +153,5 @@ if __name__ == '__main__':
     create_reagents(sequence.SequenceID, cassettes)
     update_sequence_details(sequence)
     update_component_details(cassettes)
+    from IPython import embed
+    embed()

@@ -1,13 +1,19 @@
 #!/usr/bin/env python
 """ Component Base Class
 """
-
-#TODO from pyelixys.logs import seqlog as log
 # import the HAL
-#TODO from pyelixys.hal.system import system
+from pyelixys.logs import seqlog as log
+from pyelixys.hal.system import system
 
 class Component(object):
-    """ Base Component Class """
+    """ Base Component Class
+        The component_status attribute is
+        a string that shall represent the
+        status of the component during a run()
+        execution. The attribute shall be a
+        property and set log messages with
+        the same string.
+    """
     system = None
     log = None
     #system = system
@@ -15,8 +21,24 @@ class Component(object):
 
     def __init__(self, dbcomp):
         self.dbcomp = dbcomp
+        self.status = ""
         
     def run(self):
         """ Run this component thread!
         If we have one?"""
         pass
+
+    def get_component_status(self):
+        '''
+        '''
+        return self.status
+
+    def set_component_status(self, new_component_status):
+        '''
+        '''
+
+        self.status = new_component_status
+
+    component_status = property(
+            get_component_status,
+            set_component_status)
