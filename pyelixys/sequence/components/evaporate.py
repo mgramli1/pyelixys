@@ -55,6 +55,7 @@ class EvaporateThread(ComponentThread):
         the unit op's execution.
         '''
         evaporate.log.debug("Starting the Evaporate run()")
+        evaporate.component_status = "Starting the Evaporate run()"
         evaporate.log.debug("Setting pressure regulator 1 to " 
                 + str(evaporate.evaporationpressure))
         # Set pressure regualtor 1 to 'evaporate.evaporationpressure'
@@ -63,9 +64,16 @@ class EvaporateThread(ComponentThread):
         evaporate.log.debug("Setting reactor "
                 + str(evaporate.reactor)
                 + " to the Evaporate position")
+        evaporate.component_status = ("Setting reactor "
+                + str(evaporate.reactor)
+                + " to the Evaporate position")
         # Set the Evaporate position to 'evaporate.reactor'
 
         evaporate.log.debug("Setting reactor "
+                + str(evaporate.reactor)
+                + " stir speed to "
+                + str(evaporate.stir_speed))
+        evaporate.component_status = ("Setting reactor "
                 + str(evaporate.reactor)
                 + " stir speed to "
                 + str(evaporate.stir_speed))
@@ -73,16 +81,21 @@ class EvaporateThread(ComponentThread):
 
         # Make sure gripper is up
         evaporate.log.debug("Checking if gripper is up")
-        if not bool(evaporate.system.reagent_robot.gripper.is_up):
+        evaporate.component_status = "Checking if gripper is up"
+        if not evaporate.system.reagent_robot.gripper.is_up:
             evaporate.log.debug("Gripper is not up, setting up")
+            evaporate.component_status = "Gripper is not up, setting up"
             evaporate.system.reagent_robot.gripper.lift()
         # Make sure gas transfer is up
         evaporate.log.debug("Check if gas transfer is up")
-        if not bool(evaporate.system.reagent_robot.gas_transfer.is_up):
+        evaporate.component_status = "Checking if gas transfer is up"
+        if not evaporate.system.reagent_robot.gas_transfer.is_up:
             evaporate.log.debug("Gas Transfer is not up, setting up")
+            evaporate.component_status = "Gas transfer is not up, setting up"
             evaporate.system.reagent_robot.gas_transfer.lift()
         
         evaporate.log.debug("Checking to confirm reagent robot is on")
+        evaporate.component_status
         # Make sure the reagent robot is enabled
         evaporate.log.debug("Moving the robot to the evaporate position")
         # Move the robot to the evaporate position
@@ -122,4 +135,5 @@ class EvaporateThread(ComponentThread):
                 + str(evaporate.duration) + " seconds")
         # Set Pressure Regulator 1 to 'evaporate.evaporation_pressure'
         # and wait the time for 'evaporate.duration'
-        
+       
+

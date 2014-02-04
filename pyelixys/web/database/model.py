@@ -720,9 +720,5 @@ def loadSession():
 if __name__ == '__main__':
     """ If the database and tables don't exist create them! """
     metadata.create_all(checkfirst=True)
-    session = loadSession()
-    session_query = session.query(User.Username,
-            User.Password).all()
-    print str(session_query)
     from IPython import embed
     embed()

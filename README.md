@@ -78,10 +78,14 @@ as soon as you initialized it. To initialize it run:
 sudo python -m pyelixys.web.database.model
 ```
 
-If the database does not exist it will now!
+If the database does not exist, it will now!
 The filename of the database is located in
 the dbconf.ini and can be fount in database
 directory.
+This will execute the setup of the database and return
+the user in an Ipython terminal upon completion. At this
+point, a user may run additional scripts or commands.
+To exit Ipython, type `exit`.
 
 The database is accessed through the wonderful
 [sqlalchemy][sqlalchemylink] library, and the models can be found
@@ -90,8 +94,16 @@ in model.py
 
 Initializing Data in the Database
 ---------------------------------
-TBD
+In order to populate the database with data, simply run:
 
+```bash
+python -m pyelixys.web.database.populatedb
+```
+
+This shall store a user with default settings onto the database.
+The user shall be returned to an an Ipython terminal upon completion.
+At this point, a user may run additional scripts or commands.
+To exit Ipython, type `exit`.
 
 Starting the Webserver
 ------------------------------------------
