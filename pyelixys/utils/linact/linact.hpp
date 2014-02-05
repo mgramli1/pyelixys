@@ -162,24 +162,36 @@ namespace IAI {
 
 
   class LinActBuf {
+    unsigned char *ptr;
     public:
+        LinActBuf();
+
+        void push(unsigned char val);
+        void reset();
+
         unsigned int len;
         unsigned char buf[LINACT_BUFLEN];
         char strbuf[LINACT_BUFLEN*2];
         void copy(LinActBuf &other);
-        unsigned int crc_update(unsigned int crc, unsigned char a);
+        unsigned int crc_update(unsigned int crc,
+                unsigned char a);
         void calc_crc();
         char *as_string();
-        void readRegsisterStr(unsigned short startreg, unsigned short count);
-        void writeRegisterStr(unsigned short reg, unsigned short value);
+        void readRegsisterStr(unsigned short startreg,
+                unsigned short count);
+        void writeRegisterStr(unsigned short reg,
+                unsigned short value);
         void writeMultiRegisterStr(unsigned short reg,
-            unsigned short reglen, unsigned char * data, unsigned char dlen);
+            unsigned short reglen,
+            unsigned char * data,
+            unsigned char dlen);
   };
 
   class LinearActuator {
 
     public:
         LinActBuf buffer;
+        LinActBuf inbuf;
         LinearActuator();
         ~LinearActuator();
         unsigned short getAxisReadAddress(unsigned int axisid);
@@ -188,13 +200,16 @@ namespace IAI {
         LinActBuf * getGwStartStr();
         LinActBuf * getAxisStatus(unsigned int axisid);
         LinActBuf * getAxisPos(unsigned int axisid);
-        LinActBuf * getSetAxisPos(unsigned int axisid, unsigned int position);
+        LinActBuf * getSetAxisPos(unsigned int axisid,
+                unsigned int position);
         LinActBuf * getAxisStart(unsigned int axisid);
         LinActBuf * getAxisPause(unsigned int axisid);
         LinActBuf * getAxisReset(unsigned int axisid);
         LinActBuf * getAxisBrakeRelease(unsigned int axisid);
 
-    };
+        void send();
+        LinActBuf * receive(int len);
+  };
 
 }
 

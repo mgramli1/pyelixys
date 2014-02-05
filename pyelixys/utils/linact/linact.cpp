@@ -5,7 +5,24 @@
 
 
 namespace IAI {
-char linactbuf[LINACT_BUFLEN];
+
+
+LinActBuf::LinActBuf() {
+    reset();
+}
+
+void LinActBuf::push(unsigned char value) {
+    len++;
+    *ptr = value;
+    ptr++;
+}
+
+void LinActBuf::reset() {
+    len = 0;
+    ptr = buf;
+    buf[0] = GWADDR;
+}
+
 
 void LinActBuf::copy(LinActBuf &other) {
     for(int i=0;i<other.len;i++) {
@@ -225,6 +242,24 @@ LinActBuf * LinearActuator::getAxisBrakeRelease(unsigned int axisid) {
     value = (AXIS_CTRL_BKRL);
     buffer.writeRegisterStr(axisreg, value);
     return &buffer;
+}
+
+void LinearActuator::send() {
+    // Drive WR pin
+    for(int i=0;i<buffer.len;i++){
+        putchar(buffer.buf[i]);
+    }
+    // Stop driving WR pin to receive
+}
+
+LinActBuf * LinearActuator::receive(int len) {
+    // Fill buffer
+    inbuf.reset();
+    for(int i=0;i<len;i++) {
+        inbuf.push(getc(stdin));
+        //printf("Inbuf.len=%d", inbuf.len);
+    }
+    printf("Receive: %s\r\n", inbuf.as_string());
 }
 
 } // End Namespace IAI
