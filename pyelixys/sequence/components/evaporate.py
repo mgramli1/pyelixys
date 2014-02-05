@@ -54,86 +54,118 @@ class EvaporateThread(ComponentThread):
         which shall contain the details of
         the unit op's execution.
         '''
-        evaporate.log.debug("Starting the Evaporate run()")
         evaporate.component_status = "Starting the Evaporate run()"
-        evaporate.log.debug("Setting pressure regulator 1 to " 
+        evaporate.component_status= ("Setting pressure regulator 1 to " 
                 + str(evaporate.evaporationpressure))
         # Set pressure regualtor 1 to 'evaporate.evaporationpressure'
-        # Note: Divide pressure by 3?
+        # Note: Divide pressure by 3? This is down in the old codebase
 
-        evaporate.log.debug("Setting reactor "
-                + str(evaporate.reactor)
-                + " to the Evaporate position")
         evaporate.component_status = ("Setting reactor "
                 + str(evaporate.reactor)
                 + " to the Evaporate position")
         # Set the Evaporate position to 'evaporate.reactor'
 
-        evaporate.log.debug("Setting reactor "
-                + str(evaporate.reactor)
-                + " stir speed to "
-                + str(evaporate.stir_speed))
         evaporate.component_status = ("Setting reactor "
                 + str(evaporate.reactor)
                 + " stir speed to "
                 + str(evaporate.stir_speed))
         # Set the Evaporate stir speed to 'evaporate.stir_speed'
+        #evaporate.system.reactors[evaporate.reactor].mixer.stir_speed = \
+        #evaporate.stir_speed
 
         # Make sure gripper is up
-        evaporate.log.debug("Checking if gripper is up")
         evaporate.component_status = "Checking if gripper is up"
         if not evaporate.system.reagent_robot.gripper.is_up:
-            evaporate.log.debug("Gripper is not up, setting up")
             evaporate.component_status = "Gripper is not up, setting up"
             evaporate.system.reagent_robot.gripper.lift()
         # Make sure gas transfer is up
-        evaporate.log.debug("Check if gas transfer is up")
         evaporate.component_status = "Checking if gas transfer is up"
         if not evaporate.system.reagent_robot.gas_transfer.is_up:
-            evaporate.log.debug("Gas Transfer is not up, setting up")
             evaporate.component_status = "Gas transfer is not up, setting up"
             evaporate.system.reagent_robot.gas_transfer.lift()
         
-        evaporate.log.debug("Checking to confirm reagent robot is on")
-        evaporate.component_status
+        evaporate.component_status = "Checking to confirm reagent robot is on"
         # Make sure the reagent robot is enabled
-        evaporate.log.debug("Moving the robot to the evaporate position")
+        #if not evaporate.system.reagent_robot.enabled:
+        #   evaporate.system.reagent_robot.enable()
+        evaporate.component_status = "Moving the robot to the evaporate position" 
         # Move the robot to the evaporate position
         
         # Lower the gas transfer
-        evaporate.log.debug("Lowering gas transfer")
+        evaporate.component_status = "Lowering gas transfer" 
         evaporate.system.reagent_robot.gas_transfer.lower()
 
-        evaporate.log.debug("Setting gas transfer valve on")
+        evaporate.component_status = "Setting gas transfer valve on" 
         # Turn on gas transfer valve
-
+        
+        evaporate.component_status = "Setting the vacuum system on"
         # Set vacuum system on
         
         # Set reactor's temp to 'evaporate.evaporation_temperature'
-        evaporate.log.debug("Setting reactor "
+        evaporate.component_status = ("Setting reactor "
                 + str(evaporate.reactor)
                 + "'s temperature controllers to "
                 + str(evaporate.evaporation_temperature))
-        evaporate.system.reactor[evaporate.reactor].temperature_controller.set_setpoint(
-                evaporate.evaporation_temperature)
+        evaporate.system.reactor[evaporate.reactor].(
+                temperature_controller).set_setpoint(
+                        evaporate.evaporation_temperature)
           
-
-        evaporate.log.debug("Turning on the Heating system")
+        evaporate.component_status = "Turning on the Heating system"
         # Set reactor's heater on
+        evaporate.system.reactors[evaporate.reactor].(
+                temperature_controller).turn_on()
 
-        evaporate.log.debug("Checking of operation will stop at a temperature")
+
+        evaporate.component_status = "Checking if operation will stop at a temperature"
         if int(evaporate.stop_temperature) > 0:
-            evaporate.log.debug("Setting stir speed off")
+            evaporate.component_status = "Setting stir speed off"
             # set reactor's stir speed to 0/off
-       
+            #evaporate.system.reactors[evaporate.reactor].mixer.stir_speed = \
+            #evaporate.stir_speed
+
+        evaporate.component_status = "Starting the evaporation"
         # Set starting time
         evaporate.start_time = time.time()
-       
-        evaporate.log.debug("Setting pressure regulator 1 to the pressure "
+        
+        evaporate.component_status = "Setting pressure regulator 1 to the pressure "
                 + str(evaporate.evaporation_pressure)
                 + " for the duration of "
-                + str(evaporate.duration) + " seconds")
+                + str(evaporate.duration) + " seconds"
         # Set Pressure Regulator 1 to 'evaporate.evaporation_pressure'
-        # and wait the time for 'evaporate.duration'
-       
+        # and set pressure ramp time to 'evaporate.duration'/2
+        # Ramp pressure over the first half of the evaporation,
+        # then finish the 2nd half of the evaporation
 
+        evaporate.component_status = "Waiting for evaporation procedure to complete"
+        # Wait - while(no timer override, no abort, and starttime+duration>time.time() )
+        
+        evaporate.component_status = "Finished Evaporation, cooling down"
+        
+        evaporate.component_status = (
+                "Turning off reactor "
+                + str(evaporate.reactor)
+                + "'s Heater off")
+        # Set the reactor's Heater off
+        evaporate.system.reactors[evaporate.reactor].(
+                temperature_controller).turn_off()
+        evaporate.component_status = "Turning cooling system on"
+        # Set the cooling system on
+        #evaporate.system.coolant_pump.on=True
+
+        if int(evaporate.stop_temperature) == 0:
+            
+            # Set stir speed to 0/off
+
+        # Move reactor down
+
+        # Set gas transfer valve off
+
+        # Set vacuum system off
+
+        # Set gas transfer valve off again
+
+        # Move gas transfer up
+
+        # Home reagent robot
+
+        # Complete

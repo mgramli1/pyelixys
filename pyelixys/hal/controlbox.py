@@ -72,6 +72,7 @@ class ControlBoxSystem(ElixysObject):
         tmpstr = "/ADC/run\n"
         self.write(tmpstr)
         resp = self.read()
+        log.debug("Get ADCS: %s" , resp)
         regex = re.compile("(?:[ADC])+ "
                        "(?P<adc0>[0-9A-Fa-f]*), "
                        "(?P<adc1>[0-9A-Fa-f]*)")
@@ -80,6 +81,7 @@ class ControlBoxSystem(ElixysObject):
 			self.conf['ADCCONST0']
         adcval1 = (int(mtch.group('adc1'), 16) - self.conf['ADCOFFSET1']) * \
 			self.conf['ADCCONST1']
+        log.debug("ADC0 = %s", adcval0)
         return adcval0, adcval1
 
     def get_adc0(self):
@@ -140,7 +142,7 @@ class ControlBoxSystem(ElixysObject):
         if val < dacmin:
             log.warn("Attempt to set DAC %d to "
                     "%d, setting to MIN %d", devid, val, dacmin)
-
+        
         tmpstr = tmpstr % (devid, val)
         log.debug("Set DAC: sent %s", tmpstr)
         self.write(tmpstr)

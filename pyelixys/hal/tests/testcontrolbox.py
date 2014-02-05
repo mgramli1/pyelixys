@@ -10,6 +10,7 @@ import sys
 from StringIO import StringIO
 from pyelixys.logs import hwsimlog as log
 from pyelixys.hal.tests.testelixyshw import e as hwsim
+from pyelixys.hal.hwconf import config
 
 class CBoxSim(object):
     """ This Serial object acts like a serial port,
@@ -27,6 +28,8 @@ class CBoxSim(object):
         self.dacval1 = 0
         self.adcval0 = 0
         self.adcval1 = 0
+        self.ssrval0 = 0
+        self.ssrval1 = 0
 
         self.cbs = dict()
         self.cbs['DAC'] = self.cb_dac
@@ -39,6 +42,29 @@ class CBoxSim(object):
         if param is None:
             self.out_buffer = StringIO("DAC %X, %X\n"
                     % (self.dacval0, self.dacval1))
+            return
+        dacid = int(param[0].replace(',',''))
+        dacval = int(param[1], 16)
+        log.debug("DAC id=%s", dacid)
+        if dacid == 0:
+            dacval = (
+                    dacval
+                    + config['ControlBox']['ADCOFFSET0']
+                    * config['ControlBox']['ADCCONST0']
+                    )
+            self.dacval0 = dacval
+            log.debug("Dacval0=%s", dacval)
+        elif dacid == 1:
+            dacval = (
+                    dacval 
+                    + config['ControlBox']['ADCCONST1']
+                    * config['ControlBox']['ADCOFFSET1']
+                    )
+
+            self.dacval1 = dacval1
+            log.debug("Dacval1=%s", dacval)
+        else:
+            log.error("Unknown dac id")
 
 
     def cb_adc(self, param):
@@ -52,6 +78,11 @@ class CBoxSim(object):
     def cb_ssr(self, param):
         """ Callback for  the SSR """
         log.debug("SSR CB %s", param)
+        if param is None:
+            self.out_buffer = StringIO("ssr %X, %X\n"
+                    % (self.ssrval0, self.ssrval1))
+            return
+
 
     def write(self, msg):
         """ Write message to the control box simulator """

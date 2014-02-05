@@ -22,7 +22,8 @@ class Mixer(SystemObject):
 
     def set_duty_cycle(self, value):
         """ Sets duty cycle on mixer,
-        MAX is 1.0, Min is 0.0 """
+        MAX is 100.0, Min is 0.0.
+        Set as a percentage"""
         self._mixer.duty_cycle = value
 
     def get_duty_cycle(self):
