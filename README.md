@@ -5,6 +5,8 @@ pyelixys is a library for communicating with the [Sofie Biosciences][sofiebiolin
 development board][mbedlink].  It communicates with the hardware using the
 [websocket protocol][websocketlink].  This library abstracts the hardware to python objects.
 
+It is distributed under the 3-Clause BSD [License][bsdliclink]
+
 Developing with pyelixys
 ------------------------
 First, install pip.
@@ -157,3 +159,4 @@ Examples of URLs to visit include:
 [elixyslink]: http://sofiebio.com/products/chemistry/
 [websocketlink]: http://en.wikipedia.org/wiki/WebSocket
 [sqlalchemylink]: http://www.sqlalchemy.org/
+[bsdliclink]: http://opensource.org/licenses/BSD-3-Clause
