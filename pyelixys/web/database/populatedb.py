@@ -9,6 +9,8 @@ from pyelixys.web.database.model import User
 from pyelixys.web.database.model import Sequence
 from pyelixys.web.database.model import Component
 from pyelixys.web.database.model import Reagents
+from pyelixys.web.database.model import metadata
+
 
 # Import hashing library for pw hash
 import hashlib
@@ -28,8 +30,8 @@ def get_default_user_client_state():
             "lastselectscreen": "SAVED",
             "selectsequencesort": {"column": "name", "type": "sort", "mode": "down"},
             "prompt": {
-                "show": False, "screen": "", "text2": "", "text1": "", 
-                "edit2default": "", "buttons": [], "title": "", 
+                "show": False, "screen": "", "text2": "", "text1": "",
+                "edit2default": "", "buttons": [], "title": "",
                 "edit1validation": "", "edit1": False, "edit2": False,
                 "edit1default": "", "edit2validation": "",
                 "type": "promptstate"},
@@ -146,6 +148,7 @@ if __name__ == '__main__':
     default sequence with three cassettes
     that contain no reagents.
     '''
+    metadata.create_all(checkfirst=True)
     role = create_role()
     user = create_user(role.RoleID)
     sequence = create_sequence(user.UserID)

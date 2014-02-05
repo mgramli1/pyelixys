@@ -95,13 +95,17 @@ in model.py
 
 Initializing Data in the Database
 ---------------------------------
+Developers might like to start with some default data.
+This can be done by populating the database with data.
 In order to populate the database with data, simply run:
+
 
 ```bash
 python -m pyelixys.web.database.populatedb
 ```
 
 This shall store a user with default settings onto the database.
+If the database did not already exist it will now!
 The user shall be returned to an an Ipython terminal upon completion.
 At this point, a user may run additional scripts or commands.
 To exit Ipython, type `exit`.
