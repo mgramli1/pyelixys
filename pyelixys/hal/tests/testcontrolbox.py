@@ -11,8 +11,9 @@ from StringIO import StringIO
 from pyelixys.logs import hwsimlog as log
 from pyelixys.hal.tests.testelixyshw import e as hwsim
 from pyelixys.hal.hwconf import config
+from pyelixys.hal.elixysobject import ElixysObject
 
-class CBoxSim(object):
+class CBoxSim(ElixysObject):
     """ This Serial object acts like a serial port,
     with the Controlbox on the other end.  It allows the
     user to set the dual DACs and read the Dual ADCs.
@@ -21,6 +22,7 @@ class CBoxSim(object):
 
     def __init__(self, *args, **kwargs):
         log.debug("Creating a controlbox simulator")
+        self.conf = self.sysconf['ControlBox']
         self.hwsim = hwsim
         self.out_buffer = StringIO("CBOX")
 
@@ -38,50 +40,65 @@ class CBoxSim(object):
 
     def cb_dac(self, param):
         """ Callback for the DAC """
-        log.debug("DAC CB %s", param)
+        #log.debug("DAC CB %s", param)
         if param is None:
             self.out_buffer = StringIO("DAC %X, %X\n"
                     % (self.dacval0, self.dacval1))
             return
         dacid = int(param[0].replace(',',''))
         dacval = int(param[1], 16)
-        log.debug("DAC id=%s", dacid)
+        #log.debug("DAC id=%s", dacid)
         if dacid == 0:
-            dacval = (
-                    dacval
-                    + config['ControlBox']['ADCOFFSET0']
-                    * config['ControlBox']['ADCCONST0']
-                    )
-            self.dacval0 = dacval
-            log.debug("Dacval0=%s", dacval)
-        elif dacid == 1:
-            dacval = (
-                    dacval 
-                    + config['ControlBox']['ADCCONST1']
-                    * config['ControlBox']['ADCOFFSET1']
-                    )
 
-            self.dacval1 = dacval1
-            log.debug("Dacval1=%s", dacval)
+            self.dacval0 = dacval
+            #log.debug("Dacval0=%s",self.dacval0)
+
+            self.adcval0 = (dacval * self.conf['DACCONST0']
+                    / self.conf['ADCCONST0']
+                    + self.conf['ADCOFFSET0'])
+
+        elif dacid == 1:
+
+            self.dacval1 = dacval
+            #log.debug("Dacval1=%s", self.dacval1)
+            self.adcval1 = (dacval * self.conf['DACCONST1']
+                    / self.conf['ADCCONST1']
+                    + self.conf['ADCOFFSET1'])
+
         else:
             log.error("Unknown dac id")
 
 
     def cb_adc(self, param):
-        """ Callback for the ADC """
-        log.debug("ADC CB %s", param)
+        #""" Callback for the ADC """
+        #log.debug("ADC CB %s", param)
         if param is None:
             self.out_buffer = StringIO("ADC %X, %X\n"
                     % (self.adcval0, self.adcval0))
 
 
     def cb_ssr(self, param):
-        """ Callback for  the SSR """
-        log.debug("SSR CB %s", param)
+        #""" Callback for  the SSR """
+        #log.debug("SSR CB %s", param)
         if param is None:
-            self.out_buffer = StringIO("ssr %X, %X\n"
+            self.out_buffer = StringIO("SSR %d, %d\n"
                     % (self.ssrval0, self.ssrval1))
             return
+        #log.debug("SSR:param=%s", param)
+
+        devid = int(param[0])
+        state = int(param[1].strip())
+
+        if not state in (0,1):
+            log.error("Invalid SSR state to CBoxSim")
+            return
+
+        if devid == 0:
+            self.ssrval0 = state
+        elif devid == 1:
+            self.ssrval1 = state
+        else:
+            log.error("Invalid SSR ID to CBoxSim")
 
 
     def write(self, msg):
@@ -92,7 +109,6 @@ class CBoxSim(object):
         param = params[2]
 
         param = param.split(" ")
-        print cmd, param, len(param)
 
         if len(param) == 3:
             param0 = param[1]

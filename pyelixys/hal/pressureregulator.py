@@ -14,6 +14,7 @@ from datetime import datetime
 from datetime import timedelta
 
 from threading import Thread
+import numpy as np
 
 from pyelixys.logs import hallog as log
 from pyelixys.hal.systemobject import SystemObject
@@ -33,8 +34,9 @@ class PressureRegulator(SystemObject):
     def __init__(self, devid, synthesizer):
         """ (Construct) """
         self.id_ = devid
-        
+
         super(PressureRegulator, self).__init__(synthesizer)
+        self.setpoint = 0
 
     def _get_conf(self):
         """ Return the config this pressure regulator """
@@ -50,31 +52,29 @@ class PressureRegulator(SystemObject):
                 ['allowable_delay'])
 
         return self.press_conf['PressureRegulator%d' % self.id_]
-    
+
     def set_setpoint(self, value):
         """ Set the pressure regulator,
         setpoint is generally in psi, but really
         depends on the hw configuration """
-        
-        
+
+
         value = value * self.conf['PSICONV']
         log.debug("Set pressure regulator %d to %f", self.id_, value)
-        self.synth.cbox.set_dac(self.id_, value) 
+        self.synth.cbox.set_dac(self.id_, value)
         return
 
         log.debug("Checking for pressure to equal setpoint")
         # Loop until the pressure reaches the setpoint
         begintime = datetime.now()
-        is_pressure_reached = False
-        while (self.allowable_delay > datetime.now() - begintime
-                and not is_pressure_reached):
-            if (self.allowable_pressure_diff <= self.get_pressure()
-                    and self.get_pressure() <= self.get_pressure()):
-                is_pressure_reached = True
-        if is_pressure_reached:
-            log.debug("Sucessfully set pressure: %s", self.get_setpoint())
-        else:
-            log.debug("Unable to set pressure to %s", self.get_setpoint())
+        while (self.allowable_delay > datetime.now() - begintime):
+            if (self.is_at_pressure):
+                log.debug("Sucessfully set pressure: %s", self.get_setpoint())
+                return
+
+        log.debug("Unable to set pressure to %s", self.get_setpoint())
+        raise ElixysPressureError("Could not set pressure"\
+                                "for regulator %d", self.id_)
 
 
     def get_setpoint(self):
@@ -88,8 +88,8 @@ class PressureRegulator(SystemObject):
         return value
 
     setpoint = property(get_setpoint, set_setpoint)
-    
-    def set_pressure(self, value):
+
+    def set_pressure(self, value, duration=5.0, timestep=0.5):
         '''
         Set the pressure regulator pressure by
         setting the setpoint and confirming the
@@ -98,21 +98,20 @@ class PressureRegulator(SystemObject):
         # Slowly increment the pressure to
         # simulate the increase of pressure
         # until we reach it or timeout
-        increment_value = value/10
-        begintime = datetime.now()
-        is_pressure_reached = False
-        while (self.allowable_delay > datetime.now() - begintime
-                and not is_pressure_reached):
-            self.set_setpoint(increment_value)
-            if (self.allowable_pressure_diff <= self.get_pressure()
-                    and self.get_pressure() <= self.get_pressure()):
-                is_pressure_reached = True
-        
-        
-        if is_pressure_reached:
-            log.debug("Sucessfully set pressure: %s", self.get_setpoint())
-        else:
-            log.debug("Unable to set pressure to %s", self.get_setpoint())
+        current_pressure = self.pressure
+        num_steps = duration / timestep
+        press_diff = value - current_pressure
+        increment_value = press_diff/num_steps
+        # Always use floats else is truncates
+        pressures = np.arange(current_pressure,
+                value,
+                increment_value)
+        for press in pressures:
+            self.set_setpoint(press)
+            time.sleep(timestep)
+
+        self.set_setpoint(value)
+
 
     def get_pressure(self):
         """ Return the actual pressure in PSI,
@@ -125,6 +124,12 @@ class PressureRegulator(SystemObject):
         return value
 
     pressure = property(get_pressure, set_pressure)
+
+    def get_at_pressure(self):
+        diff = math.fabs(self.pressure - self.setpoint)
+        return diff <= self.allowable_pressure_diff
+
+    is_at_pressure = property(get_at_pressure)
 
     #: Pressure regualtor config
     conf = property(_get_conf)

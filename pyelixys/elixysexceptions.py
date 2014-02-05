@@ -40,3 +40,6 @@ class ElixysDBError(ElixysError):
 
 class ElixysInvalidSequenceID(ElixysDBError):
     pass
+
+class ElixysPressureError(ElixysHALError):
+    pass

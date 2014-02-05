@@ -77,6 +77,6 @@ class System(SystemObject):
 
 
 if __name__ == '__main__':
-    system = System()
+    s = System()
     from IPython import embed
     embed()
