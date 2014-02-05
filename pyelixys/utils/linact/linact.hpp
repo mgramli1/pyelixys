@@ -10,6 +10,8 @@
 #define GWCTRL0      0xF600
 #define GWCTRL1      0xF601
 
+#define GWCTRL_APP_SIG      (1<<15)
+
 #define AXIS0_BASE_WR        0xF608
 #define AXIS1_BASE_WR        0xF60C
 #define AXIS2_BASE_WR        0xF610
@@ -168,13 +170,25 @@ namespace IAI {
         unsigned int crc_update(unsigned int crc, unsigned char a);
         void calc_crc();
         char *as_string();
+        void readRegsisterStr(unsigned short startreg, unsigned short count);
+        void writeRegisterStr(unsigned short reg, unsigned short value);
+        void writeMultiRegisterStr(unsigned short reg,
+            unsigned short reglen, unsigned char * data, unsigned char dlen);
   };
 
   class LinearActuator {
 
     public:
+        LinActBuf buffer;
         LinearActuator();
         ~LinearActuator();
+        unsigned short getAxisReadAddress(unsigned int axisid);
+        unsigned short getAxisWriteAddress(unsigned int axisid);
+        LinActBuf * getGwStatusStr();
+        LinActBuf * getGwStartStr();
+        LinActBuf * getAxisStatus(unsigned int axisid);
+        LinActBuf * getAxisPos(unsigned int axisid);
+        LinActBuf * getSetAxisPos(unsigned int axisid, unsigned int position);
   };
 
 }

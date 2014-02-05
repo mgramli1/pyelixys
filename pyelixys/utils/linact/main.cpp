@@ -3,7 +3,7 @@
 
 using namespace IAI;
 LinActBuf lbuf;
-
+LinearActuator linact;
 
 int main() {
     printf("Linear Actuator\r\n");
@@ -16,4 +16,21 @@ int main() {
     lbuf.len = 6;
     lbuf.calc_crc();
     printf("%s\r\n", lbuf.as_string());
+
+    linact.getGwStatusStr();
+    printf("GWSTATUS: %s\r\n", linact.buffer.as_string());
+    linact.getGwStartStr();
+    printf("GWSTART: %s\r\n", linact.buffer.as_string());
+
+    linact.getAxisStatus(0);
+    printf("Get AXIS 0 Status: %s\r\n", linact.buffer.as_string());
+
+    linact.getAxisStatus(1);
+    printf("Get AXIS 1 Status: %s\r\n", linact.buffer.as_string());
+
+    linact.getAxisPos(0);
+    printf("Get AXIS0 Pos: %s\r\n", linact.buffer.as_string());
+
+    linact.getSetAxisPos(1, 1000);
+    printf("Get Set AXIS0 Pos: %s\r\n", linact.buffer.as_string());
 }
