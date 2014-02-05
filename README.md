@@ -110,6 +110,28 @@ The user shall be returned to an an Ipython terminal upon completion.
 At this point, a user may run additional scripts or commands.
 To exit Ipython, type `exit`.
 
+
+Working with the Sequence Manager
+---------------------------------
+The Sequence Manager `pyelixys.sequence.sequencemanager`
+allows the host to load sequences from the database and
+run them on the elixys robot.  It has access to the
+database model `pyelixys.web.database.model` and the
+system hardware `pyelixys.hal.system`.
+The webserver sequence requests should be sent to
+the `sequencemanager`.
+
+To run the sequencemanager simply run:
+
+```bash
+python -m pyelixys.sequence.sequencemanager
+```
+
+Doing so will load the a sequence and start an
+IPython shell.  The sequencemanager is load as
+`sm`.
+
+
 Starting the Webserver
 ------------------------------------------
 To run the Elixys web server, perform the following
