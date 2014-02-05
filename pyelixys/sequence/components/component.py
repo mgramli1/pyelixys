@@ -3,7 +3,7 @@
 """
 # import the HAL
 from pyelixys.logs import seqlog as log
-from pyelixys.hal.system import system
+from pyelixys.hal.elixyssys import system
 
 class Component(object):
     """ Base Component Class
@@ -20,7 +20,7 @@ class Component(object):
     def __init__(self, dbcomp):
         self.dbcomp = dbcomp
         self.status = ""
-        
+
     def run(self):
         """ Run this component thread!
         If we have one?"""

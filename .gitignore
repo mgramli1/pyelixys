@@ -24,3 +24,4 @@ doc/build/*
 examples/build
 utils/build
 .DS_Store
+elixys.db

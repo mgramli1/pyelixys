@@ -74,13 +74,9 @@ class System(SystemObject):
         self.simulator, self.simthread = \
                 start_simulator_thread()
 
-system = System()
 
-def main():
-    """ Main function called when executing this script """
-    return system
 
 if __name__ == '__main__':
-    s = system
+    system = System()
     from IPython import embed
     embed()
