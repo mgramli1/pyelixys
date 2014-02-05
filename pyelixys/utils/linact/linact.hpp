@@ -35,21 +35,21 @@
 #define AXIS3_POS_SET_HI   (AXIS3_BASE_WR + POS_SET_HI_OFFSET)
 #define AXIS4_POS_SET_HI   (AXIS4_BASE_WR + POS_SET_HI_OFFSET)
 
-#define CMD_POS_SET_NUM     0x2
+#define CMD_POS_SET_OFFSET  0x2
 
-#define AXIS0_CMD_POS_SET   (AXIS0_BASE_WR + CMD_POS_SET_NUM)
-#define AXIS1_CMD_POS_SET   (AXIS1_BASE_WR + CMD_POS_SET_NUM)
-#define AXIS2_CMD_POS_SET   (AXIS2_BASE_WR + CMD_POS_SET_NUM)
-#define AXIS3_CMD_POS_SET   (AXIS3_BASE_WR + CMD_POS_SET_NUM)
-#define AXIS4_CMD_POS_SET   (AXIS4_BASE_WR + CMD_POS_SET_NUM)
+#define AXIS0_CMD_POS_SET   (AXIS0_BASE_WR + CMD_POS_SET_OFFSET)
+#define AXIS1_CMD_POS_SET   (AXIS1_BASE_WR + CMD_POS_SET_OFFSET)
+#define AXIS2_CMD_POS_SET   (AXIS2_BASE_WR + CMD_POS_SET_OFFSET)
+#define AXIS3_CMD_POS_SET   (AXIS3_BASE_WR + CMD_POS_SET_OFFSET)
+#define AXIS4_CMD_POS_SET   (AXIS4_BASE_WR + CMD_POS_SET_OFFSET)
 
-#define CNTRL_SIG
+#define CNTRL_SIG_OFFSET    0x3
 
-#define AXIS0_CTRL_SIG      (AXIS0_BASE_WR + CNTRL_SIG)
-#define AXIS1_CTRL_SIG      (AXIS1_BASE_WR + CNTRL_SIG)
-#define AXIS2_CTRL_SIG      (AXIS2_BASE_WR + CNTRL_SIG)
-#define AXIS3_CTRL_SIG      (AXIS3_BASE_WR + CNTRL_SIG)
-#define AXIS4_CTRL_SIG      (AXIS4_BASE_WR + CNTRL_SIG)
+#define AXIS0_CTRL_SIG      (AXIS0_BASE_WR + CNTRL_SIG_OFFSET)
+#define AXIS1_CTRL_SIG      (AXIS1_BASE_WR + CNTRL_SIG_OFFSET)
+#define AXIS2_CTRL_SIG      (AXIS2_BASE_WR + CNTRL_SIG_OFFSET)
+#define AXIS3_CTRL_SIG      (AXIS3_BASE_WR + CNTRL_SIG_OFFSET)
+#define AXIS4_CTRL_SIG      (AXIS4_BASE_WR + CNTRL_SIG_OFFSET)
 
 #define AXIS_CTRL_BKRL      (1<<15)
 #define AXIS_CTRL_MODE      (1<<10)
@@ -189,11 +189,14 @@ namespace IAI {
         LinActBuf * getAxisStatus(unsigned int axisid);
         LinActBuf * getAxisPos(unsigned int axisid);
         LinActBuf * getSetAxisPos(unsigned int axisid, unsigned int position);
-  };
+        LinActBuf * getAxisStart(unsigned int axisid);
+        LinActBuf * getAxisPause(unsigned int axisid);
+        LinActBuf * getAxisReset(unsigned int axisid);
+        LinActBuf * getAxisBrakeRelease(unsigned int axisid);
+
+    };
 
 }
-
-
 
 #endif /* LINACT_H */
 
