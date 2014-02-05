@@ -74,29 +74,29 @@ def calc_crc(values):
 # Page 152
 gwstatus = "\x3f\x03\xf7\x00\x00\x02"
 gwstatus = calc_crc(gwstatus)
-print 'Gateway status query: %s' % gwstatus.encode('hex')
+print 'Gateway status query: %s' % gwstatus.encode('hex').upper()
 
 # Page 155
 axis0pos = "\x3f\x03\xf7\x08\x00\x02"
 axis0pos = calc_crc(axis0pos)
-print 'Query Axis 0 pos: %s' % axis0pos.encode('hex')
+print 'Query Axis 0 pos: %s' % axis0pos.encode('hex').upper()
 
 # Page 158
 axis1alarm = "\x3f\x03\xf7\x12\x00\x01"
 axis1alarm = calc_crc(axis1alarm)
 
-print 'Query Axis 1 alarm: %s' % axis1alarm.encode("hex")
+print 'Query Axis 1 alarm: %s' % axis1alarm.encode("hex").upper()
 
 # Page
 resetcmd0 = "\x3f\x06\xf6\x0b\x00\x08"
 resetcmd0 = calc_crc(resetcmd0)
 
-print 'Reset command axis 0: %s' % resetcmd0.encode("hex")
+print 'Reset command axis 0: %s' % resetcmd0.encode("hex").upper()
 
 resetcmd1 = "\x3f\x06\xf6\x0f\x00\x08"
 resetcmd1 = calc_crc(resetcmd1)
 
-print 'Reset command axis 1: %s' % resetcmd1.encode("hex")
+print 'Reset command axis 1: %s' % resetcmd1.encode("hex").upper()
 
 
 # Page 184
@@ -107,27 +107,27 @@ axis1dir = '\x3f\x10\xf6\x0c\x00\x08\x10\x3a\x98\x00' \
 axis1dir = calc_crc(axis1dir)
 
 
-print "Axis 1 Direct mode: %s" % axis1dir.encode("hex")
+print "Axis 1 Direct mode: %s" % axis1dir.encode("hex").upper()
 
 
 # Page 166
 homeretcmd0 = "\x3f\x06\xf6\x0b\x00\x12"
 homeretcmd0 = calc_crc(homeretcmd0)
 
-print "Home return command: %s" % homeretcmd0.encode("hex")
+print "Home return command: %s" % homeretcmd0.encode("hex").upper()
 
 # Page 167
 startcmd0 = "\x3f\x06\xf6\x0b\x00\x11"
 startcmd0 = calc_crc(startcmd0)
 
-print "Start command: %s" % startcmd0.encode("hex")
+print "Start command: %s" % startcmd0.encode("hex").upper()
 
 
 # Page 168
 pausecmd = "\x3f\x06\xf6\x0b\x00\x14"
 pausecmd = calc_crc(pausecmd)
 
-print "Pause command: %s" % pausecmd.encode("hex")
+print "Pause command: %s" % pausecmd.encode("hex").upper()
 
 # Page 184
 axis0dir = '\x3f\x10\xf6\x08\x00\x08\x10\x3a\x98\x00' \
@@ -137,23 +137,28 @@ axis0dir = '\x3f\x10\xf6\x08\x00\x08\x10\x3a\x98\x00' \
 axis0dir = calc_crc(axis0dir)
 
 
-print "Axis 0 Direct mode: %s" % axis0dir.encode("hex")
+print "Axis 0 Direct mode: %s" % axis0dir.encode("hex").upper()
 
 # page 165
 axis0son = '\x3f\x06\xf6\x0b\x00\x10'
 axis0son = calc_crc(axis0son)
-print "Axis 0 Servo on: %s" % axis0son.encode("hex")
+print "Axis 0 Servo on: %s" % axis0son.encode("hex").upper()
 
 # Page 158
 axis2alarm = "\x3f\x03\xf7\x13\x00\x01"
 axis2alarm = calc_crc(axis2alarm)
-print 'Query Axis 2 alarm: %s' % axis2alarm.encode("hex")
+print 'Query Axis 2 alarm: %s' % axis2alarm.encode("hex").upper()
 
 
 # Always turn on
 alwayson = "\x3f\x06\xf6\x00\x80\x00"
 alwayson = calc_crc(alwayson)
 print "Always run this: %s" % alwayson.encode("hex").upper()
+
+# Brake release
+axis0brake = '\x3f\x06\xf6\x0b\x80\x00'
+axis0brake = calc_crc(axis0brake)
+print "Axis 0 brake: %s" % axis0brake.encode('hex').upper()
 
 
 class IAI(object):
