@@ -81,6 +81,12 @@ axis0pos = "\x3f\x03\xf7\x08\x00\x02"
 axis0pos = calc_crc(axis0pos)
 print 'Query Axis 0 pos: %s' % axis0pos.encode('hex').upper()
 
+# Page 161
+axis0status = "\x3f\x03\xf7\x0b\x00\x01"
+axis0status = calc_crc(axis0status)
+
+print 'Query Axis 0 status: %s' % axis0status.encode('hex').upper()
+
 # Page 158
 axis1alarm = "\x3f\x03\xf7\x12\x00\x01"
 axis1alarm = calc_crc(axis1alarm)
@@ -178,33 +184,48 @@ def move0(posmm):
 
 
 class IAI(object):
-    def __init__(self):
-        self.s = serial.Serial("COM5",
+    def __init__(self, simulate=True):
+        self.sim = simulate
+        if not simulate:
+            self.s = serial.Serial("COM5",
                                 baudrate=230400,
-                                timeout=0.5)
+                               timeout=0.5)
+
     def turnon(self):
-        self.s.write(alwayson)
-        time.sleep(0.1)
-        v = self.s.readline().encode('hex').upper()
-        print v
+        print "TURNON: %s" % alwayson.encode('hex').upper()
+
+        if not self.sim:
+            self.s.write(alwayson)
+            time.sleep(0.1)
+            v = self.s.readline().encode('hex').upper()
+            print v
 
     def start0(self):
-        self.s.write(startcmd0)
-        time.sleep(0.1)
-        v = self.s.readline().encode('hex').upper()
-        print v
+        print "START AXIS 0: %s" % startcmd0.encode('hex').upper()
+
+        if not self.sim:
+            self.s.write(startcmd0)
+            time.sleep(0.1)
+            v = self.s.readline().encode('hex').upper()
+            print v
 
     def home0(self):
-        self.s.write(homeretcmd0)
-        time.sleep(0.1)
-        v = self.s.readline().encode('hex').upper()
-        print v
+        print "HOME AXIS 0: %s" % homeretcmd0.encode('hex').upper()
+
+        if not self.sim:
+            self.s.write(homeretcmd0)
+            time.sleep(0.1)
+            v = self.s.readline().encode('hex').upper()
+            print v
 
     def reset0(self):
-        self.s.write(resetcmd0)
-        time.sleep(0.1)
-        v = self.s.readline().encode('hex').upper()
-        print v
+        print "RESET AXIS 0: %s" % resetcmd0.encode('hex').upper()
+
+        if not self.sim:
+            self.s.write(resetcmd0)
+            time.sleep(0.1)
+            v = self.s.readline().encode('hex').upper()
+            print v
 
     def move0(self, posmm):
         pos = [0,0,0,0]
@@ -219,9 +240,27 @@ class IAI(object):
 
         axis0setpos = calc_crc(axis0setpos)
 
-        self.s.write(axis0setpos)
-        time.sleep(0.1)
-        v = self.s.readline().encode('hex').upper()
-        print v
+        print "Move to %d mm: %s" % (posmm, axis0setpos.encode('hex').upper())
 
+        if not self.sim:
+            self.s.write(axis0setpos)
+            time.sleep(0.1)
+            v = self.s.readline().encode('hex').upper()
+            print v
+
+    def status0(self):
+        print "STATUS AXIS 0: %s" % axis0status.encode('hex').upper()
+
+        if not self.sim:
+            self.write(axis0status)
+            time.sleep(0.1)
+            v = self.s.readline().encode('hex').upper()
+
+    def gwstatus(self):
+        print "STATUS GW: %s" % gwstatus.encode('hex').upper()
+
+        if not self.sim:
+            self.write(gwstatus)
+            time.sleep(0.1)
+            v = self.s.readline().encode('hex').upper()
 
