@@ -161,6 +161,22 @@ axis0brake = calc_crc(axis0brake)
 print "Axis 0 brake: %s" % axis0brake.encode('hex').upper()
 
 
+def move0(posmm):
+    pos = [0,0,0,0]
+    axis0setpos = "\x3f\x10\xf6\x0c\x00\x02\x04"
+    pos[1] = posmm & 0xFF
+    pos[0] = (posmm & 0xFF00) >> 8
+    pos[3] = (posmm & 0xFF0000) >> 16
+    pos[2] = (posmm & 0xFF000000) >> 24
+
+    for p in pos:
+        axis0setpos += chr(p)
+
+    axis0setpos = calc_crc(axis0setpos)
+    return axis0setpos
+
+
+
 class IAI(object):
     def __init__(self):
         self.s = serial.Serial("COM5",
@@ -189,4 +205,23 @@ class IAI(object):
         time.sleep(0.1)
         v = self.s.readline().encode('hex').upper()
         print v
+
+    def move0(self, posmm):
+        pos = [0,0,0,0]
+        axis0setpos = "\x3f\x10\xf6\x0c\x00\x02\x04"
+        pos[1] = posmm & 0xFF
+        pos[0] = (posmm & 0xFF00) >> 8
+        pos[3] = (posmm & 0xFF0000) >> 16
+        pos[2] = (posmm & 0xFF000000) >> 24
+
+        for p in pos:
+            axis0setpos += chr(p)
+
+        axis0setpos = calc_crc(axis0setpos)
+
+        self.s.write(axis0setpos)
+        time.sleep(0.1)
+        v = self.s.readline().encode('hex').upper()
+        print v
+
 
