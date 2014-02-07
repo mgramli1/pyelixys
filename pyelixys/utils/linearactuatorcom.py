@@ -167,20 +167,198 @@ axis0brake = calc_crc(axis0brake)
 print "Axis 0 brake: %s" % axis0brake.encode('hex').upper()
 
 
-def move0(posmm):
-    pos = [0,0,0,0]
-    axis0setpos = "\x3f\x10\xf6\x0c\x00\x02\x04"
-    pos[1] = posmm & 0xFF
-    pos[0] = (posmm & 0xFF00) >> 8
-    pos[3] = (posmm & 0xFF0000) >> 16
-    pos[2] = (posmm & 0xFF000000) >> 24
 
-    for p in pos:
-        axis0setpos += chr(p)
+class LinearActuator(object):
+    """ Interface for the IAI linear actuators
+    """
+    AXIS0INPUTOFFSET = 0xF608
+    AXIS0OUTPUTOFFSET = 0xF708
 
-    axis0setpos = calc_crc(axis0setpos)
-    return axis0setpos
+    SLAVEADDRESS = 0x3F
 
+    GWSTATUSOFFSET = 0xF700
+
+    GWCTRLOFFSET = 0xF600
+
+    WRITESINGLEREG = 0x06
+    WRITEMULTIREG = 0x10
+    READMULTIREG = 0x03
+
+    CTRLOFFSET = 3
+    LOPOSOFFSET = 0
+
+    LOCURPOSOFFSET = 0
+    STATUSOFFSET = 3
+
+
+
+    def __init__(self, axisid, simulate=False):
+        self.simulate = simulate
+        self.axisid = axisid
+
+        self.singbytefmt = struct.Struct(">B")
+        self.twobytefmt = struct.Struct(">H")
+        self.tworegfmt = struct.Struct(">HH")
+
+    def address(self):
+        return self.singbytefmt.pack(self.SLAVEADDRESS)
+
+    def calculateInputOffset(self):
+        """ Calculate input offset """
+        return self.AXIS0INPUTOFFSET + 4 * self.axisid
+
+    def calculateOutputOffset(self):
+        """ Calculate output offset """
+        return self.AXIS0OUTPUTOFFSET + 4 * self.axisid
+
+    def calculateControlReg(self):
+        """ Control Reg Offet """
+        return self.calculateInputOffset() + self.CTRLOFFSET
+
+    def calculatePosReg(self):
+        """ Pos register """
+        return self.calculateInputOffset() + self.LOPOSOFFSET
+
+    def calculateStatusReg(self):
+        """ Status Register """
+        return self.calculateOutputOffset() + self.STATUSOFFSET
+
+    def calculateCurrentPosReg(self):
+        """ Get current position """
+        return self.calculateOutputOffset() + self.LOCURPOSOFFSET
+
+    def multiWriteHeader(self, reg):
+        """ Get Header for multibyte write """
+        cmd = self.singbytefmt.pack(self.WRITEMULTIREG)
+        reg = self.twobytefmt.pack(reg)
+        return self.address() + cmd + reg
+
+    def multiReadHeader(self, reg):
+        """ Get header for multibyte read """
+        cmd = self.singbytefmt.pack(self.READMULTIREG)
+        reg = self.twobytefmt.pack(reg)
+        return self.address() + cmd + reg
+
+    def singleWriteHeader(self, reg):
+        """ Get header for single byte write """
+        cmd = self.singbytefmt.pack(self.WRITESINGLEREG)
+        reg = self.twobytefmt.pack(reg)
+        return self.address() + cmd + reg
+
+    def writeControl(self, value):
+        """ Write the control """
+        hdr = self.singleWriteHeader(self.calculateControlReg())
+        value = self.twobytefmt.pack(value)
+        msg = hdr + value
+        msg = calc_crc(msg)
+
+        print "Sent:%s" % msg.encode('hex').upper()
+
+        if self.simulate:
+            resp = msg
+        else:
+            # Read resp
+            pass
+
+        print "Resp:%s" % resp.encode('hex').upper()
+
+    def writePos(self, posmm):
+        """ Write the Pos """
+        hdr = self.multiWriteHeader(self.calculatePosReg())
+        numreg = self.twobytefmt.pack(2)
+        numbytes = self.singbytefmt.pack(4)
+        posmm = int(posmm * 100)
+        loval = posmm & 0xFFFF
+        loval = self.twobytefmt.pack(loval)
+        hival = (posmm & 0xFFFF0000) >> 16
+        hival = self.twobytefmt.pack(hival)
+        msg = hdr + numreg + numbytes + loval + hival
+        msg = calc_crc(msg)
+        print "Sent:%s" % msg.encode('hex').upper()
+
+        if self.simulate:
+            resp = "\x3F\x10\xF6\x0C\x00\x02\xB6\x9D"
+        else:
+            # Read resp
+            pass
+
+        print "Resp:%s" % resp.encode('hex').upper()
+
+    def readStatus(self):
+        hdr = self.multiReadHeader(self.calculateStatusReg())
+        numreg = self.twobytefmt.pack(1)
+        msg = hdr + numreg
+        msg = calc_crc(msg)
+        if self.simulate:
+            print "Sent:%s" % msg.encode('hex').upper()
+            resp = "\x3F\x03\x02\x70\x13\xF5\x8C"
+        else:
+            # Read resp
+            pass
+
+        print "Resp:%s" % resp.encode('hex').upper()
+
+    def readCurrentPos(self):
+        hdr = self.multiReadHeader(self.calculateCurrentPosReg())
+        numreg = self.twobytefmt.pack(2)
+        msg = hdr + numreg
+        msg = calc_crc(msg)
+
+        print "Sent:%s" % msg.encode('hex').upper()
+
+        if self.simulate:
+            resp = "\x3F\x03\x04\x38\xA5\x00\x00\x38\xB3"
+        else:
+            # Read resp
+            pass
+
+        print "Resp:%s" % resp.encode('hex').upper()
+
+        respnochk = resp[:-2]
+        respck = calc_crc(respnochk)
+        if respck == resp:
+            print "crc check ok"
+
+        else:
+            print "invalid crc"
+
+        pos = respnochk[3:]
+        print pos.encode('hex').upper()
+        pos = self.tworegfmt.unpack(pos)
+        print pos[0], (pos[1] << 16)
+        pos = pos[0] + (pos[1] << 16)
+        print "%f mm" % (pos / 100.0)
+
+        return pos / 100.0
+
+    def readGatewayStatus(self):
+        hdr = self.multiReadHeader(self.GWSTATUSOFFSET)
+        numreg = self.twobytefmt.pack(2)
+        msg = hdr + numreg
+        msg = calc_crc(msg)
+
+        print "Sent:%s" % msg.encode('hex').upper()
+        if self.simulate:
+            resp = "\x3F\x03\x04\x80\x21\x00\x03\x1C\x3B"
+        else:
+            pass
+
+        print "Resp:%s" % resp.encode('hex').upper()
+
+
+    def writeAppCtrl(self):
+        hdr = self.singleWriteHeader(self.GWCTRLOFFSET)
+        value = self.twobytefmt.pack(0x8000)
+        msg = hdr + value
+        msg = calc_crc(msg)
+
+        print "Sent:%s" % msg.encode('hex').upper()
+        if self.simulate:
+            resp = msg
+        else:
+            pass
+
+        print "Resp:%s" % resp.encode('hex').upper()
 
 
 class IAI(object):
@@ -229,7 +407,7 @@ class IAI(object):
 
     def move0(self, posmm):
         pos = [0,0,0,0]
-        axis0setpos = "\x3f\x10\xf6\x0c\x00\x02\x04"
+        axis0setpos = "\x3f\x10\xf6\x08\x00\x02\x04"
         pos[1] = posmm & 0xFF
         pos[0] = (posmm & 0xFF00) >> 8
         pos[3] = (posmm & 0xFF0000) >> 16
@@ -252,15 +430,46 @@ class IAI(object):
         print "STATUS AXIS 0: %s" % axis0status.encode('hex').upper()
 
         if not self.sim:
-            self.write(axis0status)
+            self.s.write(axis0status)
             time.sleep(0.1)
             v = self.s.readline().encode('hex').upper()
+            print v
 
     def gwstatus(self):
         print "STATUS GW: %s" % gwstatus.encode('hex').upper()
 
         if not self.sim:
-            self.write(gwstatus)
+            self.s.write(gwstatus)
             time.sleep(0.1)
             v = self.s.readline().encode('hex').upper()
+            print v
+
+    def pos0(self):
+        print "MONITOR POSITION: %s" % axis0pos.encode('hex').upper()
+
+        if not self.sim:
+            self.s.write(axis0pos)
+            time.sleep(0.1)
+            v = self.readline().encode('hex').upper()
+            print v
+        else:
+            v = "\x3f\x03\x04\x38\xa5\x00\x00\x38\xb3"
+        vnochk = v[:-2]
+        vck = calc_crc(vnochk)
+        if vck == v:
+            print "crc check ok"
+
+        else:
+            print "invalid crc"
+
+        pos = vnochk[3:]
+        print pos.encode('hex').upper()
+        s = struct.struct(">hh")
+        pos = s.unpack(pos)
+        print pos[0], (pos[1] << 16)
+        pos = pos[0] + (pos[1] << 16)
+        print "%f mm" % (pos / 100.0)
+
+        return pos / 100.0
+
 
