@@ -218,7 +218,12 @@ class StatusSimulator(Status):
         """
         data = self.generate_packet_data()
         fmtstruct = self.fmt.get_struct()
-        return fmtstruct.pack(*data)
+        try:
+            return fmtstruct.pack(*data)
+
+        except Exception as e:
+            log.error(str(data))
+            raise e
         #self.store[sub[0]]
 
 
@@ -420,14 +425,14 @@ class ElixysSimulator(ElixysObject):
     def fans_turn_on(self, devid, value=None):
         """ Fans turn on """
         log.debug("Turn on Fan %d", devid)
-        state = self.status.Fans['state'] 
+        state = self.status.Fans['state']
         state |= 1 << devid
-        self.status.Fans['state'] = state 
+        self.status.Fans['state'] = state
 
     def fans_turn_off(self, devid, value=None):
         """ Fans turn off """
         log.debug("Turn off Fan %d", devid)
-        state = self.status.Fans['state'] 
+        state = self.status.Fans['state']
         state &= ~(1 << devid)
         self.status.Fans['state'] = state
 
@@ -635,7 +640,7 @@ def exit_gracefully(signum, frame):
 
 class Simulator(threading.Thread):
     """ Runs the websocket client simulator """
-    
+
     def __init__(self):
         """ (Constructor) """
         #websocket.enableTrace(True) # Enable for websocket trace!
@@ -645,14 +650,14 @@ class Simulator(threading.Thread):
                                 on_error=on_error,
                                 on_close=on_close)
         self.ws.on_open = on_open
-    
+
     def run(self):
         self.ws.run_forever()
 
 
 def start_simulator_thread():
     """ Start the simulator in a thread
-    create a websocket client and run it in 
+    create a websocket client and run it in
     thread.  Also grab the elixys simulator.
     """
     #websocket.enableTrace(True) # Enable for websocket trace!
