@@ -13,6 +13,8 @@ import time
 from datetime import datetime
 from datetime import timedelta
 
+import math
+
 from threading import Thread
 import numpy as np
 
@@ -36,21 +38,16 @@ class PressureRegulator(SystemObject):
         self.id_ = devid
 
         super(PressureRegulator, self).__init__(synthesizer)
+        self.allowable_pressure_diff = (
+                self.conf['allowable_pressure_diff'])
+        self.allowable_delay = timedelta(
+                0, self.conf['allowable_delay'])
         self.setpoint = 0
 
     def _get_conf(self):
         """ Return the config this pressure regulator """
         self.press_conf = self.sysconf['PressureRegulators']
-        self.allowable_pressure_diff = (
-                self.press_conf
-                ['PressureRegulator' + str(self.id_)]
-                ['allowable_pressure'])
-        self.allowable_delay = timedelta(
-                0,
-                self.press_conf
-                ['PressureRegulator' + str(self.id_)]
-                ['allowable_delay'])
-
+        
         return self.press_conf['PressureRegulator%d' % self.id_]
 
     def set_setpoint(self, value):
@@ -62,8 +59,7 @@ class PressureRegulator(SystemObject):
         value = value * self.conf['PSICONV']
         log.debug("Set pressure regulator %d to %f", self.id_, value)
         self.synth.cbox.set_dac(self.id_, value)
-        return
-
+        
         log.debug("Checking for pressure to equal setpoint")
         # Loop until the pressure reaches the setpoint
         begintime = datetime.now()

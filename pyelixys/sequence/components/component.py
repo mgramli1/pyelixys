@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 """ Component Base Class
 """
+
 # import the HAL
 from pyelixys.logs import seqlog as log
 from pyelixys.hal.elixyssys import system
@@ -45,3 +46,4 @@ class Component(object):
     component_status = property(
             get_component_status,
             set_component_status)
+

@@ -74,7 +74,7 @@ class CBoxSim(ElixysObject):
         #log.debug("ADC CB %s", param)
         if param is None:
             self.out_buffer = StringIO("ADC %X, %X\n"
-                    % (self.adcval0, self.adcval0))
+                    % (self.adcval0, self.adcval1))
 
 
     def cb_ssr(self, param):

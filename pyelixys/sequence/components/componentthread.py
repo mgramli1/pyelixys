@@ -1,5 +1,6 @@
 # Import threading capabilities
 from threading import Thread
+from threading import Event
 
 class ComponentThread(Thread):
     '''
@@ -11,4 +12,26 @@ class ComponentThread(Thread):
         super(ComponentThread, self).__init__()
         # Creation of a new thread, add to list
         self.component_threads.append(self)
+        self._is_complete = Event()
+
+    def is_running(self):
+        '''
+        '''
+        if self._is_complete.isSet():
+            self.join()
+            self._is_complete.clear()
+            return True
+        return False
+
+    def run(self):
+        '''
+        '''
+        # Clear event
+        self._is_complete.clear()
+        # Set event
+        self._is_complete.set()
+
+        return
+
+
 
