@@ -274,19 +274,17 @@ class LinearActuator(object):
     OUTRESETBIT = (1 << 3)
 
 
-    def __init__(self, axisid, simulate=False):
-        self.simulate = simulate
+    def __init__(self, axisid, com=None):
         self.axisid = axisid
 
         self.singbytefmt = struct.Struct(">B")
         self.twobytefmt = struct.Struct(">H")
         self.tworegfmt = struct.Struct(">HH")
 
-        if not self.simulate:
-            self.com = serial.Serial("COM5",
-                                baudrate=230400,
-                               timeout=0.5)
-
+        self.simulate = True
+        if not com is None:
+            self.com = com
+            self.simulate = False
 
     def address(self):
         return self.singbytefmt.pack(self.SLAVEADDRESS)
@@ -664,8 +662,7 @@ class IAI(object):
         return pos / 100.0
 
 if __name__ == '__main__':
-    s = LinearActuator(0,True)
-
+    s = LinearActuator(0)
     s.writeAppCtrl()
     s.reset()
     s.home()
