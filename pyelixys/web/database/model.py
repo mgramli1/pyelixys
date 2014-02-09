@@ -20,8 +20,15 @@ class Component(Base):
     __tablename__ = 'Components'
     ComponentID = Column(Integer, primary_key=True)
     SequenceID = Column(Integer, ForeignKey('Sequences.SequenceID'))
-    PreviousComponentID = Column(Integer)
-    NextComponentID = Column(Integer)
+
+    PreviousComponentID = Column(Integer, ForeignKey('Components.ComponentID',
+            use_alter=True,
+            name="fk_prev_comp"))
+
+    NextComponentID = Column(Integer, ForeignKey('Components.ComponentID',
+            use_alter=True,
+            name="fk_next_comp"))
+
     Type = Column(String(length=20))
     Note = Column(String(length=64))
     Details = Column(String(length=2048))
@@ -32,6 +39,15 @@ class Component(Base):
             primaryjoin="and_" +
             "(Reagent.ComponentID==Component.ComponentID)",
             uselist=True)
+
+    previous_component = relationship('Component',
+            primaryjoin="Component.ComponentID==Component.PreviousComponentID",
+            uselist=False)
+
+    next_component = relationship('Component',
+            primaryjoin="Component.ComponentID==Component.NextComponentID",
+            uselist=False)
+
 
     def __init__(self,
             seqID=None,

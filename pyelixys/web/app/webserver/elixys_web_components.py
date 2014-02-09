@@ -46,7 +46,7 @@ elixys_web_components = Blueprint('elixys_web_components', __name__,
         template_folder = 'templates')
 
 class ElixysComponentHandler(object):
-    """ This provides routes for Elixys/sequence/id/*
+    """ This provides routes for Elixys/sequence/id/component/id
     It handles GET,POST and DELETE
     """
 
@@ -94,14 +94,7 @@ class ElixysComponentHandler(object):
     @requires_auth
     def getcompinseq(sequence_id, component_id):
         '''
-        Funciton shall take in a sequence id as a
-        parameter.
-        Function shall return the sequence object
-        as a jSON object.
-        Function shall try to obtain the sequence based
-        on the id or try to handle the unknown sequence id.
-        All components shall be added to the return object
-        as a part of a sequence's components.
+        Get a specific component from a sequence
         '''
         current_app.logger.debug("REQ:%s", request)
         auth = request.authorization

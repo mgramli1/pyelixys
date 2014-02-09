@@ -131,6 +131,8 @@ def update_component_details(cassettes):
     # cassette component
     # Keep a reactor count
     reactor_count = 1
+
+    previous_cassette = None
     for cassette in cassettes:
         cassette.Details = json.dumps(
                 get_default_component_state(
@@ -138,6 +140,15 @@ def update_component_details(cassettes):
                 reactor_count))
         session.commit()
         reactor_count += 1
+        if not previous_cassette is None:
+            cassette.previous_component = previous_cassette
+            session.commit()
+            previous_cassette.next_component = cassette
+            session.commit()
+
+
+        previous_cassette = cassette
+
 
 if __name__ == '__main__':
     '''

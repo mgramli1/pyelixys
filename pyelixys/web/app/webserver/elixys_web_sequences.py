@@ -67,6 +67,7 @@ class RunResponse(object):
         self.action_dict['BUTTONCLICK'] = self.but_action_dict
 
     def __call__(self, req_dict):
+        """ When called, run a action """
         self.req = req_dict
         log.debug("REQ: %s" % repr(self.req))
         try:
@@ -87,30 +88,37 @@ class RunResponse(object):
 
     def action_abort(self, req=None):
         """ Abort sequence """
+        #TODO Implement abort on sequencemanager
         return jsonify({"Abort":None})
 
     def action_home(self,req=None):
         """ Redirect user to home screen """
+        #TODO Implement user client status
         return jsonify({"Home":None})
 
     def action_timer_override(self,req=None):
         """ Override the currently running timer """
+        #TODO Implement timer override on sequencemanager
         return jsonify({"TimerOverride":None})
 
     def action_timer_continue(self,req=None):
         """ Continue a timer """
+        #TODO Implement timer continue on sequencemanager
         return jsonify({"ContinueTimer":None})
 
     def action_user_input(self,req=None):
         """ Deliver message to from user """
+        #TODO Implement user input on sequencemanager
         return jsonify({"UserInput":None})
 
     def action_pause_run(self,req=None):
         """ Pause a currently running sequence """
+        #TODO Implement pause on sequencemanager
         return jsonify({"PauseRun":None})
 
     def action_continue_run(self,req=None):
         """ Continue a currently paused sequence """
+        #TODO Implement continue on sequencemanager
         return jsonify({"ContinueRun":None})
 
 
@@ -126,16 +134,9 @@ class ElixysSequencesHandler(object):
             '/Elixys/sequence/<sequence_id>',
             methods=['GET'])
     @requires_auth
-    def sequence_index(sequence_id):
+    def getsequence(sequence_id):
         '''
-        Funciton shall take in a sequence id as a
-        parameter.
-        Function shall return the sequence object
-        as a jSON object.
-        Function shall try to obtain the sequence based
-        on the id or try to handle the unknown sequence id.
-        All components shall be added to the return object
-        as a part of a sequence's components.
+        Retrieve a sequence for a given id
         '''
         current_app.logger.debug("REQ:%s", request)
         auth = request.authorization
