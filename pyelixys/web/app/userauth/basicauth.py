@@ -5,8 +5,13 @@ from flask import request, Response
 import hashlib
 # import logging
 from flask import current_app
+from pyelixys.web.database.model import Session,\
+                                        User
+
+from sqlalchemy.orm.exc import MultipleResultsFound,\
+                               NoResultFound
 # import db comm layer
-from pyelixys.web.database.dbcomm import DBComm
+#from pyelixys.web.database.dbcomm import DBComm
 
 def check_auth(username, password):
     """
@@ -15,19 +20,16 @@ def check_auth(username, password):
     username and password exists on the database via
     hashing.
     """
-    # create new DB communication object
-    # and check for a valid login
-    db = DBComm()
-    # Check if user exists
-    if db.is_a_user(str(username)):
-        # Convert string password to md5 hash format
-        password_hash = hashlib.md5(str(password)).hexdigest()
-        # Check username with password
-        return (db.is_valid_login(
-           str(username),
-           str(password_hash)))
-    # The file doesn't exist, the user doesn't exist,
-    # or the username-password combination isn't valid.
+    session = Session()
+    password_hash = hashlib.md5(str(password)).hexdigest()
+    try:
+        user = session.query(User).filter(User.Username==username).\
+            filter(User.Password==password_hash).one()
+    except (MultipleResultsFound, NoResultFound):
+        return False
+
+    if user:
+        return True
     return False
 
 def authenticate():

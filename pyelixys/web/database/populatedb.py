@@ -3,12 +3,13 @@ Populates the SQLite database with
 a user and a sequence with three components.
 '''
 import json
+from pyelixys.logs import dblog as log
 from pyelixys.web.database.model import session
-from pyelixys.web.database.model import Roles
+from pyelixys.web.database.model import Role
 from pyelixys.web.database.model import User
 from pyelixys.web.database.model import Sequence
 from pyelixys.web.database.model import Component
-from pyelixys.web.database.model import Reagents
+from pyelixys.web.database.model import Reagent
 from pyelixys.web.database.model import metadata
 
 
@@ -17,7 +18,7 @@ import hashlib
 
 def create_role():
     # Create admin role
-    role = Roles('Administrator', 255)
+    role = Role('Administrator', 255)
     session.add(role)
     session.commit()
     return role
@@ -58,7 +59,7 @@ def get_default_component_state(cassette, reactor_count):
         details_dict['reagent'].append(reagent.ReagentID)
     return details_dict
 
-def create_user(role_id):
+def create_user(role):
     # Let's create a default user
     # Encrypt the password using md5 and reutrn as hex
     new_user = User()
@@ -67,7 +68,7 @@ def create_user(role_id):
     new_user.FirstName = 'Sofiebio'
     new_user.LastName = 'Developer'
     new_user.Email = 'developer@sofiebio.com'
-    new_user.RoleID = role_id
+    new_user.role = role
     new_user.ClientState = json.dumps(
             get_default_user_client_state())
     session.add(new_user)
@@ -75,23 +76,25 @@ def create_user(role_id):
 
     return new_user
 
-def create_sequence(user_id):
+def create_sequence(user):
     # Create a new sequence for the user
     new_seq = Sequence()
     new_seq.Name = 'Sequence 1'
     new_seq.Component = 'Test Sequence'
     new_seq.Type = 'Saved'
-    new_seq.UserID = user_id
+    new_seq.user = user
     session.add(new_seq)
+    session.commit()
+    user.selected_sequence = new_seq
     session.commit()
     return new_seq
 
-def create_cassette_components(sequence_id):
+def create_cassette_components(sequence):
     # Create a new set of component cassettes
     cass_list = []
     for cass_count in range(1,4):
         new_comp = Component()
-        new_comp.SequenceID = sequence_id
+        new_comp.sequence = sequence
         new_comp.Type = 'CASSETTE'
         new_comp.Note = ''
         # Leave details empty, update later
@@ -101,17 +104,15 @@ def create_cassette_components(sequence_id):
         cass_list.append(new_comp)
     return cass_list
 
-def create_reagents(sequence_id, cassettes):
+def create_reagents(cassettes):
     # Let's create some empty reagents
     # For each of the 3 cassettes, create
     # 12 reagents
     for cassette in cassettes:
         for reg_count in range(1,13):
-            reagent = Reagents()
-            reagent.SequenceID = sequence_id
+            reagent = Reagent()
             reagent.Position = reg_count
             reagent.component = cassette
-            reagent.ComponentID = cassette.ComponentID
             session.add(reagent)
             session.commit()
 
@@ -119,11 +120,10 @@ def update_sequence_details(sequence):
     # Update the first component id and
     # component count of the sequence's fields
     # Query for the first component matched
-    component_id = session.query(Component).filter_by(
-            SequenceID = sequence.SequenceID).first().ComponentID
-    sequence.FirstComponentID = component_id
-    sequence.ComponentCount = 3
-    sequence.Valid = 1
+    comp = session.query(Component).filter_by(
+            SequenceID = sequence.SequenceID).first()
+    sequence.first_component = comp
+    sequence.Valid = True
     session.commit()
 
 def update_component_details(cassettes):
@@ -149,12 +149,21 @@ if __name__ == '__main__':
     that contain no reagents.
     '''
     metadata.create_all(checkfirst=True)
+    log.debug("Created Database")
     role = create_role()
-    user = create_user(role.RoleID)
-    sequence = create_sequence(user.UserID)
-    cassettes = create_cassette_components(sequence.SequenceID)
-    create_reagents(sequence.SequenceID, cassettes)
+    log.debug("Created Role")
+    user = create_user(role)
+    log.debug("Created User")
+    sequence = create_sequence(user)
+    log.debug("Created Seqence")
+    cassettes = create_cassette_components(sequence)
+    log.debug("Created Cassettes")
+    create_reagents(cassettes)
+    log.debug("Created Reagents")
     update_sequence_details(sequence)
+    log.debug("Updated sequence details")
     update_component_details(cassettes)
+    log.debug("Updated component details")
+    user = session.query(User).first()
     from IPython import embed
     embed()

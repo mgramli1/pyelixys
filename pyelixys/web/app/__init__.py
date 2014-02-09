@@ -13,17 +13,18 @@ request. Here, this file registers each GET, POST,
 and DELETE class.
 '''
 from flask import Flask
-# import the elixys web GET handler
-# import the elixys web POST handler
-# import the elixys web DELETE handler
-from webserver.elixys_web_get import elixys_web_get
-from webserver.elixys_web_get import elixys_web_get_sequence
-from webserver.elixys_web_post import elixys_post
-from webserver.elixys_web_delete import elixys_delete
+
+from webserver.elixys_web_index import elixys_web_index
+from webserver.elixys_web_sequences import elixys_web_sequences
+from webserver.elixys_web_components import elixys_web_components
+from webserver.elixys_web_users import elixys_web_users
+from webserver.elixys_web_reagents import elixys_web_reagents
 
 app = Flask('Elixys Web Server')
 app.debug = True
-app.register_blueprint(elixys_web_get)
-app.register_blueprint(elixys_web_get_sequence)
-app.register_blueprint(elixys_post)
-app.register_blueprint(elixys_delete)
+
+app.register_blueprint(elixys_web_index)
+app.register_blueprint(elixys_web_sequences)
+app.register_blueprint(elixys_web_components)
+app.register_blueprint(elixys_web_reagents)
+app.register_blueprint(elixys_web_users)

@@ -12,5 +12,5 @@ running this file.
 '''
 if __name__ == '__main__':
     from pyelixys.web.app import app
-    from pyelixys.sequence.sequencemanager import SequenceManager
+    #from pyelixys.sequence.sequencemanager import SequenceManager
     app.run(host='0.0.0.0', debug=True, port=80)
