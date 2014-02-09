@@ -592,25 +592,6 @@ def handle_get_state_run(client_state, username):
         "componentid":client_state["componentid"]}
 
 # GET Classes
-class Elixys_Get_Main:
-    '''
-    This class handles the "Main" page for
-    the web browser. If the user has yet to
-    be authenticated, they will be prior to
-    visiting the Homepage.
-    Class represents the GET / web requests.
-    '''
-    @elixys_web_get.route('/')
-    @requires_auth
-    def main_index():
-        '''
-        Function requires authentication.
-        Upon valid authentication, function shall
-        render a HTML page stored in the 'templates'
-        folder.
-        '''
-        current_app.logger.debug(str(request))
-        return render_template('main_elixys.html')
 
 class Elixys_Get_State:
     '''
@@ -683,65 +664,6 @@ class Elixys_Get_State:
         #current_app.logger.debug("Return state: " + str(return_state))
         return jsonify(return_state)
 
-class Elixys_Get_Component:
-    '''
-    This class represents the
-    GET Elixys/component/<component_id>
-       '''
-    @elixys_web_get.route(
-            '/sequence/<sequence_id>/component/<component_id>',
-            methods=['GET'])
-    @elixys_web_get.route(
-            '/Elixys/sequence/<sequence_id>/component/<component_id>',
-            methods=['GET'])
-    @requires_auth
-    def component_index(sequence_id, component_id):
-        '''
-        Function handles GET request for
-        /Elixys/sequence/<sequenceid>/component/<componentid>.
-        Function expects a sequence id and a component id to be
-        passed in through the web request.
-        Function shall either return a component as a JSON object
-        or try to handle an exception.
-        If the sequence id from the component found on the database
-        is the same as thesequence id passed in, the function returns.
-        If the sequence ids do not match, function calls a helper method
-        to try to find the matching component.
-        '''
-        auth = request.authorization
-        username = str(auth.username)
-        client_state = getCurrentClientState(username)
-        server_state = get_server_state(str(username))
-        current_app.logger.debug("In /sequence/s_id/component/c_id" +
-                "\nRequest for %s" % str(request) + \
-                "\nClient state: " + str(client_state) + \
-                "\nServer state: " + str(server_state))
-
-        # Handle GET /sequence/[sequenceid]/component/[componentid]
-        # Get the component and verify the sequence ID
-        try :
-            component = sequence_manager.GetComponent(
-                    username,
-                    int(component_id),
-                    int(sequence_id))
-        except Exceptions.ComponentNotFoundException:
-            return handle_component_not_found(
-                    client_state,
-                    username,
-                    int(component_id))
-
-        current_app.logger.debug(
-                "\nSequence id: " + str(component['sequenceid']) + \
-                "\nPassed in sequence id: " + str(sequence_id) + \
-                "\nPassed in compo id : " + str(component_id) + \
-                "\nComponent JSON: " + str(component))
-        if int(component["sequenceid"]) == int(sequence_id):
-            return jsonify(component)
-        else:
-            return handle_component_not_found(
-                    client_state,
-                    username,
-                    int(component_id))
 
 class Elixys_Get_Configuration:
     '''
@@ -774,111 +696,6 @@ class Elixys_Get_Configuration:
         current_app.logger.debug(str(config))
         return jsonify(config)
 
-class Elixys_Get_Reagent:
-    '''
-    This class represents the
-    GET Elixys/sequence/<sequence_id>/reagent/<reagent_id>
-    web request.
-    '''
-    @elixys_web_get.route(
-            '/Elixys/sequence/<sequence_id>/reagent/<reagent_ids>')
-    @elixys_web_get.route(
-            '/sequence/<sequence_id>/reagent/<reagent_ids>')
-    @requires_auth
-    def reagent_index(sequence_id, reagent_ids):
-        '''
-        Function expects a sequence id and a reagent id(s) that
-        is passed in from the web request.
-        Function returns a reagent(s) object as a JSON object.
-        This function takes all reagent ids passed in
-        (seperated by a dot -in the form of .../reagent/1.2.5.6).
-        For each reagent id, this funcion shall obtain the reagent
-        information and return all the information as a whole.
-        '''
-        current_app.logger.debug(str(request))
-        auth = request.authorization
-        user = db.get_user(auth.username)
-        # Split each reagent id based on a '.'
-        reagent_ids = str(reagent_ids).split(".")
-
-        # Create and return the reagent array
-        reagents = {}
-        reagents["type"] = "reagents"
-        reagents["reagents"] = []
-        for reagent_id in reagent_ids:
-            reagents["reagents"].append(
-                    sequence_manager.GetReagent(user, int(reagent_id)))
-        return jsonify(reagents)
-
-class Elixys_Get_Sequence:
-    # Note that this routes for 'elixys_web_get_sequence'.
-    # This is because the route above ('/Elixys/sequence/...')
-    # has the same format as this route so we use two routes.
-    '''
-    This class represents the GET Elixys/sequence/<sequence_id>.
-    '''
-    @elixys_web_get_sequence.route(
-            '/sequence/<sequence_id>',
-            methods=['GET'])
-    @elixys_web_get_sequence.route(
-            '/Elixys/sequence/<sequence_id>',
-            methods=['GET'])
-    @requires_auth
-    def sequence_index(sequence_id):
-        '''
-        Funciton shall take in a sequence id as a
-        parameter.
-        Function shall return the sequence object
-        as a jSON object.
-        Function shall try to obtain the sequence based
-        on the id or try to handle the unknown sequence id.
-        All components shall be added to the return object
-        as a part of a sequence's components.
-        '''
-
-        current_app.logger.debug(str(request))
-        auth = request.authorization
-        username = str(auth.username)
-        server_state = get_server_state(str(username))
-        client_state = getCurrentClientState(str(username))
-        current_app.logger.debug(str(request) + \
-                "\nClient state: " + str(client_state) + \
-                "\nServer state: " + str(server_state))
-        sequence = None
-        # Load the sequence
-        try :
-            sequence = sequence_manager.GetSequence(
-                    username,
-                    int(sequence_id),
-                    False)
-        except Exceptions.SequenceNotFoundException:
-            return handle_sequence_not_found(
-                    client_state,
-                    username,
-                    int(sequence_id))
-
-        #current_app.logger.debug("In /sequence function, client state: " + \
-        #        str(client_state) + \
-        #        "\nSequence found: " + str(sequence))
-
-        # Copy a subset of the sequence data
-        new_components = []
-        for old_comp in sequence["components"]:
-            new_comp = {"type":"sequencecomponent",
-                    "note":old_comp["note"],
-                    "id":old_comp["id"],
-                    "componenttype":old_comp["componenttype"],
-                    "validationerror":False}
-            if old_comp.has_key("validationerror"):
-                new_comp["validationerror"] = old_comp["validationerror"]
-            new_components.append(new_comp)
-        sequence["components"] = new_components
-
-        sequence.update({"type": "sequence"})
-        # Return cleaned sequence
-        current_app.logger.debug("In /sequence function, new sequence: " + \
-                str(sequence))
-        return jsonify(sequence)
 
 class Elixys_Get_Runstate:
     '''

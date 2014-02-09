@@ -57,14 +57,66 @@ class ElixysUserHandler(object):
 
         session = Session()
 
-        users = session.query(User).\
-                    filter_by(Username=username).all()
+        users = session.query(User).all()
 
         users = {"users":
                     [user.as_dict() for user in users]}
 
 
         return jsonify(users)
+
+    @elixys_web_users.route(
+            '/users/<username>',
+            methods=['GET'])
+    @elixys_web_users.route(
+            '/Elixys/users/<username>',
+            methods=['GET'])
+    @requires_auth
+    def getuser(username):
+        '''
+        Return all system users and roles
+        '''
+        current_app.logger.debug("REQ:%s", request)
+        auth = request.authorization
+        username_ = auth.username
+
+        session = Session()
+
+        users = session.query(User).\
+                filter_by(Username=username).all()
+
+        users = {"users":
+                    [user.as_dict() for user in users]}
+
+        return jsonify(users)
+
+
+
+    @elixys_web_users.route(
+            '/roles',
+            methods=['GET'])
+    @elixys_web_users.route(
+            '/Elixys/roles',
+            methods=['GET'])
+    @requires_auth
+    def getroles():
+        '''
+        Return all system users and roles
+        '''
+        current_app.logger.debug("REQ:%s", request)
+        auth = request.authorization
+        username = auth.username
+
+        session = Session()
+
+        roles = session.query(Role).all()
+
+        roles = {"roles":
+                    [role.as_dict() for role in roles]}
+
+
+        return jsonify(roles)
+
 
 
 

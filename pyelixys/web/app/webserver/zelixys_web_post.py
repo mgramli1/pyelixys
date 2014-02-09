@@ -8,7 +8,7 @@ import time
 import json
 # import flask components
 from flask import Blueprint
-from flask import current_app 
+from flask import current_app
 from flask import request
 # import basic user auth
 from pyelixys.web.app.userauth.basicauth import requires_auth
@@ -45,7 +45,7 @@ def get_server_state(username):
     None. If server state is None, create a new server state.
     '''
     # Initializes and/or returns the cached server state
-    
+
     server_state = core_server.GetServerState(username)
     if server_state == None:
         current_app.logger.debug("Core Server has yet to setup server state" +
@@ -95,7 +95,7 @@ def save_client_state_and_return(client_state, username):
 def handle_sequence_not_found(client_state, username, sequence_id):
     """Handles the error when the server fails to find a sequence"""
     current_app.logger.debug("Failed to find sequence %s " % str(sequence_id))
-            
+
     # Was it the sequence that the user is currently on?
     if client_state["sequenceid"] == sequence_id:
         # Yes, so return the user to the last Select Sequence screen
@@ -128,7 +128,7 @@ def handle_component_not_found(client_state, username, component_id):
         except Exceptions.SequenceNotFoundException as ex:
             # Sequence not found
             current_app.logger.error("Sequence Not Found Exception" + str(ex))
-            return handle_sequence_not_found(client_state, 
+            return handle_sequence_not_found(client_state,
                     username, sequence_id)
 
     # Return the state
@@ -220,16 +220,16 @@ def handle_post_base_sequence(client_state,
             return True
         elif action_target_id == "NEXT":
             # Move to the next component
-            next_component = db.get_next_component( 
+            next_component = db.get_next_component(
                     client_state["componentid"])
             if next_component != None:
                 client_state["componentid"] = next_component["id"]
             return True
         else:
-            # Check if the target ID corresponds to 
+            # Check if the target ID corresponds to
             # one of our sequence components
             try:
-                # Cast the action target ID to an integer 
+                # Cast the action target ID to an integer
                 # and fetch the corresponding component
                 action_target_id = int(action_target_id)
                 component = db.get_component(action_target_id)
@@ -256,7 +256,7 @@ def show_run_sequence_from_component_prompt(client_state,
         username, sequence_id, component_id):
     '''
     Function expects a client state, a string username, an integer
-    sequence id, and an integer component_id to be passed in as 
+    sequence id, and an integer component_id to be passed in as
     parameters.
     Function calls the save client and return function and returns
     the output of the function.
@@ -271,7 +271,7 @@ def show_run_sequence_from_component_prompt(client_state,
             break
         index += 1
     if component == None:
-        raise Exception("Component " + str(component_id) + 
+        raise Exception("Component " + str(component_id) +
                 " not found in sequence " + str(sequence_id))
 
     # Adjust the component index for the cassettes
@@ -317,11 +317,11 @@ def handle_post_component(s_id, c_id, unit, client_state, username, body):
     '''
     # Extract sequence and component IDs
     current_app.logger.debug("Handle post component.")
-    
+
     sequence_id = int(s_id)
     component_id = int(c_id)
     insertion_id = unit
-    
+
     # Make sure we can edit this sequence
     sequence_metadata = db.get_sequence_metadata(sequence_id)
     if sequence_metadata["sequencetype"] != "Saved":
@@ -337,7 +337,7 @@ def handle_post_component(s_id, c_id, unit, client_state, username, body):
         # Yes, so update the existing component
         sequence_manager.UpdateComponent(
                 username, int(sequence_id),
-                int(component_id), 
+                int(component_id),
                 int(insertion_id),
                 component)
     else:
@@ -375,7 +375,7 @@ def handle_post_reagent(s_id, r_id, client_state, username, body):
     # Save the reagent
     reagent = json.loads(body)
     db.update_reagent(
-            reagent_id, 
+            reagent_id,
             reagent["name"],
             reagent["description"])
 
@@ -406,14 +406,14 @@ class Elixys_Post_Component:
         Based on the body sent with the POST request, this function
         shall use sequence_manager to update the component passed in.
         '''
-        
+
         auth = request.authorization
         username = str(auth.username)
         server_state = get_server_state(username)
         client_state = getCurrentClientState(username)
         # Get POST object
         body = request.data
-        
+
         insertion_id = None
         if unit != None:
             insertion_id = int(unit)
@@ -426,7 +426,7 @@ class Elixys_Post_Component:
         if sequence_metdata['sequencetype'] != 'Saved':
             raise Exception("Cannot edit sequence!")
         component = None
-        
+
         if len(body) != 0:
             component = json.loads(body)
         if int(c_id) != 0:
@@ -482,7 +482,7 @@ class Elixys_Post_Reagent:
         before calling save client state and return.
         '''
         # Get objects
-        
+
         auth = request.authorization
         username = str(auth.username)
         server_state = get_server_state(username)
@@ -498,7 +498,7 @@ class Elixys_Post_Reagent:
 
         # Save the reagent
         reagent = json.loads(body)
-        db.update_reagent( 
+        db.update_reagent(
                 int(r_id),
                 reagent["name"],
                 reagent["description"])
@@ -528,7 +528,7 @@ class Elixys_Post_Home:
         before returning via save client state and return.
         '''
         # Get objects
-        
+
         auth = request.authorization
         username = str(auth.username)
         server_state = get_server_state(username)
@@ -580,12 +580,12 @@ class Elixys_Post_Select:
         Function expects no parameters to be passed in.
         Function checks what the action type and target from the
         body sent with the POST web request.
-        Function returns either the output of the save client state 
+        Function returns either the output of the save client state
         and return function or returns the output of the prompt handler
         for a sequence run.
         '''
         # Get objects
-        
+
         auth = request.authorization
         username = str(auth.username)
         server_state = get_server_state(username)
@@ -793,7 +793,7 @@ class Elixys_Post_Select:
                         return save_client_state_and_return(
                                 client_state, username)
         # Unhandled use case
-        raise Exceptions.StateMisalignmentException() 
+        raise Exceptions.StateMisalignmentException()
 
 class Elixys_Post_View:
     '''
@@ -814,7 +814,7 @@ class Elixys_Post_View:
         based on the body sent.
         '''
         # Get objects
-        
+
         auth = request.authorization
         username = str(auth.username)
         server_state = get_server_state(username)
@@ -850,7 +850,7 @@ class Elixys_Post_View:
                         client_state, username)
             elif action_target_id == "RUNSEQUENCE":
                 # Show the Run Sequence prompt
-                return show_run_sequence_prompt(client_state, 
+                return show_run_sequence_prompt(client_state,
                         username, client_state["sequenceid"])
             elif action_target_id == "RUNSEQUENCEHERE":
                 # Show the Run Sequence From Component prompt
@@ -867,7 +867,7 @@ class Elixys_Post_Edit:
     '''
     @elixys_post.route('/Elixys/EDIT', methods=['POST'])
     @requires_auth
-    def edit_post_index(): 
+    def edit_post_index():
         '''
         Function shall handle POST /VIEW requests from the client.
         Function expects no parameters to be passed in.
@@ -876,7 +876,7 @@ class Elixys_Post_Edit:
         from the body of the POST web request.
         '''
         # Get objects
-        
+
         auth = request.authorization
         username = str(auth.username)
         server_state = get_server_state(username)
@@ -925,92 +925,6 @@ class Elixys_Post_Edit:
         # Unhandled use case
         raise Exceptions.StateMisalignmentException()
 
-class Elixys_Post_Run:
-    '''
-    Class shall represent the POST /Elixys/RUN web request.
-    '''
-    @elixys_post.route('/Elixys/RUN', methods=['POST'])
-    @requires_auth
-    def run_post_index():
-        '''
-        Function shall handle POST /VIEW requests from the client.
-        Function expects no parameters to be passed in.
-        Function shall return the output of the save client
-        and return function.
-        '''
-        # Get objects
-        
-        auth = request.authorization
-        username = str(auth.username)
-        server_state = get_server_state(username)
-        client_state = getCurrentClientState(username)
-        # Get POST object
-        # body = ... obtain POST object sent
-        body = request.data
-        current_app.logger.debug("POST REQUEST:" + str(request) + \
-                "\nBody Sent: " + \
-                str(request.data))
-        
-        # Make sure we are on Run Sequence
-        if client_state["screen"] != "RUN":
-            current_app.logger.error("State Misalignment Exception")
-            raise Exceptions.StateMisalignmentException()
-
-        # Parse the JSON string in the body and extract the action type and target
-        JSON_body = json.loads(body)
-        action_type = str(JSON_body["action"]["type"])
-        action_target_id = str(JSON_body["action"]["targetid"])
-        current_app.logger.debug("Action Type: " + str(action_type) + \
-                "\nAction Target: " + str(action_target_id))
-        # Check which button the user clicked
-        if action_type == "BUTTONCLICK":
-            if action_target_id == "ABORTRUN":
-                # Show the abort confirmation prompt
-                # Using the CoreServer's show abort prompt
-                core_server.ShowAbortSequencePrompt(username, True)
-                return save_client_state_and_return(
-                        client_state, username)
-            elif action_target_id == "SEQUENCER":
-                # Switch states to Home
-                client_state["screen"] = "HOME"
-                return save_client_state_and_return(
-                        client_state, username)
-            elif action_target_id == "TIMEROVERRIDE":
-                # Override the timer
-                core_server.OverrideTimer(username)
-                return save_client_state_and_return(
-                        client_state, username)
-            elif action_target_id == "TIMERCONTINUE":
-                # Stop the timer
-                core_server.StopTimer(username)
-                return save_client_state_and_return(
-                        client_state, username)
-            elif action_target_id == "USERINPUT":
-                # Deliver user input
-                current_app.logger.debug("USERINPUT")
-                try:
-                    core_server.DeliverUserInput(username)
-                except Exception as ex:
-                    raise Exception(str(ex))
-                current_app.logger.debug(
-                        "Delivered User Input, " + 
-                        "save_client_state & return...")
-                return save_client_state_and_return(
-                        client_state, username)
-            elif action_target_id == "PAUSERUN":
-                # Pause the run
-                core_server.PauseSequence(username)
-                return save_client_state_and_return(
-                        client_state, username)
-            elif action_target_id == "CONTINUERUN":
-                # Continue the run
-                core_server.ContinueSequence(username)
-                return save_client_state_and_return(
-                        client_state, username)
-        # Unhandled use case
-        current_app.logger.error("State Misalignment Exception")
-        raise Exceptions.StateMisalignmentException() 
-
 class Elixys_Post_Prompt:
     '''
     Class shall represent the POST /Elixys/PROMPT.
@@ -1025,7 +939,7 @@ class Elixys_Post_Prompt:
         return function.
         '''
         # Get objects
-        
+
         auth = request.authorization
         username = str(auth.username)
         server_state = get_server_state(username)
@@ -1040,9 +954,9 @@ class Elixys_Post_Prompt:
 
         if (not client_state["prompt"]["show"]
                 or not client_state["prompt"]["screen"].startswith("PROMPT")):
-            current_app.logger.error("Client[prompt][show] is False, raising " + 
+            current_app.logger.error("Client[prompt][show] is False, raising " +
                     "State Misalignment Exception")
-            raise Exceptions.StateMisalignmentException() 
+            raise Exceptions.StateMisalignmentException()
 
         # Parse the JSON string in the body
         JSON_body = json.loads(body)
@@ -1055,7 +969,7 @@ class Elixys_Post_Prompt:
 
         # The only recognized action from a prompt is a button click
         if action_type != "BUTTONCLICK":
-            raise Exceptions.StateMisalignmentException() 
+            raise Exceptions.StateMisalignmentException()
         # Interpret the response in context of the client state
         if client_state["prompt"]["screen"] == "PROMPT_CREATESEQUENCE":
             if action_target_id == "OK":
@@ -1090,7 +1004,7 @@ class Elixys_Post_Prompt:
                 # Sequence name is required
                 if edit1 == "":
                     raise Exception("Sequence name is required")
-                
+
                 # create a copy of the sequence in the database
                 new_sequence_id = sequence_manager.CopySequence(
                         username,
@@ -1137,7 +1051,7 @@ class Elixys_Post_Prompt:
                 # Hide the prompt and switch states to Run Sequence
                 client_state["prompt"]["show"] = False
                 client_state["screen"] = "RUN"
-                
+
                 current_app.logger.debug("From POST /PROMPT, calling save client")
 
                 return save_client_state_and_return(
@@ -1155,7 +1069,7 @@ class Elixys_Post_Prompt:
                         int(client_state["sequenceid"]))
                 if not sequence["metadata"]["valid"]:
                     raise Exceptions.InvalidSequenceException(client_state['sequenceid'])
-                
+
                 # Run the sequence from the component
                 core_server.RunSequenceFromComponent(username,
                         client_state["sequenceid"],
@@ -1192,4 +1106,4 @@ class Elixys_Post_Prompt:
                 return save_client_state_and_return(
                         client_state, username)
         # Unhandled use case
-        raise Exceptions.StateMisalignmentException() 
+        raise Exceptions.StateMisalignmentException()
