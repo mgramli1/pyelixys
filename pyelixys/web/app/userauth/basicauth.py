@@ -3,10 +3,10 @@ from flask import request, Response
 
 # import hashing library
 import hashlib
-# import logging
-from flask import current_app
 # import db comm layer
 from pyelixys.web.database.dbcomm import DBComm
+# import logging
+from pyelixys.logs import seqlog as log
 
 def check_auth(username, password):
     """
@@ -15,6 +15,9 @@ def check_auth(username, password):
     username and password exists on the database via
     hashing.
     """
+    log.debug("Checking if valid user")
+    log.debug("Username: %s\nPassword: %s" %
+            (username, password))
     # create new DB communication object
     # and check for a valid login
     db = DBComm()
@@ -23,11 +26,11 @@ def check_auth(username, password):
         # Convert string password to md5 hash format
         password_hash = hashlib.md5(str(password)).hexdigest()
         # Check username with password
+
         return (db.is_valid_login(
            str(username),
            str(password_hash)))
-    # The file doesn't exist, the user doesn't exist,
-    # or the username-password combination isn't valid.
+    log.debug("Username isn't valid")
     return False
 
 def authenticate():
@@ -44,6 +47,8 @@ def requires_auth(f):
     @wraps(f)
     def decorated(*args, **kwargs):
         auth = request.authorization
+        log.debug("Request: %s" % request)
+        log.debug("Auth: %s" % auth)
         if not auth or not check_auth(auth.username, auth.password):
             #log.debug("Requires auth")
             return authenticate()
