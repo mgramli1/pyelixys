@@ -36,6 +36,7 @@ import struct
 import serial
 import time
 
+
 ## Packet Description
 
 # Header T1-T2-T3-T4 (silent interval)
@@ -70,6 +71,9 @@ def calc_crc(values):
             CRC & 0xFF,
             (CRC & 0xFF00) >> 8)
     return values + crcbytes
+
+def valid_crc(msg, msgcrc):
+    return calc_crc(msg) == msgcrc
 
 # Page 152
 gwstatus = "\x3f\x03\xf7\x00\x00\x02"
@@ -166,7 +170,79 @@ axis0brake = '\x3f\x06\xf6\x0b\x80\x00'
 axis0brake = calc_crc(axis0brake)
 print "Axis 0 brake: %s" % axis0brake.encode('hex').upper()
 
+class AxisStatus(object):
 
+    INEMERGBIT = (1 << 15)
+    INCRDYBIT = (1 << 14)
+    INZONE1BIT = (1 << 13)
+    INZONE2BIT = (1 << 12)
+    INPZONEBIT = (1 << 11)
+    INMODESBIT = (1 << 10)
+    INWENDBIT = (1 << 9)
+    INSVONBIT = (1 << 4)
+    INALMBIT = (1 << 3)
+    INMOVEBIT = (1 << 2)
+    INHOMENDBIT = (1 << 1)
+    INPOSENDBIT = (1 << 0)
+
+
+    def __init__(self, status_value):
+        self.status = status_value
+
+    def isMoving(self):
+        if self.status & self.INMOVEBIT:
+            return True
+        return False
+
+    def isAlarm(self):
+        if self.status & self.INALMBIT:
+            return True
+        return False
+
+    def isHome(self):
+        if self.status & self.INHOMENDBIT:
+            return True
+        return False
+
+    def isInPosition(self):
+        if self.status & self.INPOSENDBIT:
+            return True
+        return False
+
+    def isServoOn(self):
+        if self.status & self.INSVONBIT:
+            return True
+        return False
+
+    def isPosLoad(self):
+        if self.status & self.INWENDBIT:
+            return True
+        return False
+
+    def isPosZone(self):
+        if self.status & self.INPZONEBIT:
+            return True
+        return False
+
+    def isZone1(self):
+        if self.status & self.INZONE1BIT:
+            return True
+        return False
+
+    def isZone2(self):
+        if self.status & self.INZONE2BIT:
+            return True
+        return False
+
+    def isCtrlReady(self):
+        if self.status & self.INCRDYBIT:
+            return True
+        return False
+
+    def isEmergencyStop(self):
+        if self.status &  self.INEMERGBIT:
+            return True
+        return False
 
 class LinearActuator(object):
     """ Interface for the IAI linear actuators
@@ -190,15 +266,25 @@ class LinearActuator(object):
     LOCURPOSOFFSET = 0
     STATUSOFFSET = 3
 
+    OUTSONBIT = (1 << 4)
+    OUTHOMEBIT = (1 << 1)
+    OUTSTARTBIT = (1 << 0)
+    OUTPAUSEBIT = (1 << 2)
+    OUTBRKBIT = (1 << 15)
+    OUTRESETBIT = (1 << 3)
 
 
-    def __init__(self, axisid, simulate=False):
-        self.simulate = simulate
+    def __init__(self, axisid, com=None):
         self.axisid = axisid
 
         self.singbytefmt = struct.Struct(">B")
         self.twobytefmt = struct.Struct(">H")
         self.tworegfmt = struct.Struct(">HH")
+
+        self.simulate = True
+        if not com is None:
+            self.com = com
+            self.simulate = False
 
     def address(self):
         return self.singbytefmt.pack(self.SLAVEADDRESS)
@@ -245,21 +331,113 @@ class LinearActuator(object):
         reg = self.twobytefmt.pack(reg)
         return self.address() + cmd + reg
 
+    def send(self, msg):
+        """ Send command to system """
+        print "Sent:%s" % msg.encode('hex').upper()
+        if  not self.simulate:
+            self.com.clear_buffer()
+            self.com.write(msg)
+
+    def receiveSingleRegWrite(self, msg):
+        """ Receive the expected number of bytes """
+        time.sleep(0.1)
+        expectedmsglen = len(msg)
+        if not self.simulate:
+            resp = self.com.read(len(msg))
+        else:
+            resp = msg
+
+        if len(resp) == len(msg):
+            print "Query and response length matches"
+            if resp == msg:
+                print "System validated command"
+
+        return resp
+
+    def receiveMultWrite(self, msg, exampleresp=None):
+        """ Receive the expected number of bytes """
+        time.sleep(0.1)
+        numreg = msg[4:6]
+        numreg = self.twobytefmt.unpack(numreg)[0]
+        numbytes = numreg * 2
+        print "Expected numreg written: %d" % numreg
+        print "Expected numbytes written: %d" % numbytes
+        expectedmsglen = 8
+
+        if self.simulate and exampleresp is None:
+            resp = self.singbytefmt.pack(self.SLAVEADDRESS)
+            resp += self.singbytefmt.pack(self.WRITESINGLEREG)
+            resp += self.twobytefmt.pack(numreg)
+            resp = calc_crc(resp)
+            print "Simulated resp %s" % resp.encode('hex').upper()
+
+        elif not self.simulate and not exampleresp is None:
+            resp = exampleresp
+        else:
+            # Get response!
+            self.com.read(expectedmsglen)
+
+
+        if valid_crc(resp[:-2],resp):
+            print "System validated command"
+
+        byteswritten = self.twobytefmt.unpack(resp[2:4])
+        print "Confirmed wrote %d" % byteswritten
+
+        return byteswritten
+
+
+    def receiveMultiRead(self, msg, exampleresp=None):
+        """ Receive the expected number of bytes """
+
+        numreg = msg[-4:-2]
+        numreg = self.twobytefmt.unpack(numreg)[0]
+        numbytes = numreg * 2
+        print "Numreg: %d" % numreg
+        print "Numbytes: %d" % numbytes
+
+        expectedmsglen = 5 + numbytes
+
+        if self.simulate and exampleresp is None:
+            resp = self.singbytefmt.pack(self.SLAVEADDRESS)
+            resp += self.singbytefmt.pack(self.READMULTIREG)
+            resp += self.singbytefmt.pack(numbytes)
+            msgbytesfmt = struct.Struct(">"+ "B" * numbytes)
+            data = [0 for i in range(numbytes)]
+            resp += msgbytesfmt.pack(*data)
+            resp = calc_crc(resp)
+        elif self.simulate and not expectedmsglen is None:
+            resp = exampleresp
+        else:
+            self.com.read(expectedmsglen)
+
+        if len(resp) == expectedmsglen:
+            print "Received correct number of bytes"
+
+        respnochk = resp[:-2]
+        respck = calc_crc(respnochk)
+
+        if respck == resp:
+            print "crc check ok"
+
+        else:
+            print "invalid crc"
+
+        print "Resp:%s" % resp.encode('hex').upper()
+
+        payload = resp[3:-2]
+        print "Payload: %s" % payload.encode('hex').upper()
+        return payload
+
+
     def writeControl(self, value):
         """ Write the control """
         hdr = self.singleWriteHeader(self.calculateControlReg())
         value = self.twobytefmt.pack(value)
         msg = hdr + value
         msg = calc_crc(msg)
-
-        print "Sent:%s" % msg.encode('hex').upper()
-
-        if self.simulate:
-            resp = msg
-        else:
-            # Read resp
-            pass
-
+        self.send(msg)
+        resp = self.receiveSingleRegWrite(msg)
         print "Resp:%s" % resp.encode('hex').upper()
 
     def writePos(self, posmm):
@@ -277,26 +455,23 @@ class LinearActuator(object):
         print "Sent:%s" % msg.encode('hex').upper()
 
         if self.simulate:
-            resp = "\x3F\x10\xF6\x0C\x00\x02\xB6\x9D"
+            self.receiveMultWrite(msg)
         else:
             # Read resp
             pass
 
-        print "Resp:%s" % resp.encode('hex').upper()
 
     def readStatus(self):
         hdr = self.multiReadHeader(self.calculateStatusReg())
         numreg = self.twobytefmt.pack(1)
         msg = hdr + numreg
         msg = calc_crc(msg)
-        if self.simulate:
-            print "Sent:%s" % msg.encode('hex').upper()
-            resp = "\x3F\x03\x02\x70\x13\xF5\x8C"
-        else:
-            # Read resp
-            pass
-
+        print "Sent:%s" % msg.encode('hex').upper()
+        resp = "\x3F\x03\x02\x70\x13\xF5\x8C"
+        payload = self.receiveMultiRead(msg, resp)
         print "Resp:%s" % resp.encode('hex').upper()
+        print "Payload: %s" % payload.encode('hex').upper()
+        return self.twobytefmt.unpack(payload)[0]
 
     def readCurrentPos(self):
         hdr = self.multiReadHeader(self.calculateCurrentPosReg())
@@ -308,27 +483,20 @@ class LinearActuator(object):
 
         if self.simulate:
             resp = "\x3F\x03\x04\x38\xA5\x00\x00\x38\xB3"
+            payload = self.receiveMultiRead(msg,
+                    exampleresp=resp)
         else:
-            # Read resp
-            pass
+            payload = self.receiveMultiRead(msg)
 
-        print "Resp:%s" % resp.encode('hex').upper()
 
-        respnochk = resp[:-2]
-        respck = calc_crc(respnochk)
-        if respck == resp:
-            print "crc check ok"
-
-        else:
-            print "invalid crc"
-
-        pos = respnochk[3:]
+        pos = payload
         print pos.encode('hex').upper()
         pos = self.tworegfmt.unpack(pos)
         print pos[0], (pos[1] << 16)
         pos = pos[0] + (pos[1] << 16)
         print "%f mm" % (pos / 100.0)
 
+        self.receiveMultiRead(msg)
         return pos / 100.0
 
     def readGatewayStatus(self):
@@ -336,14 +504,10 @@ class LinearActuator(object):
         numreg = self.twobytefmt.pack(2)
         msg = hdr + numreg
         msg = calc_crc(msg)
-
+        exresp = "\x3F\x03\x04\x80\x21\x00\x03\x1C\x3B"
+        payload = self.receiveMultiRead(msg, exresp)
         print "Sent:%s" % msg.encode('hex').upper()
-        if self.simulate:
-            resp = "\x3F\x03\x04\x80\x21\x00\x03\x1C\x3B"
-        else:
-            pass
-
-        print "Resp:%s" % resp.encode('hex').upper()
+        print "Payload:%s" % payload.encode('hex').upper()
 
 
     def writeAppCtrl(self):
@@ -356,10 +520,35 @@ class LinearActuator(object):
         if self.simulate:
             resp = msg
         else:
-            pass
+            self.receiveSingleRegWrite(msg)
 
         print "Resp:%s" % resp.encode('hex').upper()
 
+
+    def pause(self):
+        """ Pause actuator """
+        self.writeControl(self.OUTSONBIT|self.OUTPAUSEBIT)
+
+    def home(self):
+        """ Home actuator """
+        self.writeControl(self.OUTSONBIT|self.OUTHOMEBIT)
+
+    def start(self):
+        """ Start motion """
+        self.writeControl(self.OUTSONBIT|self.OUTSTARTBIT)
+
+    def reset(self):
+        """ Reset actuator """
+        self.writeControl(self.OUTRESETBIT)
+
+    def clear_buffer(self):
+        """ Flush input buffer """
+        if not self.simulate:
+            self.com.flushInput()
+
+    def status(self):
+        """ Read Status """
+        return AxisStatus(self.readStatus())
 
 class IAI(object):
     def __init__(self, simulate=True):
@@ -472,4 +661,9 @@ class IAI(object):
 
         return pos / 100.0
 
-
+if __name__ == '__main__':
+    s = LinearActuator(0)
+    s.writeAppCtrl()
+    s.reset()
+    s.home()
+    s.readStatus()
