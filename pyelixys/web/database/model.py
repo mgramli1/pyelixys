@@ -8,6 +8,9 @@ from sqlalchemy.orm import sessionmaker
 from sqlalchemy.schema import ForeignKeyConstraint
 
 from pyelixys.web.database.dbconf import config
+# Import validator for components
+from pyelixys.web.app.webserver.validate.validatecomponent import comp_vtor
+
 
 dburl = config['database_url']
 engine = create_engine(dburl, echo=True)
@@ -33,7 +36,7 @@ class Component(Base):
             "(Reagents.ComponentID==Component.ComponentID)",
             uselist=True)
 
-    def __init__(self, 
+    def __init__(self,
             seqID=None,
             previousCompID=None,
             nextCompID=None,
@@ -81,6 +84,36 @@ class Component(Base):
 
     details = property(get_details)
 
+    def update_from_dict(self, comp_dict):
+        '''
+        Updates the attributes of the component
+        with the values of the passed in dict.
+        Function expects a dictionary object
+        with keys that map to the Component's
+        attributes/fields.
+        Function returns no output.
+        '''
+        # First validate the entries
+        comp_vtor.check('check_component', comp_dict)
+        # Valid, let's update the entries of the Component
+        for key, value in comp_dict.iteritems():
+            if key == "sequence_id":
+                self.SequenceID = value
+            elif key == "previous_component_id":
+                self.PreviousComponentID = value
+            elif key == "next_component_id":
+                self.NextComponentID = value
+            elif key == "type":
+                self.Type = value
+            elif key == "note":
+                self.Note = value
+            elif key == "details":
+                self.Details = value
+            else:
+                # Else, we received an unknown key
+                # Should flag an error
+                print "%s,%s" % (key, value)
+
 
 class Reagents(Base):
     """
@@ -101,10 +134,10 @@ class Reagents(Base):
             uselist=False)
 
 
-    def __init__(self, 
+    def __init__(self,
             seqID=None,
             componentID=None,
-            position=None, 
+            position=None,
             name="",
             description="",
             reagentID = None):
@@ -606,12 +639,12 @@ class Sequence(Base):
     def __init__(self,
             name="",
             comment="",
-            seq_type="", 
+            seq_type="",
             creationData="",
             userID=0,
             firstComponentID=0,
-            componentCount=0, 
-            valid=False, 
+            componentCount=0,
+            valid=False,
             dirty=False):
         self.Name = name
         self.Comment = comment
@@ -665,9 +698,9 @@ class User(Base):
     sequences = relationship('Sequence', backref='user')
     runlogs = relationship('RunLog', backref='user')
 
-    def __init__(self, 
+    def __init__(self,
             username="",
-            passwd="", 
+            passwd="",
             firstname="",
             lastname="",
             roleID=0,
@@ -710,6 +743,22 @@ class User(Base):
         user_dict['phone'] = str(self.Phone)
         user_dict['messagelevel'] = int(self.MessageLevel)
         return user_dict
+
+
+    def update_from_dict(self, comp_dict):
+        '''
+        Updates the attributes of the user
+        with the values of the passed in dict.
+        Function expects a dictionary object
+        with keys that map to the User's
+        attributes/fields.
+        Function returns no output.
+        '''
+        # First validate the entries
+        comp_vtor.check('check_user', comp_dict)
+        # Valid, let's update the entries of the users
+        #TODO update User
+        pass
 
 metadata = Base.metadata
 Session = sessionmaker(bind=engine)
