@@ -4,6 +4,12 @@ if os.name == 'nt':
 else:
     env = Environment()
 
+subdirs = ['lib/linact']
+
+for dir in subdirs:
+        print os.path.join(dir, 'SConscript')
+        SConscript( os.path.join(dir, 'SConscript'), exports = ['env'])
+
 build_dir = "build/"
 Clean('.', build_dir)
 

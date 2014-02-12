@@ -1,15 +1,11 @@
 Import('env')
+src = ['main.cpp']
+libs = ['linact']
 
-src = ['main.cpp','linact.cpp']
-libs = []
+libpaths=['#lib/linact']
 
-libpaths = []
+Clean('.','build/')
 
-Clean(".","build")
-
-env.Append(CPPPATH = ['.'])
-env.Program(target="linact",CCFLAGS='-g',
-        LIBPATH=libpaths, LIBS=libs,
-        source=src)
-
-
+env.VariantDir('build/', 'src/')
+env.Program(target='linact',CCFLAGS='-g',
+        LIBPATH=libpaths,LIBS=libs,source=src)
