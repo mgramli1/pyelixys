@@ -335,7 +335,7 @@ class LinearActuator(object):
         """ Send command to system """
         print "Sent:%s" % msg.encode('hex').upper()
         if  not self.simulate:
-            self.com.clear_buffer()
+            self.clear_buffer()
             self.com.write(msg)
 
     def receiveSingleRegWrite(self, msg):
@@ -354,7 +354,7 @@ class LinearActuator(object):
 
         return resp
 
-    def receiveMultWrite(self, msg, exampleresp=None):
+    def receiveMultiWrite(self, msg, exampleresp=None):
         """ Receive the expected number of bytes """
         time.sleep(0.1)
         numreg = msg[4:6]
@@ -375,7 +375,7 @@ class LinearActuator(object):
             resp = exampleresp
         else:
             # Get response!
-            self.com.read(expectedmsglen)
+            resp = self.com.read(expectedmsglen)
 
 
         if valid_crc(resp[:-2],resp):
@@ -399,6 +399,7 @@ class LinearActuator(object):
         expectedmsglen = 5 + numbytes
 
         if self.simulate and exampleresp is None:
+            print "Generate Example"
             resp = self.singbytefmt.pack(self.SLAVEADDRESS)
             resp += self.singbytefmt.pack(self.READMULTIREG)
             resp += self.singbytefmt.pack(numbytes)
@@ -407,9 +408,12 @@ class LinearActuator(object):
             resp += msgbytesfmt.pack(*data)
             resp = calc_crc(resp)
         elif self.simulate and not expectedmsglen is None:
+            print "Using given example"
             resp = exampleresp
         else:
-            self.com.read(expectedmsglen)
+            print "Receive multiread"
+            resp = self.com.read(expectedmsglen)
+            print "MultiRead: %s" % resp.encode("hex").upper()
 
         if len(resp) == expectedmsglen:
             print "Received correct number of bytes"
@@ -454,8 +458,9 @@ class LinearActuator(object):
         msg = calc_crc(msg)
         print "Sent:%s" % msg.encode('hex').upper()
 
-        if self.simulate:
-            self.receiveMultWrite(msg)
+        if not self.simulate:
+            self.com.write(msg)
+            self.receiveMultiWrite(msg)
         else:
             # Read resp
             pass
@@ -467,9 +472,15 @@ class LinearActuator(object):
         msg = hdr + numreg
         msg = calc_crc(msg)
         print "Sent:%s" % msg.encode('hex').upper()
-        resp = "\x3F\x03\x02\x70\x13\xF5\x8C"
+
+        if self.simulate:
+            resp = "\x3F\x03\x02\x70\x13\xF5\x8C"
+        else:
+            resp = None
+            self.com.write(msg)
+
         payload = self.receiveMultiRead(msg, resp)
-        print "Resp:%s" % resp.encode('hex').upper()
+        #print "Resp:%s" % resp.encode('hex').upper()
         print "Payload: %s" % payload.encode('hex').upper()
         return self.twobytefmt.unpack(payload)[0]
 
@@ -486,6 +497,7 @@ class LinearActuator(object):
             payload = self.receiveMultiRead(msg,
                     exampleresp=resp)
         else:
+            self.com.write(msg)
             payload = self.receiveMultiRead(msg)
 
 
@@ -494,6 +506,10 @@ class LinearActuator(object):
         pos = self.tworegfmt.unpack(pos)
         print pos[0], (pos[1] << 16)
         pos = pos[0] + (pos[1] << 16)
+        if pos & (1<<31):
+            pos &= ~(1<<31)
+            pos = -1*pos
+
         print "%f mm" % (pos / 100.0)
 
         self.receiveMultiRead(msg)
@@ -520,7 +536,8 @@ class LinearActuator(object):
         if self.simulate:
             resp = msg
         else:
-            self.receiveSingleRegWrite(msg)
+            self.com.write(msg)
+            resp = self.receiveSingleRegWrite(msg)
 
         print "Resp:%s" % resp.encode('hex').upper()
 
@@ -662,8 +679,10 @@ class IAI(object):
         return pos / 100.0
 
 if __name__ == '__main__':
-    s = LinearActuator(0)
-    s.writeAppCtrl()
-    s.reset()
-    s.home()
-    s.readStatus()
+    import serial
+    s = serial.Serial("COM5", baudrate=230400, timeout=0.5)
+    linact = LinearActuator(0)
+    linact.writeAppCtrl()
+    linact.reset()
+    linact.home()
+    linact.readStatus()
