@@ -3,10 +3,14 @@ from flask import request, Response
 
 # import hashing library
 import hashlib
-# import db comm layer
-from pyelixys.web.database.dbcomm import DBComm
 # import logging
-from pyelixys.logs import seqlog as log
+from flask import current_app
+from pyelixys.web.database.model import Session,\
+                                        User
+
+from sqlalchemy.orm.exc import MultipleResultsFound,\
+                               NoResultFound
+from pyelixys.logs import weblog as log
 
 def check_auth(username, password):
     """
@@ -15,29 +19,23 @@ def check_auth(username, password):
     username and password exists on the database via
     hashing.
     """
-    log.debug("Checking if valid user")
-    log.debug("Username: %s\nPassword: %s" %
-            (username, password))
-    # create new DB communication object
-    # and check for a valid login
-    db = DBComm()
-    # Check if user exists
-    if db.is_a_user(str(username)):
-        # Convert string password to md5 hash format
-        password_hash = hashlib.md5(str(password)).hexdigest()
-        # Check username with password
+    session = Session()
+    password_hash = hashlib.md5(str(password)).hexdigest()
+    try:
+        user = session.query(User).filter(User.Username==username).\
+            filter(User.Password==password_hash).one()
+    except (MultipleResultsFound, NoResultFound):
+        return False
 
-        return (db.is_valid_login(
-           str(username),
-           str(password_hash)))
-    log.debug("Username isn't valid")
+    if user:
+        return True
     return False
 
 def authenticate():
     """
     Sends a 401 response that enables basic auth
     """
-    #log.info("Authenticate")
+    log.info("Authenticate")
     return Response(
             'Could not verify your access level for elixys\n'
             'You must have proper credentials', 401,
@@ -50,9 +48,9 @@ def requires_auth(f):
         log.debug("Request: %s" % request)
         log.debug("Auth: %s" % auth)
         if not auth or not check_auth(auth.username, auth.password):
-            #log.debug("Requires auth")
+            log.debug("Requires auth")
             return authenticate()
-        #log.debug("username:%s" % auth.username)
+        log.debug("username:%s" % auth.username)
         return f(*args, **kwargs)
     return decorated
 
