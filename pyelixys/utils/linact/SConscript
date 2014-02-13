@@ -5,7 +5,6 @@ libs = ['linact']
 
 libpaths=['#lib/linact','#build']
 
-Clean('.','build')
 
 env.Program(target='linact',CCFLAGS='-g',
         LIBPATH=libpaths,LIBS=libs,source=src)

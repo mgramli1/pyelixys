@@ -8,7 +8,7 @@
 
 namespace IAI {
 
-  class LinActBuf {
+  class  LinActBuf {
     unsigned char *ptr;
     public:
         LinActBuf();
@@ -36,7 +36,5 @@ namespace IAI {
   }; // End linactbuf class
 
 }; // End namespace
-
-
 
 #endif //~ end LINACTBUF_H

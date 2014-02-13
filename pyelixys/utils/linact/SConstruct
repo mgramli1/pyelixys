@@ -20,4 +20,3 @@ for dir in subdirs:
 SConscript('SConscript', variant_dir='build', duplicate=0,
         exports = ['env', 'build_dir'])
 
-Command('../../build', 'linact.dll', Copy("$TARGET","$SOURCE"))

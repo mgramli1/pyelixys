@@ -4,11 +4,17 @@ import glob
 Import('env')
 Import('build_dir')
 
-src = ['linact.cpp','linactbuf.cpp']
+src = ['linact.cpp','linactbuf.cpp', 'pylinact.cpp']
 
 env.Append(CPPPATH=map(os.path.abspath,glob.glob('.')))
 
 penv = env.Clone()
 
-penv.SharedLibrary('linact', source=src)
+if os.name == 'nt':
+    penv.SharedLibrary('linact', source=src, CCFLAGS='-DBUILD_DLL')
+else:
+    penv.SharedLibrary('linact', source=src)
+
+
+
 penv.Install('../../build', 'linact.dll')
