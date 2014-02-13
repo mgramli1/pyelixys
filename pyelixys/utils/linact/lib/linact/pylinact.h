@@ -18,7 +18,19 @@ extern "C" {
 
 
 LinActBuf* LinActBuf_new();
+void LinActBuf_push(LinActBuf *buf, unsigned char c);
 
+void LinActBuf_calc_crc(LinActBuf* buf);
+
+char * LinActBuf_as_str(LinActBuf * buf);
+
+void LinActBuf_push(LinActBuf *buf, unsigned char val);
+
+void LinActBuf_reset(LinActBuf *buf);
+
+void LinActBuf_copy(LinActBuf * src, LinActBuf * dest);
+
+unsigned int LinActBuf_len(LinActBuf * buf);
 }
 
 #endif

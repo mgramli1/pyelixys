@@ -14,3 +14,5 @@ void LinActBuf_push(LinActBuf *buf, unsigned char val) { buf->push(val); }
 void LinActBuf_reset(LinActBuf *buf) { buf->reset(); }
 
 void LinActBuf_copy(LinActBuf * src, LinActBuf * dest) { dest->copy(src); }
+
+unsigned int LinActBuf_len(LinActBuf * buf) {return buf->len;}
