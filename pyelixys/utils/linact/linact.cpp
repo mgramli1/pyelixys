@@ -262,4 +262,7 @@ LinActBuf * LinearActuator::receive(int len) {
     printf("Receive: %s\r\n", inbuf.as_string());
 }
 
+
+
+
 } // End Namespace IAI

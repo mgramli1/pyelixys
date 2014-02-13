@@ -10,7 +10,7 @@ import copy
 from flask import Blueprint
 from flask import render_template
 from flask import jsonify
-from flask import current_app 
+from flask import current_app
 from flask import request
 import sys
 # import flask class struct implmentation
@@ -22,7 +22,7 @@ from pyelixys.web.app.userauth.basicauth import requires_auth
 # import the coreserver, db and sequence manager
 # from elixysweb.py
 from web_service import getCurrentClientState
-from web_service import core_server
+#from web_service import core_server
 from web_service import db, sequence_manager
 # import initial run state obj for serverstate
 from web_service import InitialRunState
@@ -68,7 +68,7 @@ def handle_sequence_not_found(client_state, username, sequence_id):
 
     current_app.logger.debug("Failed to find sequence: " + str(sequence_id) + \
             "Client state: " + str(client_state))
- 
+
     # Was it the sequence that the user is currently on?
     if client_state["sequenceid"] == int(sequence_id):
         # Yes, so return the user to the last Select Sequence screen
@@ -137,7 +137,7 @@ def handle_reagent_not_found(client_state, username, reagent_id):
 
 def handle_invalid_sequence(username, sequence_id):
     """Handles the error when the use attempts to run an invalid sequence"""
-    current_app.logger.error("Cannot run invalid sequence (" + 
+    current_app.logger.error("Cannot run invalid sequence (" +
             str(sequence_id) + "\nUser:" + str(username))
     return {"type":"error", "description":"Invalid sequence"}
 
@@ -162,7 +162,7 @@ def get_server_state(username):
     None. If server state is None, create a new server state.
     '''
     # Initializes and/or returns the cached server state
-    
+
     server_state = core_server.GetServerState(username)
     if server_state == None:
         current_app.logger.debug("Core Server has yet to setup server state" +
@@ -173,7 +173,7 @@ def get_server_state(username):
         server_state["runstate"]["status"] = "Offline"
         server_state["runstate"]["username"] = ""
     #current_app.logger.debug("Returned server state: " + \
-    #        str(server_state)) 
+    #        str(server_state))
     return server_state
 
 def lower_if_possible(string_x):
@@ -196,8 +196,8 @@ def handle_get_state_home(username):
     HOME screen.
 
     '''
-    # 
-    
+    #
+
     server_state = get_server_state(str(username))
     # Check if someone running the system
     system_running = (server_state["runstate"]["username"] != "")
@@ -231,7 +231,7 @@ def handle_get_state_select_savedsequences(client_state, username):
     screen that lists all sequences.)
     '''
     # Check if the system is running
-    
+
     server_state = get_server_state(username)
     system_available = (server_state["runstate"]["status"] == "Idle")
 
@@ -302,7 +302,7 @@ def handle_get_state_select_savedsequences(client_state, username):
     # Append the saved sequence list
     saved_sequences = db.get_all_sequences("Saved")
     saved_sequences.sort(key=lambda sequence: map(
-        lower_if_possible, 
+        lower_if_possible,
         sequence[sort_key]),
         reverse=sort_descending)
     return_state.update({"sequences":saved_sequences})
@@ -317,7 +317,7 @@ def handle_get_state_select_runhistory(client_state, username):
     screen. Function handles the toggles of the buttons for what order
     sequences shall be listed in.
     '''
-    
+
     server_state = get_server_state(username)
     system_available = (server_state["runstate"]["status"] == "Idle")
 
@@ -416,9 +416,9 @@ def handle_get_state_select_runhistory(client_state, username):
             reverse=sort_descending)
     else:
         run_history_sequences.sort(key=lambda sequence: (map(
-            lower_if_possible, 
-            sequence[sort_key1]), 
-            map(lower_if_possible, sequence[sort_key2])), 
+            lower_if_possible,
+            sequence[sort_key1]),
+            map(lower_if_possible, sequence[sort_key2])),
             reverse=sort_descending)
     return_state.update({"sequences":run_history_sequences})
     return return_state
@@ -430,7 +430,7 @@ def handle_get_state_view(client_state, username):
     Function expects a client state and a string username.
     Function returns the "View Sequence" screen.
     '''
-    
+
     server_state = get_server_state(username)
     # Do we have a component ID?
     if client_state["componentid"] == 0:
@@ -442,8 +442,8 @@ def handle_get_state_view(client_state, username):
                 False)
         client_state["componentid"] = sequence["components"][0]["id"]
         # Save client state
-        db.update_user_client_state(username, client_state)        
-        
+        db.update_user_client_state(username, client_state)
+
     # Allow editing if this is a saved sequence
     sequence_metadata = db.get_sequence_metadata(
             client_state["sequenceid"])
@@ -455,7 +455,7 @@ def handle_get_state_view(client_state, username):
     # Allow running from here if this is not a cassette
     run_here_allowed = False
     if run_allowed:
-        component = sequence_manager.GetComponent(username, 
+        component = sequence_manager.GetComponent(username,
                 client_state["componentid"],
                 client_state["sequenceid"])
         run_here_allowed = (component["componenttype"] != "CASSETTE")
@@ -483,20 +483,20 @@ def handle_get_state_edit(client_state, username):
     Function shall expect a client state and a string username.
     Function shall return the "Edit Sequence" screen.
     '''
-    
+
     server_state = get_server_state(username)
     current_app.logger.debug("GET /STATE - edit" +
             "\nclient state: " + str(client_state) + \
             "\nclient state[comp id]: " + str(client_state["componentid"]) + \
             "\nRun State: " + str(server_state["runstate"]))
-    
+
     # Do we have a component ID?
     if client_state["componentid"] == 0:
         # No, the component ID is missing.
         # Get the sequence and the ID of the first component
         sequence = sequence_manager.GetSequence(
-                username, 
-                client_state["sequenceid"], 
+                username,
+                client_state["sequenceid"],
                 False)
         client_state["componentid"] = sequence["components"][0]["id"]
         # Save client state
@@ -514,7 +514,7 @@ def handle_get_state_edit(client_state, username):
                 client_state["sequenceid"])
         run_here_allowed = (component["componenttype"] != "CASSETTE")
 
- 
+
     # Return the state
     return {"buttons":[{"type":"button",
         "id":"SEQUENCER",
@@ -536,24 +536,24 @@ def handle_get_state_run(client_state, username):
     '''
     Handles GET /state for Run Sequtate: " + str(server_state))
     '''
-    
+
     server_state = get_server_state(username)
-    current_app.logger.debug("In GET /STATE - RUN" + 
+    current_app.logger.debug("In GET /STATE - RUN" +
             "\nClientstate: " + str(client_state) + \
             "\nServerstate: " + str(server_state))
-    
+
     server_state = get_server_state(username)
 
     # Sync the client state with the run state
-    if ((client_state["sequenceid"] != server_state["runstate"]["sequenceid"]) or 
-            (client_state["componentid"] != server_state["runstate"]["componentid"]) or 
-            (client_state["prompt"]["show"] != server_state["runstate"]["prompt"]["show"]) or 
-            ((client_state["prompt"].has_key("screen")) and 
-                (server_state["runstate"]["prompt"].has_key("screen")) and 
+    if ((client_state["sequenceid"] != server_state["runstate"]["sequenceid"]) or
+            (client_state["componentid"] != server_state["runstate"]["componentid"]) or
+            (client_state["prompt"]["show"] != server_state["runstate"]["prompt"]["show"]) or
+            ((client_state["prompt"].has_key("screen")) and
+                (server_state["runstate"]["prompt"].has_key("screen")) and
                 (client_state["prompt"]["screen"] != server_state["runstate"]["prompt"]["screen"]))):
         # Log issue
         current_app.logger.debug("Syncing the client with run state" +
-                   "\nClient State:\n" + str(client_state) + 
+                   "\nClient State:\n" + str(client_state) +
                    "\nRun State:\n" + str(server_state["runstate"]))
         # Update the sequence and component IDs
         client_state["sequenceid"] = server_state["runstate"]["sequenceid"]
@@ -592,25 +592,6 @@ def handle_get_state_run(client_state, username):
         "componentid":client_state["componentid"]}
 
 # GET Classes
-class Elixys_Get_Main:
-    '''
-    This class handles the "Main" page for
-    the web browser. If the user has yet to
-    be authenticated, they will be prior to
-    visiting the Homepage.
-    Class represents the GET / web requests.
-    '''
-    @elixys_web_get.route('/')
-    @requires_auth
-    def main_index():
-        '''
-        Function requires authentication.
-        Upon valid authentication, function shall
-        render a HTML page stored in the 'templates'
-        folder.
-        '''
-        current_app.logger.debug(str(request))
-        return render_template('main_elixys.html')
 
 class Elixys_Get_State:
     '''
@@ -627,7 +608,7 @@ class Elixys_Get_State:
         current screen.
         Function returns the state to the client as a JSON object.
         '''
-        
+
         auth = request.authorization
         user = db.get_user(str(auth.username))
         server_state = get_server_state(str(auth.username))
@@ -640,7 +621,7 @@ class Elixys_Get_State:
             if client_state["screen"] != "RUN":
                 # Update the client state
                 client_state["screen"] = "RUN"
-                db.update_user_client_state( 
+                db.update_user_client_state(
                         str(auth.username),
                         client_state)
 
@@ -651,8 +632,8 @@ class Elixys_Get_State:
                 "timestamp":time.time()}
         # Check which screen is active
         choice = str(client_state["screen"])
-        
-        current_app.logger.debug("Request for state" +  
+
+        current_app.logger.debug("Request for state" +
                 "\nREQUEST: " + str(request) + \
                 "\nClient state: " + str(client_state) + \
                 "\nServer state: " + str(server_state))
@@ -680,68 +661,9 @@ class Elixys_Get_State:
         else:
             current_app.logger.debug("Unknown screen: %s" % str(choice))
             raise Exception("Unknown screen: %s" % str(choice))
-        #current_app.logger.debug("Return state: " + str(return_state)) 
+        #current_app.logger.debug("Return state: " + str(return_state))
         return jsonify(return_state)
 
-class Elixys_Get_Component:
-    '''
-    This class represents the
-    GET Elixys/component/<component_id>
-       '''
-    @elixys_web_get.route(
-            '/sequence/<sequence_id>/component/<component_id>', 
-            methods=['GET'])
-    @elixys_web_get.route(
-            '/Elixys/sequence/<sequence_id>/component/<component_id>', 
-            methods=['GET'])
-    @requires_auth
-    def component_index(sequence_id, component_id):
-        '''
-        Function handles GET request for
-        /Elixys/sequence/<sequenceid>/component/<componentid>.
-        Function expects a sequence id and a component id to be
-        passed in through the web request.
-        Function shall either return a component as a JSON object
-        or try to handle an exception.
-        If the sequence id from the component found on the database 
-        is the same as thesequence id passed in, the function returns. 
-        If the sequence ids do not match, function calls a helper method
-        to try to find the matching component.
-        '''
-        auth = request.authorization
-        username = str(auth.username)
-        client_state = getCurrentClientState(username)
-        server_state = get_server_state(str(username)) 
-        current_app.logger.debug("In /sequence/s_id/component/c_id" + 
-                "\nRequest for %s" % str(request) + \
-                "\nClient state: " + str(client_state) + \
-                "\nServer state: " + str(server_state))
-       
-        # Handle GET /sequence/[sequenceid]/component/[componentid]
-        # Get the component and verify the sequence ID
-        try :
-            component = sequence_manager.GetComponent(
-                    username,
-                    int(component_id),
-                    int(sequence_id))
-        except Exceptions.ComponentNotFoundException:
-            return handle_component_not_found(
-                    client_state,
-                    username,
-                    int(component_id))
-
-        current_app.logger.debug(
-                "\nSequence id: " + str(component['sequenceid']) + \
-                "\nPassed in sequence id: " + str(sequence_id) + \
-                "\nPassed in compo id : " + str(component_id) + \
-                "\nComponent JSON: " + str(component))
-        if int(component["sequenceid"]) == int(sequence_id):
-            return jsonify(component)
-        else:
-            return handle_component_not_found(
-                    client_state,
-                    username,
-                    int(component_id))
 
 class Elixys_Get_Configuration:
     '''
@@ -769,116 +691,11 @@ class Elixys_Get_Configuration:
         config = {"type":"configuration"}
         config.update(db.get_configuration())
         config.update(
-                {"supportedoperations": 
+                {"supportedoperations":
                     db.get_supported_operations()})
         current_app.logger.debug(str(config))
         return jsonify(config)
 
-class Elixys_Get_Reagent:
-    '''
-    This class represents the
-    GET Elixys/sequence/<sequence_id>/reagent/<reagent_id>
-    web request.
-    '''
-    @elixys_web_get.route(
-            '/Elixys/sequence/<sequence_id>/reagent/<reagent_ids>')
-    @elixys_web_get.route(
-            '/sequence/<sequence_id>/reagent/<reagent_ids>')
-    @requires_auth
-    def reagent_index(sequence_id, reagent_ids):
-        '''
-        Function expects a sequence id and a reagent id(s) that
-        is passed in from the web request.
-        Function returns a reagent(s) object as a JSON object.
-        This function takes all reagent ids passed in
-        (seperated by a dot -in the form of .../reagent/1.2.5.6).
-        For each reagent id, this funcion shall obtain the reagent
-        information and return all the information as a whole.
-        '''
-        current_app.logger.debug(str(request))
-        auth = request.authorization
-        user = db.get_user(auth.username)
-        # Split each reagent id based on a '.'
-        reagent_ids = str(reagent_ids).split(".")
-        
-        # Create and return the reagent array
-        reagents = {}
-        reagents["type"] = "reagents"
-        reagents["reagents"] = []
-        for reagent_id in reagent_ids:
-            reagents["reagents"].append(
-                    sequence_manager.GetReagent(user, int(reagent_id)))
-        return jsonify(reagents)
-
-class Elixys_Get_Sequence:
-    # Note that this routes for 'elixys_web_get_sequence'.
-    # This is because the route above ('/Elixys/sequence/...')
-    # has the same format as this route so we use two routes.
-    '''
-    This class represents the GET Elixys/sequence/<sequence_id>.
-    '''
-    @elixys_web_get_sequence.route(
-            '/sequence/<sequence_id>',
-            methods=['GET'])
-    @elixys_web_get_sequence.route(
-            '/Elixys/sequence/<sequence_id>',
-            methods=['GET'])
-    @requires_auth
-    def sequence_index(sequence_id):
-        '''
-        Funciton shall take in a sequence id as a 
-        parameter.
-        Function shall return the sequence object
-        as a jSON object.
-        Function shall try to obtain the sequence based
-        on the id or try to handle the unknown sequence id.
-        All components shall be added to the return object
-        as a part of a sequence's components.
-        '''
-        
-        current_app.logger.debug(str(request))
-        auth = request.authorization
-        username = str(auth.username)
-        server_state = get_server_state(str(username))
-        client_state = getCurrentClientState(str(username))
-        current_app.logger.debug(str(request) + \
-                "\nClient state: " + str(client_state) + \
-                "\nServer state: " + str(server_state))
-        sequence = None
-        # Load the sequence
-        try :
-            sequence = sequence_manager.GetSequence(
-                    username,
-                    int(sequence_id),
-                    False)
-        except Exceptions.SequenceNotFoundException:
-            return handle_sequence_not_found(
-                    client_state,
-                    username,
-                    int(sequence_id))
-            
-        #current_app.logger.debug("In /sequence function, client state: " + \
-        #        str(client_state) + \
-        #        "\nSequence found: " + str(sequence))
-     
-        # Copy a subset of the sequence data
-        new_components = []
-        for old_comp in sequence["components"]:
-            new_comp = {"type":"sequencecomponent",
-                    "note":old_comp["note"],
-                    "id":old_comp["id"],
-                    "componenttype":old_comp["componenttype"],
-                    "validationerror":False}
-            if old_comp.has_key("validationerror"):
-                new_comp["validationerror"] = old_comp["validationerror"]
-            new_components.append(new_comp)
-        sequence["components"] = new_components
-
-        sequence.update({"type": "sequence"})
-        # Return cleaned sequence
-        current_app.logger.debug("In /sequence function, new sequence: " + \
-                str(sequence))
-        return jsonify(sequence)
 
 class Elixys_Get_Runstate:
     '''
@@ -923,11 +740,11 @@ class Elixys_Get_Runstate:
         as a JSON object.
         '''
         # Sync the client state with the run state
-        if ((client_state["sequenceid"] != server_state["runstate"]["sequenceid"]) or 
-                (client_state["componentid"] != server_state["runstate"]["componentid"]) or 
-                (client_state["prompt"]["show"] != server_state["runstate"]["prompt"]["show"]) or 
-                ((client_state["prompt"].has_key("screen")) and 
-                    (server_state["runstate"]["prompt"].has_key("screen")) and 
+        if ((client_state["sequenceid"] != server_state["runstate"]["sequenceid"]) or
+                (client_state["componentid"] != server_state["runstate"]["componentid"]) or
+                (client_state["prompt"]["show"] != server_state["runstate"]["prompt"]["show"]) or
+                ((client_state["prompt"].has_key("screen")) and
+                    (server_state["runstate"]["prompt"].has_key("screen")) and
                     (client_state["prompt"]["screen"] != server_state["runstate"]["prompt"]["screen"]))):
             # Update the sequence and component IDs
             client_state["sequenceid"] = server_state["runstate"]["sequenceid"]
@@ -939,7 +756,7 @@ class Elixys_Get_Runstate:
             # Update the client state
             db.update_user_client_state(username, client_state)
 
-                
+
         # Determine if we are the user running the system
         if username == server_state["runstate"]["username"]:
             # Enable or disable buttons
@@ -967,7 +784,7 @@ class Elixys_Get_Runstate:
             "enabled":True}],
             "sequenceid":client_state["sequenceid"],
             "componentid":client_state["componentid"]}
-    
+
     @elixys_web_get.route('/runstate')
     @elixys_web_get.route('/Elixys/runstate')
     @requires_auth
@@ -979,14 +796,14 @@ class Elixys_Get_Runstate:
         This state will contain components from the client
         state and the server state.
         '''
-        
+
         # Handle GET /runstate request
         # Get the user information and server state
-        current_app.logger.debug(str(request))
+        current_app.logger.debug("REQUEST:%s" % request)
 
         auth = request.authorization
         user = db.get_user(str(auth.username))
-        server_state = core_server.GetServerState(user)
+        server_state = {} #core_server.GetServerState(user)
         client_state = getCurrentClientState(auth.username)
 
         # Start the state object

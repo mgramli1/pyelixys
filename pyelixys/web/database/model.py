@@ -25,18 +25,34 @@ class Component(Base):
     __tablename__ = 'Components'
     ComponentID = Column(Integer, primary_key=True)
     SequenceID = Column(Integer, ForeignKey('Sequences.SequenceID'))
-    PreviousComponentID = Column(Integer)
-    NextComponentID = Column(Integer)
+
+    PreviousComponentID = Column(Integer, ForeignKey('Components.ComponentID',
+            use_alter=True,
+            name="fk_prev_comp"))
+
+    NextComponentID = Column(Integer, ForeignKey('Components.ComponentID',
+            use_alter=True,
+            name="fk_next_comp"))
+
     Type = Column(String(length=20))
     Note = Column(String(length=64))
     Details = Column(String(length=2048))
     runlogs = relationship('RunLog', backref='runlogs')
     sequence = relationship('Sequence', backref='components',
             foreign_keys=[SequenceID])
-    reagents = relationship('Reagents',
+    reagents = relationship('Reagent',
             primaryjoin="and_" +
-            "(Reagents.ComponentID==Component.ComponentID)",
+            "(Reagent.ComponentID==Component.ComponentID)",
             uselist=True)
+
+    previous_component = relationship('Component',
+            primaryjoin="Component.ComponentID==Component.PreviousComponentID",
+            uselist=False)
+
+    next_component = relationship('Component',
+            primaryjoin="Component.ComponentID==Component.NextComponentID",
+            uselist=False)
+
 
     def __init__(self,
             seqID=None,
@@ -55,7 +71,8 @@ class Component(Base):
         self.Details = details
 
     def __repr__(self):
-        return '<Component(%s,%s)>' % (self.ComponentID, self.SequenceID)
+        return '<Component(%s,%s)>' % (self.ComponentID,
+                                        self.SequenceID)
 
     def as_dict(self):
         """
@@ -66,19 +83,9 @@ class Component(Base):
         Function returns a Component as a
         dictionary object.
         """
-        comp_dict = {}
-        comp_dict['id'] = int(self.ComponentID)
-        comp_dict['sequenceid'] = int(self.SequenceID)
-        comp_dict['note'] = str(self.Note)
-        comp_dict['componenttype'] = str(self.Type)
-        details = json.loads(str(self.Details))
-        if 'reactor' in details and 'reagentids' in details:
-            comp_dict['reactor'] = str(details['reactor'])
-            comp_dict['reagentids'] = details['reagentids']
-        else:
-            comp_dict.update(details)
-        comp_dict['validationerror'] = bool(details['validationerror'])
-        comp_dict['type'] = str(details['type'])
+        comp_dict = self.details
+        comp_dict['reagents'] = [r.as_dict() for r in self.reagents]
+
         return comp_dict
 
     def get_details(self):
@@ -122,22 +129,22 @@ class Component(Base):
         # Update to DB
         session.commit()
 
-class Reagents(Base):
+    def as_json(self):
+        return json.dumps(self.as_dict(), indent=2)
+
+
+class Reagent(Base):
     """
     Reagent Object
     """
     __tablename__ = 'Reagents'
     ReagentID = Column(Integer, primary_key=True)
-    SequenceID = Column(Integer, ForeignKey('Sequences.SequenceID'))
     ComponentID = Column(Integer, ForeignKey('Components.ComponentID'))
     Position = Column(String(length=2))
     Name = Column(String(length=64))
     Description = Column(String(length=255))
-    components = relationship('Component',
-            primaryjoin="Component.ComponentID==Reagents.ComponentID",
-            uselist=False)
-    sequence = relationship('Sequence',
-            primaryjoin="Sequence.SequenceID==Reagents.SequenceID",
+    component = relationship('Component',
+            primaryjoin="Component.ComponentID==Reagent.ComponentID",
             uselist=False)
 
 
@@ -171,17 +178,20 @@ class Reagents(Base):
         """
         reagent_dict = {}
         reagent_dict['type'] = 'reagent'
-        reagent_dict['reagentid'] = int(self.ReagentID)
-        reagent_dict['componentid'] = int(self.ComponentID)
-        reagent_dict['position'] = int(self.Position)
-        reagent_dict['name'] = str(self.Name)
+        reagent_dict['reagentid'] = self.ReagentID
+        reagent_dict['componentid'] = self.ComponentID
+        reagent_dict['position'] = self.Position
+        reagent_dict['name'] = self.Name
         reagent_dict['namevalidation'] = 'type=string; required=true'
-        reagent_dict['description'] = str(self.Description)
+        reagent_dict['description'] = self.Description
         reagent_dict['descriptionvalidation'] = 'type=string'
         return reagent_dict
 
+    def as_json(self):
+        return json.dumps(self.as_dict(), indent=2)
 
-class Roles(Base):
+
+class Role(Base):
     """
     Roles Object
     """
@@ -190,7 +200,7 @@ class Roles(Base):
     RoleName = Column(String(length=30))
     Flags = Column(Integer)
     users = relationship('User',
-            primaryjoin="User.RoleID==Roles.RoleID",
+            primaryjoin="User.RoleID==Role.RoleID",
             backref='role')
 
     def __init__(self,
@@ -203,7 +213,7 @@ class Roles(Base):
         self.Flags = flag
 
     def __repr__(self):
-        return '<Roles(%s,%s)>' % (self.RoleID, self.RoleName)
+        return '<Role(%s,%s)>' % (self.RoleID, self.RoleName)
 
     def as_dict(self):
         """
@@ -220,6 +230,9 @@ class Roles(Base):
         role_dict['name'] = str(self.RoleName)
         role_dict['flags'] = int(self.Flags)
         return role_dict
+
+    def as_json(self):
+        return json.dumps(self.as_dict(), indent=2)
 
 
 class SystemLog(Base):
@@ -631,7 +644,6 @@ class Sequence(Base):
     CreationDate = Column(DateTime, default=datetime.now)
     UserID = Column(Integer, ForeignKey('Users.UserID'))
     FirstComponentID = Column(Integer)
-    ComponentCount = Column(Integer)
     Valid = Column(Boolean, default=False)
     Dirty = Column(Boolean, default=False)
     first_component = relationship('Component',
@@ -676,14 +688,16 @@ class Sequence(Base):
         dictionary object.
         """
         comp_dict = {}
-        comp_dict['id'] = int(self.SequenceID)
-        comp_dict['name'] = str(self.Name)
-        comp_dict['comment'] = str(self.Comment)
+        comp_dict['id'] = self.SequenceID
+        comp_dict['name'] = self.Name
+        comp_dict['comment'] = self.Comment
         comp_dict['date'] = self.CreationDate.strftime('%m/%d/%Y')
         comp_dict['time'] = self.CreationDate.strftime('%H:%M.%S')
-        comp_dict['components'] = int(self.ComponentCount)
-        comp_dict['valid'] = bool(self.Valid)
-        comp_dict['dirty'] = bool(self.Dirty)
+        comp_dict['components'] = [comp.as_dict() for comp in self.components]
+
+
+        comp_dict['valid'] = self.Valid
+        comp_dict['dirty'] = self.Dirty
         return comp_dict
 
     def update_from_dict(self, seq_dict):
@@ -729,6 +743,10 @@ class Sequence(Base):
                 print "%s%s" % (key, value)
         session.commit()
 
+    def as_json(self):
+        return json.dumps(self.as_dict(), indent=4)
+
+
 class User(Base):
     """
     User Object
@@ -744,8 +762,19 @@ class User(Base):
     Phone = Column(String(20))
     MessageLevel = Column(Integer)
     ClientState = Column(String(2048))
-    sequences = relationship('Sequence', backref='user')
+    SelectedSequenceID = Column(Integer, ForeignKey('Sequences.SequenceID',
+        use_alter=True,
+        name="fk_select_seq"))
+
+    sequences = relationship('Sequence',
+            backref='user',
+            foreign_keys=[Sequence.UserID])
+
+    selected_sequence = relationship('Sequence',
+            foreign_keys=[SelectedSequenceID],
+            uselist=False)
     runlogs = relationship('RunLog', backref='user')
+
 
     def __init__(self,
             username="",
@@ -784,13 +813,14 @@ class User(Base):
         dictionary object.
         """
         user_dict = {'type': 'user'}
-        user_dict['username'] = str(self.Username)
-        user_dict['firstname'] = str(self.FirstName)
-        user_dict['lastname'] = str(self.LastName)
-        user_dict['accesslevel'] = int(self.RoleID)
-        user_dict['email'] = str(self.Email)
-        user_dict['phone'] = str(self.Phone)
-        user_dict['messagelevel'] = int(self.MessageLevel)
+        user_dict['username'] = self.Username
+        user_dict['firstname'] = self.FirstName
+        user_dict['lastname'] = self.LastName
+        user_dict['accesslevel'] = self.RoleID
+        user_dict['email'] = self.Email
+        user_dict['phone'] = self.Phone
+        user_dict['messagelevel'] = self.MessageLevel
+        user_dict['role'] = self.role.as_dict()
         return user_dict
 
     def update_from_dict(self, user_dict):
@@ -834,6 +864,9 @@ class User(Base):
                 print "%s,%s" % (key, value)
         # Update to DB
         session.commit()
+
+    def as_json(self):
+        return json.dumps(self.as_dict(), indent=2)
 
 metadata = Base.metadata
 Session = sessionmaker(bind=engine)
