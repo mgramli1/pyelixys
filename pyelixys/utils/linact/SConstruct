@@ -6,13 +6,18 @@ else:
 
 subdirs = ['lib/linact']
 
-for dir in subdirs:
-        print os.path.join(dir, 'SConscript')
-        SConscript( os.path.join(dir, 'SConscript'), exports = ['env'])
+build_dir = "build"
 
-build_dir = "build/"
 Clean('.', build_dir)
 
-SConscript('SConscript', variant_dir='build',
-        duplicate=0, exports = ['env', 'build_dir'])
+for dir in subdirs:
+        print os.path.join(dir, 'SConscript')
+        SConscript( os.path.join(dir, 'SConscript'),
+            duplicate=0,
+            exports = ['env', 'build_dir'])
 
+
+SConscript('SConscript', variant_dir='build', duplicate=0,
+        exports = ['env', 'build_dir'])
+
+Command('../../build', 'linact.dll', Copy("$TARGET","$SOURCE"))
