@@ -1,4 +1,5 @@
 import json
+from datetime import datetime
 from validate import Validator
 from validate import VdtTypeError
 
@@ -32,8 +33,6 @@ def check_cassette_details(details):
         comp_vtor.check("integer(min=1)", reagent_id)
     # Check boolean(s)
     comp_vtor.check("boolean", details["validationerror"])
-
-    return details
 
 def check_add_details(details):
     '''
@@ -69,8 +68,6 @@ def check_add_details(details):
     # Check boolean
     comp_vtor.check("boolean", details['validationerror'])
 
-    return details
-
 def check_details(details):
     '''
     Function shall check what
@@ -84,7 +81,6 @@ def check_details(details):
         check_cassette_details(details)
     elif details['componenttype'] == 'ADD':
         check_add_details(details)
-    return details
 
 def component_check(params):
     """
@@ -112,25 +108,26 @@ def component_check(params):
         # Check string cases
         elif k in valid_str_keys:
             if k == 'type':
-            comp_vtor.check("string(min=1, max=20)", v)
+                comp_vtor.check("string(min=1, max=20)", v)
             elif k == 'note':
-            comp_vtor.check("string(min=0, max=64)", v)
+                comp_vtor.check("string(min=0, max=64)", v)
+
         # Check details dict
         elif k == 'details':
             comp_vtor.check("string(min=1, max=2048)", v)
             # Check all the objects in the details dict
             check_details(v)
-                else:
-            # Else, we recieved an invalid key
+        # Else, we found an invalid key
+        else:
             # Flag an error?
             print "%s,%s" % (k,v)
 
-    return params
-
-def check_user_clientstate(clientstate):
+def user_clientstate_check(clientstate):
     '''
     Checks the clientstate fields for
     a user's "clientstate" field.
+    Clientstate is expected to be a
+    passed in parameter of type dict.
     '''
     valid_int_clientstate_keys = [
             'sequenceid',
@@ -160,7 +157,7 @@ def check_user_clientstate(clientstate):
             # We found an unknown, flag error?
             print "%s,%s" % (key, value)
 
-def check_user(params):
+def user_check(params):
     '''
     Function shall check
     if the values for the user
@@ -190,23 +187,75 @@ def check_user(params):
 
         # Check clientstate dict
         elif key == "clientstate":
-            clientstate = json.dumps(params['clientstate'])
-            check_user_clientstate(clientstate)
+            user_clientstate_check(value)
 
         # Else, we have an unknown key, flag it?
         else:
             print "%s,%s" % (key, value)
 
-# TODO remove this (for testing)
-#"runhistorysort": {"column": "date&time", "type": "sort", "mode": "down"},
-#"lastselectscreen": "SAVED",
-#"selectsequencesort": {"column": "name", "type": "sort", "mode": "down"},
-#"prompt": {"show": false, "screen": "", "text2": "", "text1": "", "edit2default": "", "buttons": [], "title": "", "edit1validation": "", "edit1": false, "edit2": false, "edit1default": "", "edit2validation": "", "type": "promptstate"},
-#"screen": "HOME", "type": "clientstate", "componentid": 0}
+def sequence_check(params):
+    '''
+    Checks if a sequence is valid.
+    '''
+    # Check valid strings
+    valid_keys = [
+            'name',
+            'comment',
+            'type',
+            '']
+    # Check valid integers
+    valid_int_keys = [
+            'sequenceid',
+            'userid',
+            'firstcomponenid',
+            'componentcount',
+            'valid',
+            'dirty']
 
+    for key, value in params.iteritems():
+        # Check valid strings
+        if key in valid_keys:
+            comp_vtor.check("string(min=0, max=40)", value)
+
+        # Check valid integers
+        elif key in valid_int_keys:
+            comp_vtor.check("integer()", value)
+
+        # Check valid date
+        elif key == "creationdate":
+            datetime.strptime(value,
+                    '%Y-%m-%d %H:%M:%S')
+
+        # Else, unknown key
+        else:
+            # Flag an error?
+            print "%s, %s" %(key, value)
+
+def reagent_check(params):
+    '''
+    Checks if a reagent is valid.
+    '''
+    valid_str_keys = [
+            'position',
+            'name',
+            'description']
+    valid_int_keys = [
+            'sequenceid',
+            'componentid']
+
+    for key, value in params.iteritems():
+    # Check valid string
+    if key in valid_str_keys:
+        comp_vtor.check("string(min=0, max=255)", value)
+
+    # Check valid integers
+    if key in valid_int_keys:
+        comp_vtor.check("integer(min=0)", value)
 
 comp_vtor.functions['check_component'] = component_check
 comp_vtor.functions['check_user'] = user_check
+comp_vtor.functions['check_sequence'] = sequence_check
+comp_vtor.functions['check_reagent'] = reagent_check
 
 ### For Testing as a Script ###
 if __name__ == "__main__":
