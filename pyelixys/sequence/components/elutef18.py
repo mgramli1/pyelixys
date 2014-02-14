@@ -30,7 +30,6 @@ class EluteF18(Component):
         '''
         self.thread.start()
 
-
 class EluteF18Thread(ComponentThread):
     '''
     Main Elute F18 Thread point

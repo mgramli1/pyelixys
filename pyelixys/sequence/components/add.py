@@ -25,7 +25,6 @@ class Add(Component):
         # Set a thread
         self.thread = AddThread(self)
 
-
     def run(self):
         '''
         Executes the 'ADD' run thread

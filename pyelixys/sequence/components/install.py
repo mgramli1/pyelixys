@@ -27,7 +27,6 @@ class Install(Component):
         '''
         self.thread.start()
 
-
 class InstallThread(ComponentThread):
     '''
     Main Install Thread point

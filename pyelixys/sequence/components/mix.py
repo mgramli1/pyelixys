@@ -63,7 +63,6 @@ class MixThread(ComponentThread):
                 self.mix.stir_speed)
         time.sleep(2)
 
-
         self.mix.component_status = "Mixing reagent, waiting for completion"
         starttimer = time.time()
         while (starttimer + self.mix.mix_time > time.time()):
