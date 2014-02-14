@@ -31,6 +31,61 @@ void LinActBuf_reset(LinActBuf *buf);
 void LinActBuf_copy(LinActBuf * src, LinActBuf * dest);
 
 unsigned int LinActBuf_len(LinActBuf * buf);
+
+void LinActBuf_readRegsister(LinActBuf *buf,
+        unsigned short reg,
+        unsigned short count);
+
+void LinActBuf_writeRegister(LinActBuf *buf,
+        unsigned short reg,
+        unsigned short value);
+
+void LinActBuf_writeMultiRegister(LinActBuf * buf,
+        unsigned short reg,
+        unsigned short reglen,
+        unsigned char * data,
+        unsigned char len);
+
+char * LinActBuf_buf(LinActBuf* buf);
+
+
+LinearActuator* LinAct_new();
+
+LinActBuf * LinAct_gatewayStatusQueury(LinearActuator *act);
+
+LinActBuf * LinAct_gatewayStartQuery(LinearActuator *act);
+
+LinActBuf * LinAct_axisStatusQuery(LinearActuator *act,
+        unsigned int axisid);
+
+LinActBuf * LinAct_axisPosSetQuery(LinearActuator *act,
+        unsigned int axisid,
+        unsigned int pos);
+
+LinActBuf * LinAct_axisPosGetQuery(LinearActuator *act,
+        unsigned int axisid);
+
+LinActBuf * LinAct_axisStartQuery(LinearActuator *act,
+        unsigned int axisid);
+
+LinActBuf * LinAct_axisPauseQuery(LinearActuator *act,
+        unsigned int axisid);
+
+LinActBuf * LinAct_axisResetQuery(LinearActuator *act,
+        unsigned int axisid);
+
+LinActBuf * LinAct_axisBrakeReleaseQuery(LinearActuator *act,
+        unsigned int axisid);
+
+LinActBuf * LinAct_axisHomeQuery(LinearActuator *act,
+        unsigned int axisid);
+
+unsigned short LinAct_axisWriteAddr(LinearActuator *act,
+        unsigned int axisid);
+
+unsigned short LinAct_axisReadAddr(LinearActuator *act,
+        unsigned int axisid);
+
 }
 
 #endif

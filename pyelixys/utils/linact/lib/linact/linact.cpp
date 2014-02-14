@@ -125,6 +125,16 @@ LinActBuf * LinearActuator::getAxisReset(unsigned int axisid) {
     return &buffer;
 }
 
+LinActBuf * LinearActuator::getAxisHome(unsigned int axisid) {
+    // resetcmd0 = "\x3f\x06\xf6\x0b\x00\x08"
+    unsigned short int axisreg;
+    unsigned short value;
+    axisreg = getAxisWriteAddress(axisid) + CNTRL_SIG_OFFSET;
+    value = (AXIS_CTRL_HOME);
+    buffer.writeRegisterStr(axisreg, value);
+    return &buffer;
+}
+
 LinActBuf * LinearActuator::getAxisBrakeRelease(unsigned int axisid) {
     unsigned short int axisreg;
     unsigned short value;
