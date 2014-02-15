@@ -10,20 +10,30 @@ namespace IAI {
 
   class  LinActBuf {
     unsigned char *ptr;
+    unsigned char *rxptr;
+    unsigned char *rxmsgptr;
     public:
         LinActBuf();
 
         void push(unsigned char val);
+        void pushRx(unsigned char val);
         void reset();
 
         unsigned int len;
+        unsigned int rxlen;
+        unsigned int exprxlen;
+        unsigned int datalen;
+
         unsigned char buf[LINACT_BUFLEN];
+        unsigned char rxbuf[LINACT_BUFLEN];
         char strbuf[LINACT_BUFLEN*2];
+        char rxstrbuf[LINACT_BUFLEN*2];
         void copy(LinActBuf *other);
         unsigned int crc_update(unsigned int crc,
                 unsigned char a);
         void calc_crc();
         char *as_string();
+        char *rx_as_string();
         void readRegsisterStr(unsigned short startreg,
                 unsigned short count);
         void writeRegisterStr(unsigned short reg,
@@ -32,6 +42,10 @@ namespace IAI {
             unsigned short reglen,
             unsigned char * data,
             unsigned char dlen);
+
+        unsigned char * rxdata();
+        unsigned int rxdatalen();
+        int rxvalidate();
 
   }; // End linactbuf class
 

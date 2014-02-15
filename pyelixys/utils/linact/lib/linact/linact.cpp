@@ -144,6 +144,10 @@ LinActBuf * LinearActuator::getAxisBrakeRelease(unsigned int axisid) {
     return &buffer;
 }
 
+LinActBuf * LinearActuator::getBuffer() {
+    return &buffer;
+}
+
 void LinearActuator::send() {
     // Drive WR pin
     for(int i=0;i<buffer.len;i++){
@@ -152,14 +156,22 @@ void LinearActuator::send() {
     // Stop driving WR pin to receive
 }
 
-LinActBuf * LinearActuator::receive(int len) {
+LinActBuf * LinearActuator::receiveStdin(int len) {
     // Fill buffer
-    inbuf.reset();
     for(int i=0;i<len;i++) {
-        inbuf.push(getc(stdin));
-        //printf("Inbuf.len=%d", inbuf.len);
+        pushByteRxBuffer(getc(stdin));
+        //printf("Inbuf.len=%d", rxbuf.len);
     }
-    printf("Receive: %s\r\n", inbuf.as_string());
+    printf("Receive: %s\r\n", buffer.rx_as_string());
+}
+
+LinActBuf * LinearActuator::pushByteRxBuffer(char c) {
+    buffer.pushRx(c);
+    return &buffer;
+}
+
+int LinearActuator::checkChecksum() {
+    return buffer.rxvalidate();
 }
 
 } // End Namespace IAI

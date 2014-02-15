@@ -11,11 +11,18 @@ char * LinActBuf_as_str(LinActBuf * buf) { return buf->as_string(); };
 
 void LinActBuf_push(LinActBuf *buf, unsigned char val) { buf->push(val); }
 
+void LinActBuf_pushRx(LinActBuf *buf, unsigned char val) { buf->pushRx(val); }
+
 void LinActBuf_reset(LinActBuf *buf) { buf->reset(); }
 
 void LinActBuf_copy(LinActBuf * src, LinActBuf * dest) { dest->copy(src); }
 
 unsigned int LinActBuf_len(LinActBuf * buf) {return buf->len;}
+
+unsigned int LinActBuf_rxlen(LinActBuf * buf) {return buf->rxlen;}
+
+unsigned int LinActBuf_rxdatalen(LinActBuf * buf) {return buf->datalen;}
+
 
 void LinActBuf_writeMultiRegister(LinActBuf * buf,
                                           unsigned short reg,
@@ -43,6 +50,9 @@ char * LinActBuf_buf(LinActBuf *buf) {
         return (char *)buf->buf;
 }
 
+char * LinActBuf_rxbuf(LinActBuf *buf) {
+        return (char *)buf->rxbuf;
+}
 
 LinearActuator * LinAct_new() { return new LinearActuator(); }
 
@@ -105,6 +115,11 @@ unsigned short LinAct_axisWriteAddr(LinearActuator *act,
     return act->getAxisWriteAddress(axisid);
 }
 
+void LinAct_pushRx(LinearActuator *act,
+        unsigned char c) {
+    act->pushByteRxBuffer(c);
+}
 
-
-
+int LinAct_checkcrc(LinearActuator *act) {
+    return act->checkChecksum();
+}

@@ -13,10 +13,21 @@ void LinActBuf::push(unsigned char value) {
     ptr++;
 }
 
+void LinActBuf::pushRx(unsigned char value) {
+    rxlen++;
+    *rxptr = value;
+    rxptr++;
+}
+
 void LinActBuf::reset() {
     len = 0;
+    rxlen = 0;
+    exprxlen = 0;
     ptr = buf;
     buf[0] = GWADDR;
+    rxptr = rxbuf;
+    rxbuf[0] = 0;
+    rxmsgptr = 0;
 }
 
 
@@ -71,6 +82,18 @@ char * LinActBuf::as_string() {
     return strbuf;
 }
 
+char * LinActBuf::rx_as_string() {
+    rxstrbuf[0]='\0';
+    char tmpbuf[4] = "";
+    for(int i=0;i<len;i++) {
+        sprintf(tmpbuf, "%02X", (unsigned char)buf[i]);
+
+        strcat(rxstrbuf,tmpbuf);
+        //printf("%d:%s\r\n",i, tmpbuf);
+    }
+    return rxstrbuf;
+}
+
 void LinActBuf::readRegsisterStr(unsigned short startreg, unsigned short count) {
     buf[0] = GWADDR;
     buf[1] = LINACT_READ_MULTI;
@@ -80,6 +103,13 @@ void LinActBuf::readRegsisterStr(unsigned short startreg, unsigned short count) 
     buf[5] = (unsigned char)(count & 0x00FF);
     len = 6;
     calc_crc();
+
+    // See page 151
+    // Header + crc + 2*numreg
+    datalen = 2 * count;
+    exprxlen = 5 + datalen; // Len in bytes
+
+    rxmsgptr = rxbuf + 3;
 }
 
 void LinActBuf::writeRegisterStr(unsigned short reg, unsigned short value) {
@@ -91,6 +121,9 @@ void LinActBuf::writeRegisterStr(unsigned short reg, unsigned short value) {
     buf[5] = (unsigned char)(value & 0x00FF);
     len = 6;
     calc_crc();
+
+    // See Page 163 for expected len
+    exprxlen = 8; //Len in bytes
 }
 
 void LinActBuf::writeMultiRegisterStr(unsigned short reg,
@@ -110,6 +143,28 @@ void LinActBuf::writeMultiRegisterStr(unsigned short reg,
     }
     len = dlen+7;
     calc_crc();
+
+    // See page 180
+    exprxlen = 8; // Len in bytes
+
+}
+
+
+unsigned char * LinActBuf::rxdata() {
+    return rxmsgptr;
+}
+
+unsigned int LinActBuf::rxdatalen() {
+    return datalen;
+}
+
+// Check the checksum
+int LinActBuf::rxvalidate() {
+        if((buf[len-1] == rxbuf[rxlen-1]) &&
+                (buf[len-2] == rxbuf[rxlen-2]))
+            return 1;
+        else
+            return 0;
 }
 
 } // End IAI Namespace

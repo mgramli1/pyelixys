@@ -26,11 +26,18 @@ char * LinActBuf_as_str(LinActBuf * buf);
 
 void LinActBuf_push(LinActBuf *buf, unsigned char val);
 
+void LinActBuf_pushRx(LinActBuf *buf, unsigned char val);
+
 void LinActBuf_reset(LinActBuf *buf);
 
 void LinActBuf_copy(LinActBuf * src, LinActBuf * dest);
 
 unsigned int LinActBuf_len(LinActBuf * buf);
+
+
+unsigned int LinActBuf_rxlen(LinActBuf * buf);
+unsigned int LinActBuf_rxdatalen(LinActBuf * buf);
+
 
 void LinActBuf_readRegsister(LinActBuf *buf,
         unsigned short reg,
@@ -47,6 +54,8 @@ void LinActBuf_writeMultiRegister(LinActBuf * buf,
         unsigned char len);
 
 char * LinActBuf_buf(LinActBuf* buf);
+
+char * LinActBuf_rxbuf(LinActBuf* buf);
 
 
 LinearActuator* LinAct_new();
@@ -86,6 +95,8 @@ unsigned short LinAct_axisWriteAddr(LinearActuator *act,
 unsigned short LinAct_axisReadAddr(LinearActuator *act,
         unsigned int axisid);
 
+void LinAct_pushRx(LinearActuator *act,
+        unsigned char c);
 }
 
 #endif

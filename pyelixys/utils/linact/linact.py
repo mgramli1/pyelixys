@@ -31,6 +31,13 @@ class LinearActuatorBuffer(object):
     def get_length(self):
         return linactlib.LinActBuf_len(self.obj)
 
+    def get_rx_length(self):
+        return linactlib.LinActBuf_rxlen(self.obj)
+
+    def push_rx(self,c):
+        if c >= 0 and c < 256:
+            linactlib.LinActBuf_pushRx(self.obj, c)
+
     def calc_crc(self):
         linactlib.LinActBuf_calc_crc(self.obj)
 
@@ -83,6 +90,11 @@ class LinearActuatorBuffer(object):
         dataptr = f(self.obj)
         return datatype.from_address(dataptr).raw
 
+    def rxdata(self):
+        f = linactlib.LinActBuf_buf
+        datatype = ctypes.c_char * self.get_length()
+        dataptr = f(self.obj)
+        return datatype.from_address(dataptr).raw
 
     def __str__(self):
         return self.data()
@@ -138,6 +150,12 @@ class LinearActuator(object):
         buf = LinearActuatorBuffer(buf)
         return buf
 
+    def setPosQuery(self, pos):
+        pos = int(pos * 100.0)
+        buf = linactlib.LinAct_axisPosSetQuery(self.obj, self.devid, pos)
+        buf = LinearActuatorBuffer(buf)
+        return buf
+
     def statusQuery(self):
         buf = linactlib.LinAct_axisStatusQuery(self.obj, self.devid)
         buf = LinearActuatorBuffer(buf)
@@ -152,6 +170,11 @@ class LinearActuator(object):
         buf = linactlib.LinAct_gatewayStartQuery(self.obj)
         buf = LinearActuatorBuffer(buf)
         return buf
+
+    def pushRx(self, c):
+        if c >= 0 and c < 256:
+            linactlib.LinAct_pushRx(c);
+
 
 
 if __name__=='__main__':
@@ -216,6 +239,7 @@ if __name__=='__main__':
     print "RESET:%s" % repr(la.reset())
     print "BRAKERELEASE:%s" % repr(la.brakeRelease())
     print "QUERYPOS:%s" % repr(la.posQuery())
+    print "QUERYSETPOS:%s" % repr(la.setPosQuery(100))
 
 
     embed()
