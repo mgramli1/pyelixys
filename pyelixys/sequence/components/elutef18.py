@@ -30,7 +30,6 @@ class EluteF18(Component):
         '''
         self.thread.start()
 
-
 class EluteF18Thread(ComponentThread):
     '''
     Main Elute F18 Thread point
@@ -86,40 +85,72 @@ class EluteF18Thread(ComponentThread):
 
         for stopcock in self.elute.system.reactors[self.elute.reactor].stopcocks:
             self.elute.component_status = "Setting reactor %d " \
-                        "stopcock %d to CCW" \
-                       % (self.elute.system.reactors[self.elute.reactor]. \
-                       conf['id'] + 1,
-                               stopcock.id_)
+                    "stopcock %d to CW" % \
+                    (self.elute.system.reactors[self.elute.reactor].conf['id'] + 1,
+                            stopcock.id_)
             stopcock.turn_clockwise()
             self.elute.component_status = "Setting reactor %d " \
-                        "stopcock %d to CCW once again" \
+                        "stopcock %d to CW once again" \
                        % (self.elute.system.reactors[self.elute.reactor]. \
                        conf['id'] + 1,
                                stopcock.id_)
             stopcock.turn_clockwise()
 
-        self.elute.component_status = "Opening gripper arm"
-        self.elute.system.reagent_robot.gripper.open()
+        if not self.elute.system.reagent_robot.gripper.is_open:
+            self.elute.component_status = "Opening gripper arm"
+            self.elute.system.reagent_robot.gripper.open()
+        else:
+            self.elute.component_status = "Checked gripper arm, " \
+                    "gripper was already open"
 
-        self.elute.component_status = "Setting gripper up"
-        self.elute.system.reagent_robot.gripper.lift()
+        if not self.elute.system.reagent_robot.gripper.is_up:
+            self.elute.component_status = "Setting gripper up"
+            self.elute.system.reagent_robot.gripper.lift()
+        else:
+            self.elute.component_status = "Checked gripper up, " \
+                    "gripper was already up"
 
-        self.elute.component_status = "Setting gas transfer up"
-        self.elute.system.reagent_robot.gas_transfer.lift()
+        if not self.elute.system.reagent_robot.gas_transfer.is_up:
+            self.elute.component_status = "Setting gas transfer up"
+            self.elute.system.reagent_robot.gas_transfer.lift()
+        else:
+            self.elute.component_status = "Checked if gas transfer " \
+                    "was up, gas transfer was already up"
 
         # TODO Check if reagent robot is enabled?
         # TODO Move reagent robot to reagent position
+        # Pick up the vial
+        has_vial = False
+        try_count = 0
+        while not has_vial:
+            try_count += 1
+            self.elute.component_status = "Setting gripper down"
+            self.elute.system.reagent_robot.gripper.lower()
 
-        self.elute.component_status = "Setting gripper down"
-        self.elute.system.reagent_robot.gripper.lower()
+            self.elute.component_status = "Closing gripper arm"
+            self.elute.system.reagent_robot.gripper.close()
 
-        self.elute.component_status = "Closing gripper arm"
-        self.elute.system.reagent_robot.gripper.close()
+            self.elute.component_status = "Setting gripper up"
+            self.elute.system.reagent_robot.gripper.lift()
 
-        self.elute.component_status = "Setting gripper up"
-        self.elute.system.reagent_robot.gripper.lift()
+            if self.elute.system.reagent_robot.gripper.is_closed:
+                self.elute.component_status = "Successfully picked " \
+                        "up the reagent vial"
+                has_vial = True
+            elif try_count <= 3:
+                self.elute.component_status = "Failed to pick up " \
+                        "reagent vial, attempt %d" \
+                        % try_count
+                self.elute.component_status = "Opening gripper arm"
+                self.elute.system.reagent_robot.gripper.open()
+            else:
+                self.elute.component_status = "Failed to pick up " \
+                        "reagent vial after 3 attempts, " \
+                        "raising error"
+                self._is_complete.set()
+                return
 
-        # TODO Move reactor to Elute position
+        # TODO Move reagent robot to Elute position on self.elute.reactor
 
         self.elute.component_status = "Setting gas transfer down"
         self.elute.system.reagent_robot.gripper.lower()
@@ -144,31 +175,74 @@ class EluteF18Thread(ComponentThread):
         starttimer = time.time()
         while (starttimer + self.elute.elute_time > time.time()):
             pass
+        print "time leftover: %s" % \
+                (time.time() - starttimer + self.elute.elute_time)
+        time.sleep(3)
 
         self.elute.component_status = "Returning vial"
 
-        self.elute.component_status = "Setting gripper up"
-        self.elute.system.reagent_robot.gripper.lift()
+        # Check if gripper is closed and down
+        if (not self.elute.system.reagent_robot.gripper.is_closed
+                or not self.elute.system.reagent_robot.gripper.is_down):
+            self.component_status = "Gripper is either not closed or " \
+                    "not down, raising error"
+            self._is_complete.set()
+            return
 
-        self.elute.component_status = "Setting gripper up"
-        self.elute.system.reagent_robot.gripper.lift()
+        # Remove the vial
+        has_vial_up = False
+        try_count = 0
+        while not has_vial_up:
+            try_count += 1
+            self.elute.component_status = "Setting gripper up"
+            self.elute.system.reagent_robot.gripper.lift()
 
-        self.elute.component_status = "Setting gas transfer off"
+            if self.elute.system.reagent_robot.gripper.is_closed:
+                self.elute.component_status = "Successfully picked " \
+                        "up the reagent vial"
+                has_vial_up = True
+            elif try_count <= 10:
+                self.elute.component_status = "Failed to remove " \
+                        "reagent vial, attempt %s " \
+                        % try_count
+
+                self.elute.component_status = "Opening gripper arm"
+                self.elute.system.reagent_robot.gripper.open()
+
+                self.elute.component_status = "Setting gripper down"
+                self.elute.system.reagent_robot.gripper.lower()
+
+                self.elute.component_status = "Closing gripper arm"
+                self.elute.system.reagent_robot.gripper.close()
+            else:
+                self.elute.component_status = "Failed to remove " \
+                        "reagent vial after 10 attempts, " \
+                        "raising error"
+                self._is_complete.set()
+                return
+
+        self.elute.component_status = "Setting gas transfer valve off"
         self.elute.system.reagent_robot.gas_transfer.stop_transfer()
 
-        for stopcock in self.elute.system.reactors[self.elute.reactor].stopcocks:
-            self.elute.component_status = "Setting reactor %d " \
-                        "stopcock %d to CW" \
-                       % (self.elute.system.reactors[self.elute.reactor]. \
-                       conf['id'] + 1,
-                               stopcock.id_)
-            stopcock.turn_counter_clockwise()
-            self.elute.component_status = "Setting reactor %d " \
-                        "stopcock %d to CW once again" \
-                        % (self.elute.system.reactors[self.elute.reactor]. \
-                       conf['id'] + 1,
-                               stopcock.id_)
-            stopcock.turn_clockwise()
+        self.elute.component_status = "Setting gas transfer up"
+        self.elute.system.reagent_robot.gas_transfer.lift()
+
+
+        self.elute.component_status = "Moving reagent back to reagent position"
+        # TODO Move reagent robot back to the reagent position in self.elute.reactor
+
+
+        self.elute.component_status = "Setting gripper down "
+        self.elute.system.reagent_robot.gripper.lower()
+
+        self.elute.component_status = "Opening gripper arm"
+        self.elute.system.reagent_robot.gripper.open()
+
+        self.elute.component_status = "Setting gripper up"
+        self.elute.system.reagent_robot.gripper.lift()
+
+        self.elute.component_status = "Homing reagent robot"
+        # TODO Home reagent robot
 
         self.elute.component_status = "Sucessfully finished " \
                 "running EluteF18 operation"

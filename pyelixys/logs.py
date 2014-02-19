@@ -22,9 +22,12 @@ hwsimlog.setLevel(logging.DEBUG)
 hwsimlog.addHandler(hdlr)
 
 
+seqhdlr = logging.FileHandler("sequence.log",mode='a')
+seqhdlr.setLevel(logging.DEBUG)
 seqlog = logging.getLogger("elixys.seq")
 seqlog.setLevel(logging.DEBUG)
 seqlog.addHandler(hdlr)
+seqlog.addHandler(seqhdlr)
 
 weblog = logging.getLogger("elixys.web")
 weblog.setLevel(logging.DEBUG)
