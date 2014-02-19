@@ -11,7 +11,7 @@ env.Append(CPPPATH=map(os.path.abspath,glob.glob('.')))
 penv = env.Clone()
 
 if os.name == 'nt':
-    penv.SharedLibrary('linact', source=src, CCFLAGS='-DBUILD_DLL')
+    penv.SharedLibrary('linact', source=src, CCFLAGS='')
 else:
     penv.SharedLibrary('linact', source=src)
 
