@@ -24,7 +24,6 @@ namespace IAI {
     unsigned char *ptr;
     unsigned char *rxptr;
     unsigned char *rxmsgptr;
-    unsigned char *dataptr;
     public:
         LinActBuf();
 
