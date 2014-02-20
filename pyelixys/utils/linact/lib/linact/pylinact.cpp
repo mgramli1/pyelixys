@@ -21,6 +21,8 @@ unsigned int LinActBuf_len(LinActBuf * buf) {return buf->len;}
 
 unsigned int LinActBuf_rxlen(LinActBuf * buf) {return buf->rxlen;}
 
+unsigned int LinActBuf_expected_rxlen(LinActBuf * buf) {return buf->exprxlen;}
+
 unsigned int LinActBuf_rxdatalen(LinActBuf * buf) {return buf->datalen;}
 
 
@@ -52,6 +54,10 @@ char * LinActBuf_buf(LinActBuf *buf) {
 
 char * LinActBuf_rxbuf(LinActBuf *buf) {
         return (char *)buf->rxbuf;
+}
+
+char * LinActBuf_payload(LinActBuf *buf) {
+    return (char *)buf->rxdata();
 }
 
 LinearActuator * LinAct_new() { return new LinearActuator(); }
@@ -122,4 +128,12 @@ void LinAct_pushRx(LinearActuator *act,
 
 int LinAct_checkcrc(LinearActuator *act) {
     return act->checkChecksum();
+}
+
+LinActBuf *LinAct_getBuffer(LinearActuator *act) {
+    return &(act->buffer);
+}
+
+float LinAct_getPosition(LinearActuator *act) {
+    return act->getPosition();
 }

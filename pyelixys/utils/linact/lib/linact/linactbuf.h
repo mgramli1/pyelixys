@@ -6,18 +6,32 @@
 #include <linactregdefs.h>
 #include <linactbuf.h>
 
+
+
 namespace IAI {
 
+  const int RXMSGLENERR= -2;
+  const int RXINVALIDCRCERR = -1;
+  const int RXWRCRCOK = 1;
+  const int RXMULWRCRCOK = 2;
+  const int RXREADCRCOK = 3;
+
+  const int GWADDRPOS = 0;
+  const int CMDPOS = 1;
+
   class  LinActBuf {
+
     unsigned char *ptr;
     unsigned char *rxptr;
     unsigned char *rxmsgptr;
+    unsigned char *dataptr;
     public:
         LinActBuf();
 
         void push(unsigned char val);
         void pushRx(unsigned char val);
         void reset();
+        void resetRx();
 
         unsigned int len;
         unsigned int rxlen;
@@ -46,6 +60,7 @@ namespace IAI {
         unsigned char * rxdata();
         unsigned int rxdatalen();
         int rxvalidate();
+        int checkrxcrc();
 
   }; // End linactbuf class
 

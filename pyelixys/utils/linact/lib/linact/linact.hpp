@@ -10,6 +10,8 @@
 
 namespace IAI {
 
+  const float NOTPOSMSGERR = -999999.0;
+
   class LinearActuator {
 
     public:
@@ -30,19 +32,16 @@ namespace IAI {
         LinActBuf * getAxisHome(unsigned int axisid);
         LinActBuf * getAxisBrakeRelease(unsigned int axisid);
 
+        float getPosition();
+
         LinActBuf * getBuffer();
 
         void send();
         LinActBuf * receiveStdin(int len);
 
-
-
         LinActBuf * pushByteRxBuffer(char c);
 
         int checkChecksum();
-
-
-
 
   };
 

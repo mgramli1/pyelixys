@@ -37,7 +37,7 @@ unsigned int LinActBuf_len(LinActBuf * buf);
 
 unsigned int LinActBuf_rxlen(LinActBuf * buf);
 unsigned int LinActBuf_rxdatalen(LinActBuf * buf);
-
+unsigned int LinActBuf_expected_rxlen(LinActBuf * buf);
 
 void LinActBuf_readRegsister(LinActBuf *buf,
         unsigned short reg,
@@ -57,6 +57,7 @@ char * LinActBuf_buf(LinActBuf* buf);
 
 char * LinActBuf_rxbuf(LinActBuf* buf);
 
+char * LinActBuf_payload(LinActBuf* buf);
 
 LinearActuator* LinAct_new();
 
@@ -97,6 +98,15 @@ unsigned short LinAct_axisReadAddr(LinearActuator *act,
 
 void LinAct_pushRx(LinearActuator *act,
         unsigned char c);
+
+int LinAct_checkcrc(LinearActuator *act);
+
+LinActBuf *LinAct_getBuffer(LinearActuator *act);
+
+float LinAct_getPosition(LinearActuator *act);
+
+
 }
+
 
 #endif

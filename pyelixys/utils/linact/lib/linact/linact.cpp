@@ -144,6 +144,34 @@ LinActBuf * LinearActuator::getAxisBrakeRelease(unsigned int axisid) {
     return &buffer;
 }
 
+float LinearActuator::getPosition() {
+    long current_pos;
+    unsigned char *payload;
+    short slo = 0;
+    short shi = 0;
+    int payloadlen = 0;
+
+    if(buffer.rxdata()==0 || checkChecksum() < 0)
+        return NOTPOSMSGERR;
+
+    payload = buffer.rxdata();
+    payloadlen = buffer.rxdatalen();
+
+    if(buffer.rxdatalen()!=4)
+        return NOTPOSMSGERR;
+
+    current_pos = (payload[1]<<0)+(payload[0]<<8) +
+        ((payload[2] & 0x7F)<<24)+(payload[3] <<16);
+
+    if(0x80 & payload[2]) {
+        //printf("Negative\r\n");
+        current_pos = current_pos * -1;
+    }
+
+    return (float) (current_pos / 100.0);
+
+}
+
 LinActBuf * LinearActuator::getBuffer() {
     return &buffer;
 }
