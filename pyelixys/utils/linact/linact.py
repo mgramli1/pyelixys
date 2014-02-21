@@ -255,6 +255,7 @@ class LinearActuatorCom(LinearActuator):
         else:
             print "Received invalid response"
             return False
+        print buf
 
     def startGateway(self):
         self.gatewayStartQuery()
