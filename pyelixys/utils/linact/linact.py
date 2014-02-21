@@ -249,13 +249,13 @@ class LinearActuatorCom(LinearActuator):
         resplen = buf.get_expected_rx_length()
         resp = self.com.read(resplen)
         self.loadRxMsg(resp)
+        print repr(buf)
         if self.check_crc():
             print "Received valid response"
             return True
         else:
             print "Received invalid response"
             return False
-        print buf
 
     def startGateway(self):
         self.gatewayStartQuery()
