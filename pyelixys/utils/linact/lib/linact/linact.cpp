@@ -80,6 +80,7 @@ LinActBuf * LinearActuator::getAxisStatus(unsigned int axisid) {
 
 LinActBuf * LinearActuator::getAxisPos(unsigned int axisid) {
     unsigned short axis_temp_reg;
+    buffer.reset();
     axis_temp_reg = getAxisReadAddress(axisid) + POS_SET_LO_OFFSET;
     buffer.readRegsisterStr(axis_temp_reg, 2); // Read 2 to get lo and hi
     return &buffer;
