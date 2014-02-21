@@ -6,6 +6,22 @@ import time
 import ctypes
 from ctypes import cdll
 
+from functools import wraps
+
+import serial
+from serial import SerialException
+import argparse
+
+parser = argparse.ArgumentParser()
+
+parser.add_argument("-p", "--port", type=str,
+                        help="com port to use to"
+                        "send and receive command")
+
+args = parser.parse_args()
+
+
+
 if not os.name == 'nt':
     print "Windows support only at the moment"
     sys.exit(1)
@@ -133,27 +149,27 @@ class LinearActuator(object):
         f.restype = ctypes.c_ushort
         return hex(f(self.obj, self.devid))
 
-    def start(self):
+    def startQuery(self):
         buf = linactlib.LinAct_axisStartQuery(self.obj, self.devid)
         buf = LinearActuatorBuffer(buf)
         return buf
 
-    def pause(self):
+    def pauseQuery(self):
         buf = linactlib.LinAct_axisPauseQuery(self.obj, self.devid)
         buf = LinearActuatorBuffer(buf)
         return buf
 
-    def brakeRelease(self):
+    def brakeReleaseQuery(self):
         buf = linactlib.LinAct_axisBrakeReleaseQuery(self.obj, self.devid)
         buf = LinearActuatorBuffer(buf)
         return buf
 
-    def home(self):
+    def homeQuery(self):
         buf = linactlib.LinAct_axisHomeQuery(self.obj, self.devid)
         buf = LinearActuatorBuffer(buf)
         return buf
 
-    def reset(self):
+    def resetQuery(self):
         buf = linactlib.LinAct_axisResetQuery(self.obj, self.devid)
         buf = LinearActuatorBuffer(buf)
         return buf
@@ -179,7 +195,7 @@ class LinearActuator(object):
         buf = LinearActuatorBuffer(buf)
         return buf
 
-    def gatewayStart(self):
+    def gatewayStartQuery(self):
         buf = linactlib.LinAct_gatewayStartQuery(self.obj)
         buf = LinearActuatorBuffer(buf)
         return buf
@@ -211,9 +227,85 @@ class LinearActuator(object):
     buf = property(getBuf)
 
     def getPos(self):
+        self.posQuery()
         f = linactlib.LinAct_getPosition
         f.restype = ctypes.c_float
         return f(self.obj)
+
+
+class LinearActuatorCom(LinearActuator):
+    """ Linear Actuator Communicator """
+    def __init__(self, devid, port, baudrate=230400, timeout=1.0):
+        """ <Constructor> """
+        self.com = serial.Serial(port, baudrate=baudrate, timeout=timeout)
+        super(LinearActuatorCom, self).__init__(devid)
+
+    def send(self):
+        buf = self.getBuf()
+        self.com.write(buf.data())
+
+    def receive(self):
+        buf = self.getBuf()
+        resplen = buf.get_expected_rx_length()
+        resp = self.com.read(resplen)
+        self.loadRxMsg(resp)
+        if self.check_crc():
+            print "Received valid response"
+            return True
+        else:
+            print "Received invalid response"
+            return False
+
+    def startGateway(self):
+        self.gatewayStartQuery()
+        self.send()
+        self.receive()
+
+
+    def home(self):
+        self.homeQuery()
+        self.send()
+        self.receive()
+
+    def start(self):
+        self.startQuery()
+        self.send()
+        self.receive()
+
+    def pause(self):
+        self.pauseQuery()
+        self.send()
+        self.receive()
+
+    def brakeRelease(self):
+        self.brakeReleaseQuery()
+        self.send()
+        self.receive()
+
+    def reset(self):
+        self.resetQuery()
+        self.send()
+        self.receive()
+        pass
+
+    def move(self, posmm):
+        self.setPosQuery(posmm)
+        self.send()
+        self.receive()
+
+    def getPos(self):
+        self.posQuery()
+        self.send()
+        self.receive()
+        f = linactlib.LinAct_getPosition
+        f.restype = ctypes.c_float
+        return f(self.obj)
+
+    def getStatus(self):
+        pass
+
+
+
 
 
 if __name__=='__main__':
@@ -270,13 +362,13 @@ if __name__=='__main__':
     print "Page 185: Send Pos 10.00mm Axis 0 %s" % lab.as_str()
 
     la = LinearActuator(0)
-    print "GWSTART:%s" % repr(la.gatewayStart())
+    print "GWSTART:%s" % repr(la.gatewayStartQuery())
     print "GWSTATUS:%s" % repr(la.gatewayStatusQuery())
-    print "START:%s" % repr(la.start())
+    print "START:%s" % repr(la.startQuery())
     print "STATUS:%s" % repr(la.statusQuery())
-    print "HOME:%s" % repr(la.home())
-    print "RESET:%s" % repr(la.reset())
-    print "BRAKERELEASE:%s" % repr(la.brakeRelease())
+    print "HOME:%s" % repr(la.homeQuery())
+    print "RESET:%s" % repr(la.resetQuery())
+    print "BRAKERELEASE:%s" % repr(la.brakeReleaseQuery())
     print "QUERYPOS:%s" % repr(la.posQuery())
     print "QUERYSETPOS:%s" % repr(la.setPosQuery(100))
 
@@ -311,5 +403,12 @@ if __name__=='__main__':
     la.loadRxMsg(example_status_msg)
 
     print "Pos %0.2f" % la.getPos()
+
+    if args.port:
+        try:
+            linact = LinearActuatorCom(0, args.port)
+        except SerialException as e:
+            print "Could not open com port: %s" % str(e)
+
 
     embed()

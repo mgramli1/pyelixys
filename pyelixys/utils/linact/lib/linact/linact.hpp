@@ -7,6 +7,19 @@
 #include <cstring>
 
 
+#if DBGLINACTBUF
+#define LINACTDBG(x, ...) std::printf("[LinAct:DBG]"x"\r\n", ##__VA_ARGS__);
+#define LINACTWARN(x, ...) std::printf("[LinAct:WARN]"x"\r\n", ##__VA_ARGS__);
+#define LINACTERR(x, ...) std::printf("[LinAct:ERR]"x"\r\n", ##__VA_ARGS__);
+#else
+#define LINACTDBG(x, ...)
+#define LINACTWARN(x, ...)
+#define LINACTERR(x, ...)
+#endif
+
+#define LINACTINFO(x, ...) std::printf("[LinAct:INFO]"x"\r\n", ##__VA_ARGS__);
+
+
 
 namespace IAI {
 

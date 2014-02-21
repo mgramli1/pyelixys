@@ -66,7 +66,7 @@ void LinActBuf::calc_crc() {
 
     if (len+2 > LINACT_BUFLEN) {
         // this is an error so log it
-        printf("tried to write beyond buffer length\n");
+        LINBUFERR("tried to write beyond buffer length\n");
         return;
     }
     //printf("0x%04x\r\n", crc);
@@ -200,7 +200,7 @@ int LinActBuf::checkrxcrc() {
     if(rxbuf[rxlen-2] == (crc & 0xff) &&
     rxbuf[rxlen-1] == ((crc & 0xff00) >> 8))
         return 1;
-    printf("Expected CRC 0x%04X\r\n", crc);
+    LINBUFDBG("Expected CRC 0x%04X\r\n", crc);
     return 0;
 }
 

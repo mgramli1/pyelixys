@@ -4,9 +4,19 @@
 #include <cstdio>
 #include <cstring>
 #include <linactregdefs.h>
-#include <linactbuf.h>
 
 
+#if DBGLINACTBUF
+#define LINBUFDBG(x, ...) std::printf("[LinActBuf:DBG]"x"\r\n", ##__VA_ARGS__);
+#define LINBUFWARN(x, ...) std::printf("[LinActBuf:WARN]"x"\r\n", ##__VA_ARGS__);
+#define LINBUFERR(x, ...) std::printf("[LinActBuf:ERR]"x"\r\n", ##__VA_ARGS__);
+#else
+#define LINBUFDBG(x, ...)
+#define LINBUFWARN(x, ...)
+#define LINBUFERR(x, ...)
+#endif
+
+#define LINBUFINFO(x, ...) std::printf("[LinActBuf:INFO]"x"\r\n", ##__VA_ARGS__);
 
 namespace IAI {
 

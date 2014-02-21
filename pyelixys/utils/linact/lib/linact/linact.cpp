@@ -15,6 +15,8 @@ LinearActuator::~LinearActuator() {
 
 LinActBuf * LinearActuator::getGwStatusStr() {
   //gwstatus = "\x3f\x03\xf7\x00\x00\x02"
+
+  buffer.reset();
   buffer.readRegsisterStr(LINACT_GWSTATUS0, 2);
   return &buffer;
 }
@@ -25,6 +27,7 @@ LinActBuf * LinearActuator::getGwStartStr() {
   // The 15-bit of the GWCTRL register must be set
   // to enable applicable control, page 163 from
   // ROBONET(ME0208-13A-A).pdf
+  buffer.reset();
   buffer.writeRegisterStr(GWCTRL0, GWCTRL_APP_SIG);
   return &buffer;
 }
@@ -69,6 +72,7 @@ unsigned short LinearActuator::getAxisWriteAddress(unsigned int axisid) {
 LinActBuf * LinearActuator::getAxisStatus(unsigned int axisid) {
 //axis1alarm = "\x3f\x03\xf7\x12\x00\x01"
     unsigned short axis_temp_reg;
+    buffer.reset();
     axis_temp_reg = getAxisReadAddress(axisid) + STATUS_SIG_OFFSET;
     buffer.readRegsisterStr(axis_temp_reg, 1);
     return &buffer;
@@ -84,6 +88,7 @@ LinActBuf * LinearActuator::getAxisPos(unsigned int axisid) {
 LinActBuf * LinearActuator::getSetAxisPos(unsigned int axisid, unsigned int position) {
     unsigned short axis_temp_reg;
     LinActBuf temp;
+    buffer.reset();
     axis_temp_reg = getAxisWriteAddress(axisid) + POS_SET_LO_OFFSET;
     temp.buf[2] = (unsigned char)((position & 0xFF000000) >> 24);
     temp.buf[3] = (unsigned char)((position & 0x00FF0000) >> 16);
@@ -99,6 +104,7 @@ LinActBuf * LinearActuator::getAxisStart(unsigned int axisid) {
     //startcmd0 = "\x3f\x06\xf6\x0b\x00\x11"
     unsigned short int axisreg;
     unsigned short value;
+    buffer.reset();
     axisreg = getAxisWriteAddress(axisid) + CNTRL_SIG_OFFSET;
     value = (AXIS_CTRL_SON|AXIS_CTRL_CSTR);
     buffer.writeRegisterStr(axisreg, value);
@@ -109,6 +115,7 @@ LinActBuf * LinearActuator::getAxisPause(unsigned int axisid) {
     //pausecmd = "\x3f\x06\xf6\x0b\x00\x14"
     unsigned short int axisreg;
     unsigned short value;
+    buffer.reset();
     axisreg = getAxisWriteAddress(axisid) + CNTRL_SIG_OFFSET;
     value = (AXIS_CTRL_SON|AXIS_CTRL_STP);
     buffer.writeRegisterStr(axisreg, value);
@@ -119,6 +126,7 @@ LinActBuf * LinearActuator::getAxisReset(unsigned int axisid) {
     // resetcmd0 = "\x3f\x06\xf6\x0b\x00\x08"
     unsigned short int axisreg;
     unsigned short value;
+    buffer.reset();
     axisreg = getAxisWriteAddress(axisid) + CNTRL_SIG_OFFSET;
     value = (AXIS_CTRL_RES);
     buffer.writeRegisterStr(axisreg, value);
@@ -129,6 +137,7 @@ LinActBuf * LinearActuator::getAxisHome(unsigned int axisid) {
     // resetcmd0 = "\x3f\x06\xf6\x0b\x00\x08"
     unsigned short int axisreg;
     unsigned short value;
+    buffer.reset();
     axisreg = getAxisWriteAddress(axisid) + CNTRL_SIG_OFFSET;
     value = (AXIS_CTRL_HOME);
     buffer.writeRegisterStr(axisreg, value);
@@ -138,6 +147,7 @@ LinActBuf * LinearActuator::getAxisHome(unsigned int axisid) {
 LinActBuf * LinearActuator::getAxisBrakeRelease(unsigned int axisid) {
     unsigned short int axisreg;
     unsigned short value;
+    buffer.reset();
     axisreg = getAxisWriteAddress(axisid) + CNTRL_SIG_OFFSET;
     value = (AXIS_CTRL_BKRL);
     buffer.writeRegisterStr(axisreg, value);
@@ -164,6 +174,7 @@ float LinearActuator::getPosition() {
         ((payload[2] & 0x7F)<<24)+(payload[3] <<16);
 
     if(0x80 & payload[2]) {
+        // Check if we need to flip our sign
         //printf("Negative\r\n");
         current_pos = current_pos * -1;
     }
@@ -190,7 +201,7 @@ LinActBuf * LinearActuator::receiveStdin(int len) {
         pushByteRxBuffer(getc(stdin));
         //printf("Inbuf.len=%d", rxbuf.len);
     }
-    printf("Receive: %s\r\n", buffer.rx_as_string());
+    LINACTINFO("Receive: %s\r\n", buffer.rx_as_string());
 }
 
 LinActBuf * LinearActuator::pushByteRxBuffer(char c) {
