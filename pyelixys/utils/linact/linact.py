@@ -274,6 +274,8 @@ class LinearActuatorCom(LinearActuator):
         self.receive()
 
     def start(self):
+        self.pause()
+        time.sleep(0.1)
         self.startQuery()
         self.send()
         self.receive()
@@ -298,6 +300,8 @@ class LinearActuatorCom(LinearActuator):
         self.setPosQuery(posmm)
         self.send()
         self.receive()
+        time.sleep(0.1)
+        self.start()
 
     def getPos(self):
         self.posQuery()
