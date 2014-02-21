@@ -169,6 +169,11 @@ class LinearActuator(object):
         buf = LinearActuatorBuffer(buf)
         return buf
 
+    def turnOnQuery(self):
+        buf = linactlib.LinAct_axisTurnOnQuery(self.obj, self.devid)
+        buf = LinearActuatorBuffer(buf)
+        return buf
+
     def resetQuery(self):
         buf = linactlib.LinAct_axisResetQuery(self.obj, self.devid)
         buf = LinearActuatorBuffer(buf)

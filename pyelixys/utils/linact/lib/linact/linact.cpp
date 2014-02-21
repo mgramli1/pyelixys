@@ -139,7 +139,18 @@ LinActBuf * LinearActuator::getAxisHome(unsigned int axisid) {
     unsigned short value;
     buffer.reset();
     axisreg = getAxisWriteAddress(axisid) + CNTRL_SIG_OFFSET;
-    value = (AXIS_CTRL_HOME);
+    value = (AXIS_CTRL_HOME|AXIS_CTRL_SON);
+    buffer.writeRegisterStr(axisreg, value);
+    return &buffer;
+}
+
+LinActBuf * LinearActuator::getAxisOn(unsigned int axisid) {
+    // resetcmd0 = "\x3f\x06\xf6\x0b\x00\x08"
+    unsigned short int axisreg;
+    unsigned short value;
+    buffer.reset();
+    axisreg = getAxisWriteAddress(axisid) + CNTRL_SIG_OFFSET;
+    value = (AXIS_CTRL_SON);
     buffer.writeRegisterStr(axisreg, value);
     return &buffer;
 }

@@ -43,7 +43,9 @@ namespace IAI {
         LinActBuf * getAxisPause(unsigned int axisid);
         LinActBuf * getAxisReset(unsigned int axisid);
         LinActBuf * getAxisHome(unsigned int axisid);
+        LinActBuf * getAxisOn(unsigned int axisid);
         LinActBuf * getAxisBrakeRelease(unsigned int axisid);
+
 
         float getPosition();
 

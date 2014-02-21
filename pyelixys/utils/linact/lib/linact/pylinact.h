@@ -90,6 +90,10 @@ LinActBuf * LinAct_axisBrakeReleaseQuery(LinearActuator *act,
 LinActBuf * LinAct_axisHomeQuery(LinearActuator *act,
         unsigned int axisid);
 
+LinActBuf * LinAct_axisTurnOnQuery(LinearActuator *act,
+        unsigned int axisid);
+
+
 unsigned short LinAct_axisWriteAddr(LinearActuator *act,
         unsigned int axisid);
 
