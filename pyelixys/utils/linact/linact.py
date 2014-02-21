@@ -311,11 +311,17 @@ class LinearActuatorCom(LinearActuator):
         f.restype = ctypes.c_float
         return f(self.obj)
 
-    def getStatus(self):
-        pass
+    def status(self):
+        self.statusQuery()
+        self.send()
+        self.receive()
+        return self.buf.payload()
 
-
-
+    def gatewayStatus(self):
+        self.gatewayStartQuery()
+        self.send()
+        self.receive()
+        return self.buf.payload()
 
 
 if __name__=='__main__':
