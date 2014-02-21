@@ -111,6 +111,11 @@ LinActBuf * LinAct_axisHomeQuery(LinearActuator *act,
     return act->getAxisHome(axisid);
 }
 
+LinActBuf * LinAct_axisTurnOnQuery(LinearActuator *act,
+        unsigned int axisid) {
+    return act->getAxisOn(axisid);
+}
+
 unsigned short LinAct_axisReadAddr(LinearActuator *act,
         unsigned int axisid) {
     return act->getAxisReadAddress(axisid);
