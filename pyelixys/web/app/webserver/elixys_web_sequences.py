@@ -158,7 +158,57 @@ class ElixysSequencesHandler(object):
         except ValueError:
             raise InvalidId
 
-        return jsonify(seq.as_dict(), indent=4, sort_keys=True)
+        return jsonify(seq.as_dict())
+
+    @elixys_web_sequences.route(
+            '/sequence/all',
+            methods=['GET'])
+    @elixys_web_sequences.route(
+            '/Elixys/sequence/all',
+            methods=['GET'])
+    @requires_auth
+    def getallsequences():
+        '''
+        Retrieve all sequences
+        '''
+        current_app.logger.debug("REQ:%s", request)
+        auth = request.authorization
+        username = auth.username
+
+        session = Session()
+
+        seqs = session.query(Sequence).all()
+
+        seqs_dict = {"type":"sequences",
+                "sequences":[seq.as_dict() for seq in seqs]}
+
+        return jsonify(seqs_dict)
+
+
+    @elixys_web_sequences.route(
+            '/user/sequences',
+            methods=['GET'])
+    @elixys_web_sequences.route(
+            '/Elixys/user/sequence',
+            methods=['GET'])
+    @requires_auth
+    def getusersequences():
+        '''
+        Retrieve this users sequences
+        '''
+        current_app.logger.debug("REQ:%s", request)
+        auth = request.authorization
+        username = auth.username
+
+        session = Session()
+
+        user = session.query(User).\
+                    filter_by(Username=username).one()
+
+        seqs_dict = {"type":"sequences",
+                "sequences":[seq.as_dict() for seq in user.sequences]}
+
+        return jsonify(seqs_dict)
 
     @elixys_web_sequences.route(
             '/sequence/selected',
@@ -217,6 +267,8 @@ class ElixysSequencesHandler(object):
         run_resp = RunResponse()
         req_dict = json.loads(data)
         return run_resp(req_dict)
+
+
 
     @elixys_web_sequences.errorhandler(NoSequenceFound)
     def noseqfound(error):
