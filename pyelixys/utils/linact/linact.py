@@ -7,7 +7,8 @@ import ctypes
 from ctypes import cdll
 
 from functools import wraps
-
+import random
+import struct
 import serial
 from serial import SerialException
 import argparse
@@ -27,6 +28,76 @@ if not os.name == 'nt':
     sys.exit(1)
 
 linactlib = cdll.LoadLibrary("./build/linact.dll")
+
+class AxisStatus(object):
+
+    INEMERGBIT = (1 << 15)
+    INCRDYBIT = (1 << 14)
+    INZONE1BIT = (1 << 13)
+    INZONE2BIT = (1 << 12)
+    INPZONEBIT = (1 << 11)
+    INMODESBIT = (1 << 10)
+    INWENDBIT = (1 << 9)
+    INSVONBIT = (1 << 4)
+    INALMBIT = (1 << 3)
+    INMOVEBIT = (1 << 2)
+    INHOMENDBIT = (1 << 1)
+    INPOSENDBIT = (1 << 0)
+
+
+    def __init__(self, status_value):
+        self.status = status_value
+
+    def isMoving(self):
+        if self.status & self.INMOVEBIT:
+            return True
+        return False
+
+    def isAlarm(self):
+        if self.status & self.INALMBIT:
+            return True
+        return False
+
+    def isHome(self):
+        if self.status & self.INHOMENDBIT:
+            return True
+        return False
+
+    def isInPosition(self):
+        if self.status & self.INPOSENDBIT:
+            return True
+        return False
+
+    def isServoOn(self):
+        if self.status & self.INSVONBIT:
+            return True
+        return False
+
+    def isPosLoad(self):
+        if self.status & self.INWENDBIT:
+            return True
+        return False
+
+    def isPosZone(self):
+        if self.status & self.INPZONEBIT:
+            return True
+        return False
+
+    def isZone1(self):
+        if self.status & self.INZONE1BIT:
+            return True
+        return False
+
+    def isZone2(self):
+        if self.status & self.INZONE2BIT:
+            return True
+        return False
+
+    def isCtrlReady(self):
+        if self.status & self.INCRDYBIT:
+            return True
+        return False
+
 
 class LinearActuatorBuffer(object):
     """ Interface to in C++ library """
@@ -245,6 +316,8 @@ class LinearActuatorCom(LinearActuator):
         self.com = serial.Serial(port, baudrate=baudrate, timeout=timeout)
         super(LinearActuatorCom, self).__init__(devid)
 
+        self.axisstatfmt = struct.Struct('>H')
+
     def send(self):
         buf = self.getBuf()
         self.com.write(buf.data())
@@ -267,6 +340,10 @@ class LinearActuatorCom(LinearActuator):
         self.send()
         self.receive()
 
+    def turnOn(self):
+        self.turnOnQuery()
+        self.send()
+        self.receive()
 
     def home(self):
         self.homeQuery()
@@ -302,6 +379,8 @@ class LinearActuatorCom(LinearActuator):
         self.receive()
         time.sleep(0.1)
         self.start()
+        time.sleep(0.1)
+        self.turnOn()
 
     def getPos(self):
         self.posQuery()
@@ -315,14 +394,36 @@ class LinearActuatorCom(LinearActuator):
         self.statusQuery()
         self.send()
         self.receive()
-        return self.buf.payload()
+        payload = self.buf.payload()
+        status = self.axisstatfmt.unpack(payload)[0]
+        print bin(status)
+        return AxisStatus(status)
+
+    def getIsInPosition(self):
+        return self.status().isInPosition()
+
+    isInPosition = property(getIsInPosition)
 
     def gatewayStatus(self):
-        self.gatewayStartQuery()
+        self.gatewayStatusQuery()
         self.send()
         self.receive()
         return self.buf.payload()
 
+
+def randomMoveN(n, act):
+    for i in xrange(n):
+        posmm = random.randint(0,35000) / 100.0
+        print "Moving to %.2f" % posmm
+
+        act.move(posmm)
+
+        while(not act.isInPosition):
+            curpos = act.getPos()
+            print "Current Pos: %.2fmm -> Moving to %.2fmm" % (curpos,posmm)
+            time.sleep(0.2)
+        time.sleep(0.2)
+        print "Complete move %d" % i
 
 if __name__=='__main__':
     lab = LinearActuatorBuffer()
