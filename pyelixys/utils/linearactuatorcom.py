@@ -681,7 +681,7 @@ class IAI(object):
 if __name__ == '__main__':
     import serial
     s = serial.Serial("COM5", baudrate=230400, timeout=0.5)
-    linact = LinearActuator(0)
+    linact = LinearActuator(0,s)
     linact.writeAppCtrl()
     linact.reset()
     linact.home()
