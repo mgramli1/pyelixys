@@ -1,6 +1,9 @@
 #ifndef STATUSMSG_H_
 #define STATUSMSG_H_
+
+#include "mbed.h"
 #include "rtos.h"
+
 // Template Author: Henry Herman
 // Author email: hherman@mednet.ucla.edu
 
@@ -11,7 +14,7 @@
 // UNLESS you really know what you are doing!
 
 
-#define HEADERCOUNT   1
+#define HEADERCOUNT   0
 #define MIXERSCOUNT   4
 #define VALVESCOUNT   48
 #define THERMOCOUPLESCOUNT   9
@@ -23,6 +26,7 @@
 #define LINEARACTUATORSCOUNT   5
 #define DIGITALINPUTSCOUNT   12
 #define LIQUIDSENSORSCOUNT   8
+#define RADIATIONSENSORSCOUNT   8
 
 
 
@@ -56,7 +60,7 @@
 
    typedef struct __attribute__ ((__packed__)){
        int position;
-       int requested_position;
+       unsigned int requested_position;
        unsigned int error_code;
    } LINEARACTUATOR;
 
@@ -64,6 +68,10 @@
    typedef struct __attribute__ ((__packed__)){
        float analog_in;
    } LIQUIDSENSOR;
+
+   typedef struct __attribute__ ((__packed__)){
+       unsigned int analog_in;
+   } RADIATIONSENSOR;
 
 
    typedef struct __attribute__ ((__packed__)){
@@ -79,9 +87,9 @@
 
    typedef struct __attribute__ ((__packed__)){
         char error_code;
-        short state0;
-        short state1;
-        short state2;
+        unsigned short state0;
+        unsigned short state1;
+        unsigned short state2;
    } VALVES;
 
    typedef struct __attribute__ ((__packed__)){
@@ -125,6 +133,11 @@
         LIQUIDSENSOR liquidsensor[LIQUIDSENSORSCOUNT]; 
    } LIQUIDSENSORS;
 
+   typedef struct __attribute__ ((__packed__)){
+        char error_code;
+        RADIATIONSENSOR radiationsensor[RADIATIONSENSORSCOUNT]; 
+   } RADIATIONSENSORS;
+
 
 typedef struct __attribute__ ((__packed__)){
     HEADER header;
@@ -139,10 +152,11 @@ typedef struct __attribute__ ((__packed__)){
     LINEARACTUATORS linearactuators;
     DIGITALINPUTS digitalinputs;
     LIQUIDSENSORS liquidsensors;
+    RADIATIONSENSORS radiationsensors;
 } STATUSPKT;
 
 extern STATUSPKT status;
+extern Mutex status_mutex;
 
-extern Mutex status_mutex; 
 
 #endif // End statusmsg guard

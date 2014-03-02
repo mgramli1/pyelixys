@@ -76,7 +76,8 @@ int main() {
                   + sizeof(FANS)
                   + sizeof(LINEARACTUATORS)
                   + sizeof(DIGITALINPUTS)
-                  + sizeof(LIQUIDSENSORS);
+                  + sizeof(LIQUIDSENSORS)
+                  + sizeof(RADIATIONSENSORS);
     printf("Total packet size should be %d =/= %d\r\n", total_bytes, sizeof(STATUSPKT));
     
     
