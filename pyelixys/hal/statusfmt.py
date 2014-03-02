@@ -206,8 +206,8 @@ class StatusMessageFormatFactory(object):
             f.write(output_text)
             f.close()
         return output_text
-    
-    
+
+
     def generate_c_src(self, filename=None):
         template_loader = jinja2.FileSystemLoader(searchpath=".")
         template_env = jinja2.Environment(loader=template_loader,

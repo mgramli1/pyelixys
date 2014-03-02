@@ -139,6 +139,7 @@ class StatusSimulator(Status):
         # Initialize Linear Actuators
         linacts = []
         self['LinearActuators'] = dict()
+
         for i in range(self.sysconf['LinearActuators']['count']):
             linact = {'error_code': 0,
                       'position': 0,
@@ -147,6 +148,7 @@ class StatusSimulator(Status):
             self.store['LinearActuators'][i] = linact
             linacts.append(linact)
 
+        self['LinearActuators']['error_code'] = 0
         self['LinearActuators']['Subs'] = linacts
         self['LinearActuators']['count'] = \
                 self.sysconf['LinearActuators']['count']
@@ -168,6 +170,22 @@ class StatusSimulator(Status):
         self.store['LiquidSensors']['count'] = \
                 self.sysconf['LiquidSensors']['count']
         self.store['LiquidSensors']['error_code'] = '\x00'
+
+        radsensors = []
+        self['RadiationSensors'] = dict()
+        self['RadiationSensors']['error_code']= '\x00'
+
+        for i in range(self.sysconf['RadiationSensors']['count']):
+            linact = {'error_code': 0,
+                      'analog_in':0}
+
+            self.store['RadiationSensors'][i] = linact
+            linacts.append(linact)
+
+        self['RadiationSensors']['Subs'] = radsensors
+
+        self['RadiationSensors']['count']= \
+                self.sysconf['RadiationSensors']['count']
 
         for key,value in self.store.items():
             setattr(self,key,value)
