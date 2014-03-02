@@ -53,7 +53,7 @@ int main() {
     printf("\r\n");
     linact.send();
     printf("\r\n");
-    linact.receive(5);
-    linact.receive(2);
+    linact.receiveStdin(5);
+    linact.receiveStdin(2);
 
 }

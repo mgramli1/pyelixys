@@ -7,14 +7,28 @@
 #include <cstring>
 
 
+#if DBGLINACTBUF
+#define LINACTDBG(x, ...) std::printf("[LinAct:DBG]"x"\r\n", ##__VA_ARGS__);
+#define LINACTWARN(x, ...) std::printf("[LinAct:WARN]"x"\r\n", ##__VA_ARGS__);
+#define LINACTERR(x, ...) std::printf("[LinAct:ERR]"x"\r\n", ##__VA_ARGS__);
+#else
+#define LINACTDBG(x, ...)
+#define LINACTWARN(x, ...)
+#define LINACTERR(x, ...)
+#endif
+
+#define LINACTINFO(x, ...) std::printf("[LinAct:INFO]"x"\r\n", ##__VA_ARGS__);
+
+
 
 namespace IAI {
+
+  const float NOTPOSMSGERR = -999999.0;
 
   class LinearActuator {
 
     public:
         LinActBuf buffer;
-        LinActBuf inbuf;
         LinearActuator();
         ~LinearActuator();
         unsigned short getAxisReadAddress(unsigned int axisid);
@@ -29,10 +43,21 @@ namespace IAI {
         LinActBuf * getAxisPause(unsigned int axisid);
         LinActBuf * getAxisReset(unsigned int axisid);
         LinActBuf * getAxisHome(unsigned int axisid);
+        LinActBuf * getAxisOn(unsigned int axisid);
         LinActBuf * getAxisBrakeRelease(unsigned int axisid);
 
+
+        float getPosition();
+
+        LinActBuf * getBuffer();
+
         void send();
-        LinActBuf * receive(int len);
+        LinActBuf * receiveStdin(int len);
+
+        LinActBuf * pushByteRxBuffer(char c);
+
+        int checkChecksum();
+
   };
 
 }

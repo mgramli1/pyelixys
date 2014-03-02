@@ -1,6 +1,9 @@
 #Embedded file name: /home/luis/pyelixysweb/new_db/Model.py
 from datetime import datetime
 import json
+# Import hashing for user's password
+from hashlib import md5
+
 from sqlalchemy import Column, Integer, String, Float, DateTime, Boolean, create_engine, ForeignKey
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship, backref
@@ -8,6 +11,8 @@ from sqlalchemy.orm import sessionmaker
 from sqlalchemy.schema import ForeignKeyConstraint
 
 from pyelixys.web.database.dbconf import config
+# Import validator for components
+from pyelixys.web.app.webserver.validate.validatecomponent import comp_vtor
 
 dburl = config['database_url']
 engine = create_engine(dburl, echo=True)
@@ -87,6 +92,42 @@ class Component(Base):
         return json.loads(self.Details)
 
     details = property(get_details)
+
+    def update_from_dict(self, comp_dict):
+        '''
+        Updates the attributes of the component
+        with the values of the passed in dict.
+        Function expects a dictionary object
+        with keys that map to the Component's
+        attributes/fields.
+        Function returns no output.
+        '''
+        # First validate the entries
+        comp_vtor.check('check_component', comp_dict)
+        # Valid, let's update the entries of the Component
+        # Grab the session object so we can modify via ORM
+        component = session.query(Component).filter_by(\
+                ComponentID = self.ComponentID).first()
+
+        for key, value in comp_dict.iteritems():
+            if key == "sequence_id":
+                component.SequenceID = value
+            elif key == "previous_component_id":
+                component.PreviousComponentID = value
+            elif key == "next_component_id":
+                component.NextComponentID = value
+            elif key == "type":
+                component.Type = value
+            elif key == "note":
+                component.Note = value
+            elif key == "details":
+                component.Details = value
+            else:
+                # Else, we received an unknown key
+                # Should flag an error
+                print "%s,%s" % (key, value)
+        # Update to DB
+        session.commit()
 
     def as_json(self):
         return json.dumps(self.as_dict(), indent=2)
@@ -659,6 +700,49 @@ class Sequence(Base):
         comp_dict['dirty'] = self.Dirty
         return comp_dict
 
+    def update_from_dict(self, seq_dict):
+        '''
+        Updates the attributes of the sequence
+        with the values of the passed in dict.
+        Function expects a dictionary object
+        with keys that map to the Sequence's
+        attributes/fields.
+        Function returns no output.
+        '''
+        # First validate the entries
+        comp_vtor.check('check_sequence', seq_dict)
+        # Valid, let's update the entries of the sequence
+        # Grab the session object so we can modify via ORM
+        sequence = session.query(Sequence).filter_by(\
+                SequenceID = self.SequenceID).first()
+
+        for key, value in seq_dict.iteritems():
+            if key == "name":
+                sequence.Username = value
+            elif key == "comment":
+                sequence.Comment = value
+            elif key == "type":
+                sequence.Type = value
+            elif key == "userid":
+                sequence.UserID = value
+            elif key == "firstcomponentid":
+                sequence.FirstComponentID = value
+            elif key == "componentcount":
+                sequence.ComponentCount = value
+            elif key == "valid":
+                sequence.Valid = value
+            elif key == "dirty":
+                sequence.Dirty = value
+            elif key == "creationdate":
+                sequence.CreationDate =\
+                        datetime.strptime(value,\
+                        '%Y-%m-%d %H:%M:%S')
+            else:
+                # Else we have an unknown key, flag it
+                print "uhoh2"
+                print "%s%s" % (key, value)
+        session.commit()
+
     def as_json(self):
         return json.dumps(self.as_dict(), indent=4)
 
@@ -738,6 +822,48 @@ class User(Base):
         user_dict['messagelevel'] = self.MessageLevel
         user_dict['role'] = self.role.as_dict()
         return user_dict
+
+    def update_from_dict(self, user_dict):
+        '''
+        Updates the attributes of the user
+        with the values of the passed in dict.
+        Function expects a dictionary object
+        with keys that map to the User's
+        attributes/fields.
+        Function returns no output.
+        '''
+        # First validate the entries
+        comp_vtor.check('check_user', user_dict)
+        # Valid, let's update the entries of the users
+        # Grab the session object so we can modify via ORM
+        user = session.query(User).filter_by(\
+                UserID = self.UserID).first()
+        for key, value in user_dict.iteritems():
+            if key == "username":
+                user.Username = value
+            elif key == "password":
+                # Encrypt password
+                encrypt_pw = md5(value)
+                user.Password = encrypt_pw.hexdigest()
+            elif key == "firstname":
+                user.FirstName = value
+            elif key == "lastname":
+                user.LastName = value
+            elif key == "email":
+                user.Email = value
+            elif key == "phone":
+                user.Phone = value
+            elif key == "message_level":
+                user.MessageLevel = value
+            elif key == "role_id":
+                user.RoleID = value
+            elif key == "clientstate":
+                user.ClientState = json.dumps(value)
+            else:
+                # Else we have an unknown key, flag it
+                print "%s,%s" % (key, value)
+        # Update to DB
+        session.commit()
 
     def as_json(self):
         return json.dumps(self.as_dict(), indent=2)

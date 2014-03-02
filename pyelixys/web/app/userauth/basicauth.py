@@ -10,8 +10,7 @@ from pyelixys.web.database.model import Session,\
 
 from sqlalchemy.orm.exc import MultipleResultsFound,\
                                NoResultFound
-# import db comm layer
-#from pyelixys.web.database.dbcomm import DBComm
+from pyelixys.logs import weblog as log
 
 def check_auth(username, password):
     """
@@ -36,7 +35,7 @@ def authenticate():
     """
     Sends a 401 response that enables basic auth
     """
-    #log.info("Authenticate")
+    log.info("Authenticate")
     return Response(
             'Could not verify your access level for elixys\n'
             'You must have proper credentials', 401,
@@ -46,10 +45,12 @@ def requires_auth(f):
     @wraps(f)
     def decorated(*args, **kwargs):
         auth = request.authorization
+        log.debug("Request: %s" % request)
+        log.debug("Auth: %s" % auth)
         if not auth or not check_auth(auth.username, auth.password):
-            #log.debug("Requires auth")
+            log.debug("Requires auth")
             return authenticate()
-        #log.debug("username:%s" % auth.username)
+        log.debug("username:%s" % auth.username)
         return f(*args, **kwargs)
     return decorated
 
