@@ -433,10 +433,10 @@ class LinearActuator(SynthesizerSubObject):
             #self.GWSTARTRUN = True
 
     def set_position(self, posmm):
-        log.debug("Set Actuator %d Position -> %s"
-                  % (self.id_, value))
+        log.debug("Set Actuator %d Position -> %f"
+                  % (self.id_, posmm))
         self.req_position_ = int(posmm*100.0)
-        cmd = self.cmd_lookup['LinearActuators']['set_position'][self.id_](self.req_position_)
+        cmd = self.cmd_lookup['LinearActuators']['set_requested_position'][self.id_](self.req_position_)
         self.comproc.run_cmd(cmd)
 
     def get_position(self):
