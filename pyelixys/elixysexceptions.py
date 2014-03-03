@@ -43,3 +43,6 @@ class ElixysInvalidSequenceID(ElixysDBError):
 
 class ElixysPressureError(ElixysHALError):
     pass
+
+class ElixysLinactError(ElixysHALError):
+    pass

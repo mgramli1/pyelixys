@@ -34,18 +34,18 @@ class SynthesizerObject(ElixysObject):
     comproc = wscomproc
     cbox = cbox
 
-    
+
     def start_com_proc(self):
         if not self.comproc.is_alive():
             log.debug("Starting the Websocket communication process")
             self.comproc.start()
         else:
             log.debug("The Websocket communication process is active")
-        
+
     def stop_com_proc(self):
         self.comproc.stop()
-        
-                      
+
+
 class SynthesizerSubObject(SynthesizerObject):
     """ All the subsystems inherit from this object,
     this give them access to their own specific configuration
@@ -53,13 +53,13 @@ class SynthesizerSubObject(SynthesizerObject):
     send commands to hardware.
     """
     synthesizer_objects = []
-    
+
 
     def __init__(self, id, configname=None):
         self.set_id(id)
         self.synthesizer_objects.append(self)
         self.configname = configname
-        
+
 
     def set_id(self, id_):
         self.id_ = id_
@@ -101,15 +101,15 @@ class Mixer(SynthesizerSubObject):
         self.on_ = False
 
     def set_duty_cycle(self, value):
-        log.debug("Set Mixer %d duty cycle -> %f" % (self.id_, value))        
+        log.debug("Set Mixer %d duty cycle -> %f" % (self.id_, value))
         if value >= 0.0 and value <= 100.0:
             self.duty_ = value
             cmd = self.cmd_lookup['Mixers']['set_duty_cycle'][self.id_](value)
             self.comproc.run_cmd(cmd)
         else:
             # Raise Exception, value out of range!
-            log.error("Mixer %d duty cycle -> %f out of range" % (self.id_, value))                
-        
+            log.error("Mixer %d duty cycle -> %f out of range" % (self.id_, value))
+
     def get_duty_cycle(self):
         log.debug("Get Mixer %d duty cycle -> %f" % (self.id_, self.duty_))
         return self.duty_
@@ -155,7 +155,7 @@ class Valve(SynthesizerSubObject):
         Valve.valve_state0 = 0
         Valve.valve_state1 = 0
         Valve.valve_state2 = 0
-        
+
     def set_on(self, value):
         if not hasattr(self,'valve_state0') or not hasattr(self,'valve_state1') \
             or not hasattr(self,'valve_state2'):
@@ -165,7 +165,7 @@ class Valve(SynthesizerSubObject):
         if self.id_ < 16:
             log.debug("Before Set Valve %d (state0) on -> %s" % (self.id_, bin(Valve.valve_state0)))
             if value is True:
-                Valve.valve_state0 |= (1<<(self.id_%16))            
+                Valve.valve_state0 |= (1<<(self.id_%16))
             else:
                 Valve.valve_state0 &= ~(1<<(self.id_%16))
             self.comproc.run_cmd(self.cmd_lookup['Valves']['set_state0'](Valve.valve_state0))
@@ -174,22 +174,22 @@ class Valve(SynthesizerSubObject):
         elif self.id_ < 32:
             if value is True:
                 Valve.valve_state1 |= (1<< (self.id_%16))
-            else:                
+            else:
                 Valve.valve_state1 &= ~(1<<(self.id_%16))
             self.comproc.run_cmd(self.cmd_lookup['Valves']['set_state1'](Valve.valve_state1))
             log.debug("Set Valve %d (state1) on -> %s" % (self.id_, bin(Valve.valve_state1)))
             self.on_ = True
-        elif self.id_ < 48:            
+        elif self.id_ < 48:
             if value is True:
-                Valve.valve_state2 |= (1<< (self.id_%16))                     
-            else:                
+                Valve.valve_state2 |= (1<< (self.id_%16))
+            else:
                 Valve.valve_state2 &= ~(1<<(self.id_%16))
             self.comproc.run_cmd(self.cmd_lookup['Valves']['set_state2'](Valve.valve_state2))
             log.debug("Set Valve %d (state2) on -> %s" % (self.id_, bin(Valve.valve_state2)))
             self.on_ = True
-           
-        
-    def get_on(self):        
+
+
+    def get_on(self):
         if not hasattr(self,'valve_state0') or not hasattr(self,'valve_state1') \
             or not hasattr(self,'valve_state2'):
             self.load_states()
@@ -198,19 +198,19 @@ class Valve(SynthesizerSubObject):
             valve_state = self.status.Valves['state0']
             val = bool((valve_state >> self.id_) & 1)
             self.on_ = False
-            
+
         elif self.id_ < 32:
             valve_state = self.status.Valves['state1']
             val = bool((valve_state >> (self.id_ - 16)) & 1)
             self.on_ = False
-            
+
         elif self.id_ < 48:
             valve_state = self.status.Valves['state2']
-            val = bool((valve_state >> (self.id_ - 32)) & 1)            
+            val = bool((valve_state >> (self.id_ - 32)) & 1)
             self.on_ = False
-        
+
         log.debug("Get Valve %d on -> %s" % (self.id_, val))
-        
+
         return val
 
     on = property(get_on, set_on,
@@ -232,7 +232,7 @@ class Thermocouple(SynthesizerSubObject):
                   % (self.id_, self.temperature_))
         self.temperature_ = self.status['Thermocouples'][self.id_]['temperature']
         return self.temperature_  # Checks temp and returns value
-        
+
     temperature = property(get_temperature)
 
 
@@ -243,13 +243,13 @@ class AuxThermocouple(Thermocouple):
     """
     def __init__(self, id):
         super(AuxThermocouple, self).__init__(id,  "AuxThermocouples")
-        
+
     def get_temperature(self):
         log.debug("Get AuxThermocouple %d temperature -> %f"
                   % (self.id_, self.temperature_))
         self.temperature_ = self.status['AuxThermocouples'][self.id_]['temperature']
         return self.temperature_  # Checks temp and returns value
-        
+
     temperature = property(get_temperature)
 
 class Heater(SynthesizerSubObject):
@@ -266,7 +266,7 @@ class Heater(SynthesizerSubObject):
         super(Heater, self).__init__(id, "Heaters")
         self.on_ = False
 
-    def get_on(self):        
+    def get_on(self):
         self.state_ = self.status['Heaters']['state']
         self.on_ = bool(self.state_ >> self.id_ & 1)
         log.debug("Get Heater %d on -> %s" % (self.id_, self.on_))
@@ -296,11 +296,11 @@ class TemperatureController(SynthesizerSubObject):
         self.setpoint_ = self.status.TemperatureControllers[self.id_]['setpoint']
         return self.setpoint_
 
-    def set_setpoint(self, value):        
+    def set_setpoint(self, value):
         if value > 180.0:
             #Raise exception
             log.debug("Error Temperature Controller %d setpoint -> %f,"
-                      "TOO HOT, should be less than 180" 
+                      "TOO HOT, should be less than 180"
                       % (self.id_, self.setpoint_))
             return
         self.setpoint_ = value
@@ -308,7 +308,7 @@ class TemperatureController(SynthesizerSubObject):
                   % (self.id_, self.setpoint_))
         cmd = self.cmd_lookup['TemperatureControllers']['set_setpoint'][self.id_](value)
         self.comproc.run_cmd(cmd)
-        
+
     setpoint = property(get_setpoint, set_setpoint,
                         doc="Set the temperature controller setpoint")
 
@@ -353,7 +353,7 @@ class SMCInterface(SynthesizerSubObject):
     """
     def __init__(self, id):
         super(SMCInterface, self).__init__(id, "SMCInterfaces")
-        self.analog_out_ = 0        
+        self.analog_out_ = 0
 
     def set_analog_out(self, value):
         if not(value >= 0.0 and value <= 10.0):
@@ -363,7 +363,7 @@ class SMCInterface(SynthesizerSubObject):
         self.comproc.run_cmd(self.cmd_lookup['SMCInterfaces']['set_analog_out'][self.id_](value))
         log.debug("Set SMC Analog out %d on -> %s"
                   % (self.id_, value))
-        
+
         self.analog_out_ = value
 
     def get_analog_out(self):
@@ -375,7 +375,7 @@ class SMCInterface(SynthesizerSubObject):
     analog_out = property(get_analog_out, set_analog_out,
                           doc="Set the analog out 0-10V")
 
-    def get_analog_in(self):        
+    def get_analog_in(self):
         vref = self.sysconf['SMCInterfaces']['analog_in_vref'] # Depends on gain set on board!
         self.analog_in_ = self.status.SMCInterfaces[self.id_]['analog_in']
         log.debug("Get SMC RAW Analog in %d on -> %s"
@@ -385,7 +385,7 @@ class SMCInterface(SynthesizerSubObject):
         log.debug("Get SMC Analog in %d on -> %s"
                   % (self.id_, self.analog_in_))
         return self.analog_in_
-        
+
     analog_in = property(get_analog_in,
                          doc="Get the analog in 0-5V")
 
@@ -413,9 +413,9 @@ class Fan(SynthesizerSubObject):
         else:
             log.debug("Turn Off")
             cmd = self.cmd_lookup['Fans']['turn_off'][self.id_]()
-        
+
         self.comproc.run_cmd(cmd)
-        
+
     on = property(get_on, set_on,
                   doc="Turn on/off fan")
 
@@ -424,34 +424,73 @@ class LinearActuator(SynthesizerSubObject):
     """ The system has multiple linear actuators that
     can have their positions set, and read.
     """
+    GWSTARTRUN = False
     def __init__(self, id):
         super(LinearActuator, self).__init__(id, "LinearActuators")
 
-    def set_position(self, value):
+        if not self.GWSTARTRUN:
+            self.gateway_start()
+            self.GWSTARTRUN = True
+
+    def set_position(self, posmm):
         log.debug("Set Actuator %d Position -> %s"
                   % (self.id_, value))
-        self.position_ = value
+        self.req_position_ = int(posmm*100.0)
+        cmd = self.cmd_lookup['LinearActuators']['set_position'][self.id_](self.req_position_)
+        self.comproc.run_cmd(cmd)
 
     def get_position(self):
         log.debug("Get Actuator %d Position -> %s"
                   % (self.id_, self.position_))
+
+        self.position_ = self.status.LinearActuators[self.id_]['position']
+
         return self.position_
 
     position = property(get_position, set_position,
                         doc="Set Actuator position")
 
-    def set_home(self, value):
-        log.debug("Set Actuator %d Home -> %s"
-                  % (self.id_, value))
-        self.home_ = value
+    def home(self):
+        log.debug("Set Actuator %d Home"
+                  % self.id_)
+        cmd = self.cmd_lookup['LinearActuators']['home_axis'][self.id_]()
+        self.comproc.run_cmd(cmd)
 
-    def get_home(self):
-        log.debug("Get Actuator %d Home -> %s"
-                  % (self.id_, self.home_))
-        return self.home_
+    def gateway_start(self):
+        log.debug("Gateway start")
+        cmd = self.cmd_lookup['LinearActuators']['gateway_start'][self.id_]()
+        self.comproc.run_cmd(cmd)
 
-    home = property(get_home, set_home,
-                    doc="Tell the axis to home")
+    def turn_on(self):
+        log.debug("Set Actuator %d Turn on"
+                  % self.id_)
+        cmd = self.cmd_lookup['LinearActuators']['turn_on'][self.id_]()
+        self.comproc.run_cmd(cmd)
+
+    def pause(self):
+        log.debug("Set Actuator %d Pause"
+                  % self.id_)
+        cmd = self.cmd_lookup['LinearActuators']['pause'][self.id_]()
+        self.comproc.run_cmd(cmd)
+
+    def start(self):
+        log.debug("Set Actuator %d Start"
+                  % self.id_)
+        cmd = self.cmd_lookup['LinearActuators']['start'][self.id_]()
+        self.comproc.run_cmd(cmd)
+
+
+    def brake_release(self):
+        log.debug("Set Actuator %d brake release"
+                  % self.id_)
+        cmd = self.cmd_lookup['LinearActuators']['brake_release'][self.id_]()
+        self.comproc.run_cmd(cmd)
+
+    def reset(self):
+        log.debug("Set Actuator %d reset"
+                  % self.id_)
+        cmd = self.cmd_lookup['LinearActuators']['reset'][self.id_]()
+        self.comproc.run_cmd(cmd)
 
 
 class DigitalInput(SynthesizerSubObject):
@@ -462,7 +501,7 @@ class DigitalInput(SynthesizerSubObject):
         super(DigitalInput, self).__init__(id, "DigitalInputs")
         self.tripped_ = False
 
-    def get_tripped(self):        
+    def get_tripped(self):
         self.state_ = self.status.DigitalInputs['state']
         self.tripped_ = not bool(self.state_ >> self.id_ & 1)
         log.debug("Get Digital input %d tripped -> %s"
@@ -471,7 +510,7 @@ class DigitalInput(SynthesizerSubObject):
 
     tripped = property(get_tripped,
                        doc="Check if position sensor tripped")
-    
+
     def __nonzero__(self):
         return self.tripped
 
@@ -479,13 +518,13 @@ class DigitalInput(SynthesizerSubObject):
         return self.__nonzero__()
 
     def all(self):
-        self.state_ = self.status.DigitalInputs['state']               
-        self.all_state_ = [not bool(self.state_ >> sensorbit & 1) 
+        self.state_ = self.status.DigitalInputs['state']
+        self.all_state_ = [not bool(self.state_ >> sensorbit & 1)
             for sensorbit in range(self.sysconf['DigitalInputs']['count'])]
         log.debug("Get Digital input %d tripped -> %s"
                   % (self.id_, self.tripped_))
         return self.all_state_
-        
+
 
 class LiquidSensor(SynthesizerSubObject):
     """ Liquid sensors can be used as feedback on
@@ -498,7 +537,7 @@ class LiquidSensor(SynthesizerSubObject):
     def get_analog_out(self):
         self.analog_out_ = self.status.LiquidSensors[self.id_]['analog_in'] / 4095.0
         log.debug("Get Liquid Sensor Analog in %d on -> %s"
-                  % (self.id_, self.analog_out_))                  
+                  % (self.id_, self.analog_out_))
         return self.analog_out_
 
     analog_out = property(get_analog_out,
@@ -510,9 +549,9 @@ class SynthesizerHAL(SynthesizerObject):
     access to all the sub systems.
     """
     def __init__(self):
-        
-        super(SynthesizerHAL, self).__init__()        
-        
+
+        super(SynthesizerHAL, self).__init__()
+
         log.debug("Initializing SynthesizerHAL")
         self.mixer_motors = [Mixer(i) for i in
                              range(self.sysconf['Mixers']['count'])]
@@ -545,7 +584,8 @@ class SynthesizerHAL(SynthesizerObject):
 
         self.liquid_sensors = [LiquidSensor(i) for i in
                                range(self.sysconf['LiquidSensors']['count'])]
+
         self.start_com_proc()
-        
+
 if __name__ == '__main__':
     s = SynthesizerHAL()

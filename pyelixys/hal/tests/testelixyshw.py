@@ -322,6 +322,30 @@ class ElixysSimulator(ElixysObject):
                                'home_axis',
                                self.linacts_home_axis)
 
+        self.register_callback('LinearActuators',
+                               'gateway_start',
+                               self.linacts_gateway_start)
+
+        self.register_callback('LinearActuators',
+                               'turn_on',
+                               self.linacts_turn_on)
+
+        self.register_callback('LinearActuators',
+                               'pause',
+                               self.linacts_pause)
+
+        self.register_callback('LinearActuators',
+                               'start',
+                               self.linacts_start)
+
+        self.register_callback('LinearActuators',
+                               'brake_release',
+                               self.linacts_brake_release)
+
+        self.register_callback('LinearActuators',
+                               'reset',
+                               self.linacts_reset)
+
         self.tempctrl_thread = thread.start_new_thread(self.run_tempctrls,())
 
     def parse_cmd(self, cmd_pkt):
@@ -463,6 +487,26 @@ class ElixysSimulator(ElixysObject):
         """ Linear Actuator home axis """
         log.debug("Home the linear actuator %d", devid)
 
+    def linacts_gateway_start(self, devid, value=None):
+        log.debug("Set the gateway start bit")
+
+    def linacts_set_requested_position(self, devid, value=0):
+        log.debug("Set requested position of actuator %d to %f mm" % (devid, value/100.0))
+
+    def linacts_turn_on(self, devid, value=None):
+        log.debug("Axis %d turn on" % devid)
+
+    def linacts_pause(self, devid, value=None):
+        log.debug("Axis %d pause" % devid)
+
+    def linacts_start(self, devid, value=None):
+        log.debug("Axis %d start" % devid)
+
+    def linacts_brake_release(self, devid, value=None):
+        log.debug("Axis %d brake release" % devid)
+
+    def linacts_reset(self, devid, value=None):
+        log.debug("Axis %d reset" % devid)
 
     def update_digital_inputs(self):
         """ Evaluate the valve states and determine
