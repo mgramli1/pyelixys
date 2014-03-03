@@ -428,9 +428,9 @@ class LinearActuator(SynthesizerSubObject):
     def __init__(self, id):
         super(LinearActuator, self).__init__(id, "LinearActuators")
 
-        if not self.GWSTARTRUN:
-            self.gateway_start()
-            self.GWSTARTRUN = True
+        #if not self.GWSTARTRUN:
+            #self.gateway_start()
+            #self.GWSTARTRUN = True
 
     def set_position(self, posmm):
         log.debug("Set Actuator %d Position -> %s"
