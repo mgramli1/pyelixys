@@ -46,3 +46,6 @@ class ElixysPressureError(ElixysHALError):
 
 class ElixysLinactError(ElixysHALError):
     pass
+
+class ElixysLinactOutOfBoundsError(ElixysLinactError):
+    pass

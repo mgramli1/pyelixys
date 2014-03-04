@@ -11,7 +11,8 @@ from datetime import datetime
 
 from pyelixys.logs import hallog as log
 from pyelixys.hal.systemobject import SystemObject
-from pyelixys.elixysexceptions import ElixysLinactError
+from pyelixys.elixysexceptions import ElixysLinactError, \
+                                      ElixysLinactOutOfBoundsError
 
 class LinearAxis(SystemObject):
     """ The LinearAxis class has an API,
@@ -31,6 +32,11 @@ class LinearAxis(SystemObject):
 
         self.reset()
         self.home()
+
+    def _get_conf(self):
+        return self.sysconf['LinearAxis']['LinearAxis%d' % self.id_]
+
+    conf = property(_get_conf)
 
     def gwstart(self):
         self.actuator.gateway_start()
@@ -55,6 +61,9 @@ class LinearAxis(SystemObject):
         self.actuator.reset()
 
     def set_position(self, posmm):
+        if posmm > self.conf['MAX'] or posmm < self.conf['MIN']:
+            raise ElixysLinactOutOfBoundsError(
+                "Pos %f, out of bounds actuator %d" % (posmm, self.id_))
         self.actuator.set_position(posmm)
 
     def move(self, posmm):
