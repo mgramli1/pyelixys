@@ -9,7 +9,9 @@ stopcocks, can all be accessed through this device as well.
 import time
 from pyelixys.logs import hallog as log
 from pyelixys.hal.systemobject import SystemObject
-from pyelixys.hal.pneumaticactuator import PneumaticActuator
+from pyelixys.hal.pneumaticactuator import \
+        PneumaticActuator
+from pyelixys.hal.linearaxis import LinearAxis
 from pyelixys.hal.stopcock import Stopcock
 from pyelixys.hal.tempctrl import TempCtrl
 from pyelixys.hal.mixer import Mixer
@@ -48,6 +50,10 @@ class Reactor(PneumaticActuator):
         # Intialize Mixer
         self._mixer_id = self.conf['mixer_id']
         self.mixer = Mixer(self._mixer_id, synthesizer)
+
+        self._actuator_id = self.conf['actuator_id']
+        self.actuator = LinearAxis(self._actuator_id,
+                                    synthesizer)
 
     def _get_conf(self):
         """ Get the reactor config for reactor with this id"""

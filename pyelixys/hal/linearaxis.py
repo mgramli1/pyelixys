@@ -18,41 +18,47 @@ class LinearAxis(SystemObject):
     that allows the actuator position to be set.
     It provide axis to the current position and status.
     """
+    ISGWSTARTSET = False
 
     def __init__(self, devid, synthesizer):
-        super(LinearActuator, self).__init__(synthesizer)
+        super(LinearAxis, self).__init__(synthesizer)
         self.id_ = devid
+        self.actuator = synthesizer.linear_axis[self.id_]
 
-    def _get_conf(self):
-        """ Return the Linear Actuator configuraton """
-        return self.sysconf['LinearAxis']['LinearAxis%d' % self.id_]
+        if not self.ISGWSTARTSET:
+            self.gwstart()
+            self.ISGWSTARTSET = True
 
-    conf = property(_get_conf)
+        self.reset()
+        self.home()
 
     def gwstart(self):
-        pass
+        self.actuator.gateway_start()
+
+    def start(self):
+        self.actuator.start()
 
     def home(self):
-        pass
+        self.actuator.turn_on()
+        self.actuator.home()
 
     def pause(self):
-        pass
+        self.actuator.pause()
 
     def turn_on(self):
-        pass
-
-    def pause(self):
-        pass
+        self.actuator.turn_on()
 
     def brake_release(self):
-        pass
+        self.actuator.brake_release()
 
     def reset(self):
-        pass
+        self.actuator.reset()
 
-    def setPosition(self, posmm):
-        pass
+    def set_position(self, posmm):
+        self.actuator.set_position(posmm)
 
     def move(self, posmm):
-        pass
+        self.turn_on()
+        self.set_position(posmm)
+        self.start()
 

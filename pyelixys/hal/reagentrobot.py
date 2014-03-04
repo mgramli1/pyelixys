@@ -12,6 +12,7 @@ from pyelixys.logs import hallog as log
 from pyelixys.hal.systemobject import SystemObject
 from pyelixys.hal.gripper import Gripper
 from pyelixys.hal.gastransfer import GasTransfer
+from pyelixys.hal.linearaxis import LinearAxis
 
 
 class ReagentRobot(SystemObject):
@@ -27,3 +28,18 @@ class ReagentRobot(SystemObject):
 
         # Create Gripper
         self.gripper = Gripper(synthesizer)
+
+        self._xactuator_id = \
+                self.conf['xaxis_actuator_id']
+        self._yactuator_id = \
+                self.conf['yaxis_actuator_id']
+
+        self.xactuator = LinearAxis(self._xactuator_id,
+                                    synthesizer)
+        self.yactuator = LinearAxis(self._yactuator_id,
+                                    synthesizer)
+
+    def _get_conf(self):
+        return self.sysconf['ReagentRobot']
+
+    conf = property(_get_conf)
