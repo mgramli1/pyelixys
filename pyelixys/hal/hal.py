@@ -424,13 +424,84 @@ class LinearActuator(SynthesizerSubObject):
     """ The system has multiple linear actuators that
     can have their positions set, and read.
     """
+
+    INEMERGBIT = (1 << 15)
+    INCRDYBIT = (1 << 14)
+    INZONE1BIT = (1 << 13)
+    INZONE2BIT = (1 << 12)
+    INPZONEBIT = (1 << 11)
+    INMODESBIT = (1 << 10)
+    INWENDBIT = (1 << 9)
+    INSVONBIT = (1 << 4)
+    INALMBIT = (1 << 3)
+    INMOVEBIT = (1 << 2)
+    INHOMENDBIT = (1 << 1)
+    INPOSENDBIT = (1 << 0)
+
     GWSTARTRUN = False
+
     def __init__(self, id):
         super(LinearActuator, self).__init__(id, "LinearActuators")
 
         #if not self.GWSTARTRUN:
             #self.gateway_start()
             #self.GWSTARTRUN = True
+
+    def get_axis_status(self):
+        self.status_ = self.status.LinearActuators[self.id_]['error_code']
+        return self.status_
+
+    axis_status = property(get_axis_status)
+
+    def isMoving(self):
+        if self.axis_status & self.INMOVEBIT:
+            return True
+        return False
+
+    def isAlarm(self):
+        if self.axis_status & self.INALMBIT:
+            return True
+        return False
+
+    def isHome(self):
+        if self.axis_status & self.INHOMENDBIT:
+            return True
+        return False
+
+    def isInPosition(self):
+        if self.axis_status & self.INPOSENDBIT:
+            return True
+        return False
+
+    def isServoOn(self):
+        if self.axis_status & self.INSVONBIT:
+            return True
+        return False
+
+    def isPosLoad(self):
+        if self.axis_status & self.INWENDBIT:
+            return True
+        return False
+
+    def isPosZone(self):
+        if self.axis_status & self.INPZONEBIT:
+            return True
+        return False
+
+    def isZone1(self):
+        if self.axis_status & self.INZONE1BIT:
+            return True
+        return False
+
+    def isZone2(self):
+        if self.axis_status & self.INZONE2BIT:
+            return True
+        return False
+
+    def isCtrlReady(self):
+        if self.axis_status & self.INCRDYBIT:
+            return True
+        return False
 
     def set_position(self, posmm):
         log.debug("Set Actuator %d Position -> %f"
@@ -440,11 +511,9 @@ class LinearActuator(SynthesizerSubObject):
         self.comproc.run_cmd(cmd)
 
     def get_position(self):
+        self.position_ = self.status.LinearActuators[self.id_]['position']
         log.debug("Get Actuator %d Position -> %s"
                   % (self.id_, self.position_))
-
-        self.position_ = self.status.LinearActuators[self.id_]['position']
-
         return self.position_
 
     position = property(get_position, set_position,
