@@ -16,7 +16,7 @@ import datetime
 exit_event = Event()
 
 #TODO move timeout to config file
-pkt_send_timeout = 0.1
+pkt_send_timeout = 0.2
 
 class WSHandler(tornado.websocket.WebSocketHandler):
     """ This the the main websocket handler that deals with incoming
@@ -106,7 +106,7 @@ class WSHandler(tornado.websocket.WebSocketHandler):
                 log.debug("Wrote %d bytes" % len(str(cmd)))
                 self.write_message(str(cmd))
                 #self.write_message("CMD:%s" % repr(cmd))
-                time.sleep(0.06)
+                time.sleep(0.1)
         except Empty:
             pass
         tornado.ioloop.IOLoop.instance().add_timeout(
