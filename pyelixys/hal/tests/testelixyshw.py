@@ -26,6 +26,149 @@ from threading import Timer
 
 import collections
 
+
+class AxisStatus(object):
+
+    INEMERGBIT = (1 << 15)
+    INCRDYBIT = (1 << 14)
+    INZONE1BIT = (1 << 13)
+    INZONE2BIT = (1 << 12)
+    INPZONEBIT = (1 << 11)
+    INMODESBIT = (1 << 10)
+    INWENDBIT = (1 << 9)
+    INSVONBIT = (1 << 4)
+    INALMBIT = (1 << 3)
+    INMOVEBIT = (1 << 2)
+    INHOMENDBIT = (1 << 1)
+    INPOSENDBIT = (1 << 0)
+
+
+    def __init__(self, status_value=0):
+        self.status = status_value
+
+    def isMoving(self):
+        if self.status & self.INMOVEBIT:
+            return True
+        return False
+
+    def setMoving(self):
+        self.status |= self.INMOVEBIT
+
+    def clearMoving(self):
+        self.status &= ~self.INMOVEBIT
+
+    def isAlarm(self):
+        if self.status & self.INALMBIT:
+            return True
+        return False
+
+    def setAlarm(self):
+        self.status |= self.INALMBIT
+
+    def clearAlarm(self):
+        self.status &= ~self.INALMBIT
+
+    def isHome(self):
+        if self.status & self.INHOMENDBIT:
+            return True
+        return False
+
+    def setHome(self):
+        self.status |= self.INHOMENDBIT
+
+    def clearHome(self):
+        self.status &= ~self.INHOMENDBIT
+
+    def isInPosition(self):
+        if self.status & self.INPOSENDBIT:
+            return True
+        return False
+
+    def setInPosition(self):
+        self.status |= self.INPOSENDBIT
+
+    def clearInPosition(self):
+        self.status &= ~self.INPOSENDBIT
+
+    def isServoOn(self):
+        if self.status & self.INSVONBIT:
+            return True
+        return False
+
+    def setServoOn(self):
+        self.status |= self.INSVONBIT
+
+    def clearServoOn(self):
+        self.status &= ~self.INSVONBIT
+
+    def isPosLoad(self):
+        if self.status & self.INWENDBIT:
+            return True
+        return False
+
+    def setPosLoad(self):
+        self.status |= self.INWENDBIT
+
+    def clearPosLoad(self):
+        self.status &= ~self.INWENDBIT
+
+    def isPosZone(self):
+        if self.status & self.INPZONEBIT:
+            return True
+        return False
+
+    def setPosZone(self):
+        self.status |= self.INPZONEBIT
+
+    def clearPosZone(self):
+        self.status &= ~self.INPZONEBIT
+
+    def isZone1(self):
+        if self.status & self.INZONE1BIT:
+            return True
+        return False
+
+    def setZone1(self):
+        self.status |= self.INZONE1BIT
+
+    def clearZone1(self):
+        self.status &= ~self.INZONE1BIT
+
+    def isZone2(self):
+        if self.status & self.INZONE2BIT:
+            return True
+        return False
+
+    def setZone2(self):
+        self.status |= self.INZONE2BIT
+
+    def clearZone2(self):
+        self.status &= ~self.INZONE2BIT
+
+    def isCtrlReady(self):
+        if self.status & self.INCRDYBIT:
+            return True
+        return False
+
+    def setCtrlReady(self):
+        self.status |= self.INCRDYBIT
+
+    def clear(self):
+        self.status = 0
+        self.setHome()
+        self.setZone1()
+        self.setZone2()
+        self.setCtrlReady()
+        self.setInPosition()
+        self.setServoOn()
+
+    def __repr__(self):
+        return "AxisStatus(0x%X)" % self.status
+
+    def __str__(self):
+        return "0x%X" % self.status
+
+
 class StatusSimulator(Status):
     """
     The StatusSimulator object is intended to
@@ -140,10 +283,17 @@ class StatusSimulator(Status):
         linacts = []
         self['LinearActuators'] = dict()
 
+        self.linact_stats = []
+
         for i in range(self.sysconf['LinearActuators']['count']):
+            stat = AxisStatus()
+            stat.clear()
+            self.linact_stats.append(stat)
+            self.linact_stats
             linact = {'error_code': 0,
                       'position': 0,
                       'requested_position':0}
+
 
             self.store['LinearActuators'][i] = linact
             linacts.append(linact)
@@ -152,6 +302,8 @@ class StatusSimulator(Status):
         self['LinearActuators']['Subs'] = linacts
         self['LinearActuators']['count'] = \
                 self.sysconf['LinearActuators']['count']
+
+
 
         # Initialize Digital Inputs
         self.store['DigitalInputs'] = {}
@@ -190,6 +342,11 @@ class StatusSimulator(Status):
         for key,value in self.store.items():
             setattr(self,key,value)
 
+    def update_linact_state(self):
+
+        for i in range(self.sysconf['LinearActuators']['count']):
+            self.store['LinearActuators'][i]['error_code'] = self.linact_stats[i].status
+
 
     def generate_packet_data(self):
         """ This function reads the current state
@@ -199,6 +356,9 @@ class StatusSimulator(Status):
         host will get invalid data.  To do this we read the proper
         format from the config file (see sysconf on the ElixysObject)
         """
+
+        self.update_linact_state()
+
         subs = self.fmt.subsystems
         vals = []
         for subname, subcount, subvals in subs:
@@ -348,6 +508,7 @@ class ElixysSimulator(ElixysObject):
 
         self.tempctrl_thread = thread.start_new_thread(self.run_tempctrls,())
 
+
     def parse_cmd(self, cmd_pkt):
         """
         Parse the cmd sent from the host
@@ -487,11 +648,27 @@ class ElixysSimulator(ElixysObject):
         """ Linear Actuator home axis """
         log.debug("Home the linear actuator %d", devid)
 
+        def fxn():
+            self.status.linact_stats[devid].clearHome()
+            self.status.linact_stats[devid].setMoving()
+            time.sleep(1.0)
+            while not self.status.LinearActuators[devid]['position'] <= 0:
+                self.status.LinearActuators[devid]['position'] -= 10
+                if self.status.LinearActuators[devid]['position'] < 0:
+                    self.status.LinearActuators[devid]['position'] = 0
+                time.sleep(0.1)
+
+            self.status.linact_stats[devid].clear()
+
+        Timer(0.5, fxn).start()
+
+
     def linacts_gateway_start(self, devid, value=None):
         log.debug("Set the gateway start bit")
 
     def linacts_set_requested_position(self, devid, value=0):
-        log.debug("Set requested position of actuator %d to %f mm" % (devid, value/100.0))
+        log.debug("Set requested position of actuator %d to %f mm" \
+                % (devid, value/100.0))
 
     def linacts_turn_on(self, devid, value=None):
         log.debug("Axis %d turn on" % devid)
