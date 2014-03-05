@@ -328,11 +328,10 @@ class StatusSimulator(Status):
         self['RadiationSensors']['error_code']= '\x00'
 
         for i in range(self.sysconf['RadiationSensors']['count']):
-            linact = {'error_code': 0,
+            radsens = {'error_code': 0,
                       'analog_in':0}
 
-            self.store['RadiationSensors'][i] = linact
-            linacts.append(linact)
+            self.store['RadiationSensors'][i] = radsens
 
         self['RadiationSensors']['Subs'] = radsensors
 
@@ -669,21 +668,65 @@ class ElixysSimulator(ElixysObject):
     def linacts_set_requested_position(self, devid, value=0):
         log.debug("Set requested position of actuator %d to %f mm" \
                 % (devid, value/100.0))
+        self.status.LinearActuators[devid]['requested_position'] = value
 
     def linacts_turn_on(self, devid, value=None):
         log.debug("Axis %d turn on" % devid)
 
+        self.status.linact_stats[devid].setServoOn()
+        if (self.status.LinearActuators[devid]['position'] ==
+            self.status.LinearActuators[devid]['requested_position']):
+            self.status.linact_stats[devid].setInPosition()
+
+
+
     def linacts_pause(self, devid, value=None):
         log.debug("Axis %d pause" % devid)
+        self.status.linact_stats[devid].clearMoving()
+
 
     def linacts_start(self, devid, value=None):
         log.debug("Axis %d start" % devid)
+
+        def fxn():
+            self.status.linact_stats[devid].clearInPosition()
+            self.status.linact_stats[devid].setMoving()
+
+            while not (self.status.LinearActuators[devid]['position'] ==
+                        self.status.LinearActuators[devid]['requested_position']):
+
+                # If our error less than 5mm set them equal
+                if abs(self.status.LinearActuators[devid]['position'] -
+                        self.status.LinearActuators[devid]['requested_position']) < 500 :
+                    self.status.LinearActuators[devid]['position'] = \
+                        self.status.LinearActuators[devid]['requested_position']
+                    break;
+
+                # If position is greater than req position deincrement
+                if (self.status.LinearActuators[devid]['position'] >
+                        self.status.LinearActuators[devid]['requested_position']):
+                    step = -100
+
+                # Else increment
+                else:
+                    step = 100
+
+                self.status.LinearActuators[devid]['position'] += step
+                time.sleep(0.01)
+
+            self.status.linact_stats[devid].clearMoving()
+            self.status.linact_stats[devid].setInPosition()
+
+        Timer(0.5, fxn).start()
 
     def linacts_brake_release(self, devid, value=None):
         log.debug("Axis %d brake release" % devid)
 
     def linacts_reset(self, devid, value=None):
         log.debug("Axis %d reset" % devid)
+        self.status.linact_stats[devid].clear()
+        self.status.linact_stats[devid].clearHome()
+
 
     def update_digital_inputs(self):
         """ Evaluate the valve states and determine
