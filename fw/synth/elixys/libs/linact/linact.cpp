@@ -168,9 +168,6 @@ LinActBuf * LinearActuator::getAxisBrakeReleaseQuery(unsigned int axisid) {
 int LinearActuator::getPosition() {
     int current_pos;
     unsigned char *payload;
-    
-    if(buffer.rxdata()==0 || checkChecksum() < 0)
-        return NOTPOSMSGERR;
 
     payload = buffer.rxdata();
 
@@ -192,13 +189,7 @@ int LinearActuator::getPosition() {
 unsigned int LinearActuator::getStatus() {
     unsigned int current_status;
     unsigned char *payload;
-    
-    if(buffer.rxdata()==0 || checkChecksum() < 0)
-        return 0;
-        
-    if(buffer.rxdatalen()!=2)
-        return 0;
-    
+       
     payload = buffer.rxdata();
         
     current_status = (payload[1]<<0)+(payload[0]<<8);

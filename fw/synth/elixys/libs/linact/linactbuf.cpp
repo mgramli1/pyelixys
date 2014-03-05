@@ -90,8 +90,8 @@ char * LinActBuf::as_string() {
 char * LinActBuf::rx_as_string() {
     rxstrbuf[0]='\0';
     char tmpbuf[4] = "";
-    for(int i=0;i<len;i++) {
-        sprintf(tmpbuf, "%02X", (unsigned char)buf[i]);
+    for(int i=0;i<rxlen;i++) {
+        sprintf(tmpbuf, "%02X", (unsigned char)rxbuf[i]);
 
         strcat(rxstrbuf,tmpbuf);
         //printf("%d:%s\r\n",i, tmpbuf);

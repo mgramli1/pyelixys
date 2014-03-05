@@ -185,6 +185,7 @@ void valves_set_state2(CMDPKT *pkt) {
 void linacts_set_req_pos(CMDPKT *pkt) {
     int *posptr = (int*)pkt->parameter;
     int devid = pkt->device_id;
+    
     DBG("LinActs.set_req_pos");  
     actuator.getSetAxisPosQuery(devid, *posptr);
     
@@ -201,6 +202,7 @@ void linacts_set_req_pos(CMDPKT *pkt) {
 void linacts_home_axis(CMDPKT *pkt) {
     int devid = pkt->device_id;
     DBG("LinActs.home_axis");
+    
     actuator.getAxisHomeQuery(devid);
     
     if (actuator.sendAndRead()!=0) {
@@ -208,46 +210,54 @@ void linacts_home_axis(CMDPKT *pkt) {
         return;
     }
     DBG("LinActs.home_axis:OK");
+    
 }
 
 void linacts_gateway_start(CMDPKT *pkt) {
     DBG("LinActs.gateway_start");
+    
     actuator.getGwStartQuery();
     
     if (actuator.sendAndRead()!=0) {
         DBG("LinActs.gateway_start:BADRESPERR");
         return;
     }
-    DBG("LinActs.gateway_start:OK");    
+    DBG("LinActs.gateway_start:OK");   
+    
 }
 
 void linacts_turn_on(CMDPKT *pkt) {
     int devid = pkt->device_id;
     DBG("LinActs.turn_on");
+    
     actuator.getAxisOnQuery(devid);
     
     if (actuator.sendAndRead()!=0) {
         DBG("LinActs.turn_on:BADRESPERR");
         return;
     }
-    DBG("LinActs.turn_on:OK");    
+    DBG("LinActs.turn_on:OK");  
+    
 }
 
 void linacts_pause(CMDPKT *pkt) {
     int devid = pkt->device_id;
     DBG("LinActs.pause");
+    
     actuator.getAxisPauseQuery(devid);
     
     if (actuator.sendAndRead()!=0) {
         DBG("LinActs.pause:BADRESPERR");
         return;
     }
-    DBG("LinActs.pause:OK");    
+    DBG("LinActs.pause:OK");   
+    
 }
 
 void linacts_break_release(CMDPKT *pkt) {
     int devid = pkt->device_id;
     DBG("LinActs.brake_release");
+    
     actuator.getAxisBrakeReleaseQuery(devid);
     
     if (actuator.sendAndRead()!=0) {
@@ -255,11 +265,13 @@ void linacts_break_release(CMDPKT *pkt) {
         return;
     }
     DBG("LinActs.brake_release:OK");
+    
 }
 
 void linacts_reset(CMDPKT *pkt) {
     DBG("LinActs.reset");
     int devid = pkt->device_id;
+    
     actuator.getAxisResetQuery(devid);
     
     if (actuator.sendAndRead()!=0) {
@@ -267,18 +279,21 @@ void linacts_reset(CMDPKT *pkt) {
         return;
     }
     DBG("LinActs.reset:OK");   
+    
 }
 
 void linacts_start(CMDPKT *pkt) {
     DBG("LinActs.start");
     int devid = pkt->device_id;
+    
     actuator.getAxisStartQuery(devid);
     
     if (actuator.sendAndRead()!=0) {
         DBG("LinActs.start:BADRESPERR");
         return;
     }
-    DBG("LinActs.start:OK");     
+    DBG("LinActs.start:OK");  
+      
 }
 
 

@@ -1,7 +1,7 @@
 #include "cmdrun.h"
 
 //Debug is disabled by default
-#if 0
+#if 1
 #define DBG(x, ...) std::printf("[CMDRUN : DBG]"x"\r\n", ##__VA_ARGS__); 
 #define WARN(x, ...) std::printf("[CMDRUN : WARN]"x"\r\n", ##__VA_ARGS__); 
 #define ERR(x, ...) std::printf("[CMDRUN : ERR]"x"\r\n", ##__VA_ARGS__); 
@@ -72,6 +72,7 @@ void run_cmd(CMDPKT *pkt) {
             break;
         case LINACTSTART:
             linacts_start(pkt);
+            break;
         default:
             ERR("Invalid cmd_id=%d", pkt->cmd_id);
             break;

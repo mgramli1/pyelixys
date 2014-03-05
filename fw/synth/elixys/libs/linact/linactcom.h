@@ -9,12 +9,18 @@
 namespace IAI {
 class LinearActuatorCom: public LinearActuator {
     public:
-        LinearActuatorCom(PinName tx, PinName rx, PinName dir);
+        LinearActuatorCom(PinName tx, PinName rx, PinName dir, PinName idir);
         Serial serial_;
         DigitalOut dir_;
+        DigitalOut idir_;
         
         Timer timeout_timer;
         int timeout_ms;
+        
+        void enableRx();
+        void enableTx();
+        
+        void clearRx();
         
         void waitTx();
         void writeChr(int c);
@@ -23,10 +29,10 @@ class LinearActuatorCom: public LinearActuator {
         void send();
         void setTimeout(int timeout);
         
-        void readResponse();
+        int readResponse();
         void readLen(int len);
         
-        int sendAndRead(int retry=3);
+        int sendAndRead();
         
         UARTName uartname;
         

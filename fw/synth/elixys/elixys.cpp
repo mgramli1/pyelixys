@@ -6,7 +6,7 @@ using namespace IAI;
 namespace Elixys {
 
     // Linear Actuator Com Port
-    LinearActuatorCom actuator(P0_15, P0_16, P0_17);
+    LinearActuatorCom actuator(P0_15, P0_16, P0_17, P0_22);
 
     // SPI Communication Bus
     SPI spibus(P0_9,P0_8,P0_7);

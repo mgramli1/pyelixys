@@ -29,9 +29,11 @@ static const PinMap PinMap_UART_RX[] = {
 };
 
 
-LinearActuatorCom::LinearActuatorCom(PinName tx, PinName rx, PinName dir): LinearActuator(), serial_(tx, rx), dir_(dir) {
+LinearActuatorCom::LinearActuatorCom(PinName tx, PinName rx, PinName dir, PinName idir):
+             LinearActuator(), serial_(tx, rx), dir_(dir), idir_(idir) {
     serial_.baud(230400);
-    dir_ = 0;
+    timeout_ms = 500;
+    enableRx();
     
     UARTName uart_tx = (UARTName)pinmap_peripheral(tx, PinMap_UART_TX);
     UARTName uart_rx = (UARTName)pinmap_peripheral(rx, PinMap_UART_RX);
@@ -39,6 +41,24 @@ LinearActuatorCom::LinearActuatorCom(PinName tx, PinName rx, PinName dir): Linea
     
     if ((int)uartname == NC) {
         error("Serial pinout mapping failed");
+    }
+    enableRx();
+}
+
+void LinearActuatorCom::enableRx() {
+    dir_ = 0;
+    idir_ = 0;
+}
+
+
+void LinearActuatorCom::enableTx() {
+    dir_ = 1;
+    idir_ = 1;
+}
+
+void LinearActuatorCom::clearRx() {
+    if (serial_.readable()) {
+        serial_.getc();
     }
 }
 
@@ -53,24 +73,26 @@ void LinearActuatorCom::waitTx() {
 
     
 void LinearActuatorCom::writeChr(int c) {
-    dir_ = 1;
+    enableTx();
     serial_.putc(c);
     waitTx();
-    dir_ = 0;
-    timeout_ms = 10;
+    enableRx();
 }
 
 void LinearActuatorCom::sendBuf(unsigned char *buf, int buflen) {
-    dir_ = 1;
+    enableTx();
     for(int i=0; i<buflen; i++) {
         serial_.putc(*(buf+i));        
     } 
     waitTx();   
-    dir_ = 0;
+    enableRx();
 }
 
 void LinearActuatorCom::send() {
+    clearRx();
+    enableTx();
     sendBuf(buffer.buf, buffer.len);
+    enableRx();
 }
 
 void LinearActuatorCom::setTimeout(int timeout) {
@@ -81,17 +103,18 @@ void LinearActuatorCom::readLen(int len) {
     int c;
     for(int i=0;i<len;i++) {
         c = readChr();
-        if (c > 0)
+        if (c >= 0)
             pushByteRxBuffer((char)(0xFF&c));
     }
 }
 
-void LinearActuatorCom::readResponse() {
+int LinearActuatorCom::readResponse() {
     readLen(buffer.exprxlen);
+    return checkChecksum();
 }
 
 int LinearActuatorCom::readChr() {
-   dir_ = 0;
+   enableRx();
    timeout_timer.reset();
    timeout_timer.start();
    while(timeout_timer.read_ms() < timeout_ms) {
@@ -103,20 +126,23 @@ int LinearActuatorCom::readChr() {
    }      
    timeout_timer.stop();
    timeout_timer.reset();
+   //printf("Timeout\r\n");
    return -1; 
 }
 
 
-int LinearActuatorCom::sendAndRead(int retry) {
-    for(int i=0;i<retry;i++) {
+int LinearActuatorCom::sendAndRead() {
+        int check;
         send();
-        wait(0.01);
-        readResponse();
-        if (checkChecksum()) {
+        wait(0.05);
+        enableRx();
+        check = readResponse();
+        //printf("Sent:%s\r\nResp:%s\r\nRxLen:%d|ExpRxLen:%d|Check%d\r\n", buffer.rx_as_string(), buffer.rx_as_string(), buffer.rxlen, buffer.exprxlen, check);
+        if(check>0) {
+            //printf("Checksum valid\r\n");
             return 0;
         }
-    }
-    return -1;
+        return -1;
 }
 
 }

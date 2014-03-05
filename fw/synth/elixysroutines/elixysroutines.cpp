@@ -1,5 +1,15 @@
 #include "elixysroutines.h"
 
+#if 1
+#define DBG(x, ...) std::printf("[ELXRT:DBG]"x"\r\n", ##__VA_ARGS__); 
+#define WARN(x, ...) std::printf("[ELXRT:WARN]"x"\r\n", ##__VA_ARGS__); 
+#define ERR(x, ...) std::printf("[ELXRT:ERR]"x"\r\n", ##__VA_ARGS__); 
+#else
+#define DBG(x, ...) 
+#define WARN(x, ...)
+#define ERR(x, ...) 
+#endif
+
 namespace Elixys {
     
     // Helper function sets the thermocouple error code
@@ -128,31 +138,38 @@ namespace Elixys {
     
     void linear_actuator_routines() {
           
-        actuator.getGwStatusQuery();
-        actuator.send();
-        actuator.readResponse();
-        status.linearactuators.error_code = actuator.getGwStatus();
+        static int i = 0; 
         
-        //for(int i=0;i<LINEARACTUATORSCOUNT;i++) {
-        for(int i=0;i<1;i++) {
-            actuator.getAxisStatusQuery(i);
-            actuator.send();
-            actuator.readResponse();
-            status.linearactuators.linearactuator[i].error_code = actuator.getStatus();
-            
-            actuator.getAxisPosQuery(i);
-            actuator.send();
-            actuator.readResponse();
-            status.linearactuators.linearactuator[i].position = actuator.getPosition();
+        actuator.getAxisStatusQuery(i);
+        actuator.sendAndRead();
+        //DBG("Axis %d Status:%s\r\n", i, actuator.buffer.rx_as_string());
+        status.linearactuators.linearactuator[i].error_code = actuator.getStatus();
+        
+        actuator.getAxisPosQuery(i);
+        actuator.sendAndRead();
+        //DBG("Axis %d Pos:%s:%d\r\n", i, actuator.buffer.rx_as_string(), actuator.getPosition());
+        
+        status.linearactuators.linearactuator[i].position = actuator.getPosition();
+    
+        i++;
+        if(i >= LINEARACTUATORSCOUNT) {
+            i = 0;
         }
     }
     
     void elixys_routines() {
+        //DBG("Running Elixys Routines\r\n");
         thermocouple_routine();
+        //DBG("Thermocouples\r\n");
         liquid_sensor_routine();
+        //DBG("Liquid Sensors\r\n");
         postion_sensor_routine();
-        smcinterface_adc_routine();   
-        linear_actuator_routines();     
+        //DBG("Position Sensors\r\n");
+        smcinterface_adc_routine();
+        //DBG("SMC Interface\r\n");   
+        linear_actuator_routines();
+        //DBG("LinAct Status Check\r\n");   
+             
     }
 
     

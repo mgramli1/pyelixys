@@ -20,8 +20,7 @@
 #define AXIS1_BASE_WR        0xF60C
 #define AXIS2_BASE_WR        0xF610
 #define AXIS3_BASE_WR        0xF614
-#define AXIS4_BASE_WR        0xF608
-#define AXIS5_BASE_WR        0xF61C
+#define AXIS4_BASE_WR        0xF618
 
 #define POS_SET_LO_OFFSET    0x0
 

@@ -6,7 +6,6 @@
 #include <cstdio>
 #include <cstring>
 
-
 #if DBGLINACTBUF
 #define LINACTDBG(x, ...) std::printf("[LinAct:DBG]"x"\r\n", ##__VA_ARGS__);
 #define LINACTWARN(x, ...) std::printf("[LinAct:WARN]"x"\r\n", ##__VA_ARGS__);
