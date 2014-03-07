@@ -31,7 +31,7 @@ class LinearAxis(SystemObject):
             self.ISGWSTARTSET = True
 
         self.reset()
-        self.home()
+        #self.home()
 
     def _get_conf(self):
         return self.sysconf['LinearAxis']['LinearAxis%d' % self.id_]
@@ -68,6 +68,10 @@ class LinearAxis(SystemObject):
 
     def move(self, posmm):
         self.turn_on()
+        time.sleep(0.1)
         self.set_position(posmm)
+        time.sleep(0.1)
         self.start()
+        time.sleep(0.1)
+        self.turn_on()
 

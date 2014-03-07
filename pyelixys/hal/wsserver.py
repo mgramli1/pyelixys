@@ -12,11 +12,14 @@ from pyelixys.hal.status import Status
 from pyelixys.hal.cmds import cmd_lookup
 from pyelixys.logs import wsslog as log
 import datetime
+import struct
+
+hdrfmt = struct.Struct("<iIi")
 
 exit_event = Event()
 
 #TODO move timeout to config file
-pkt_send_timeout = 0.2
+pkt_send_timeout = 0.3
 
 class WSHandler(tornado.websocket.WebSocketHandler):
     """ This the the main websocket handler that deals with incoming
@@ -27,6 +30,7 @@ class WSHandler(tornado.websocket.WebSocketHandler):
     """
 
     handler_instances = []
+    pkt_id = 0
 
     def initialize(self, cmd_queue, status_queue):
         """ Setup the cmd and statu queuse
@@ -40,6 +44,8 @@ class WSHandler(tornado.websocket.WebSocketHandler):
 
         self.cmd_queue = cmd_queue
         self.status_queue = status_queue
+        self.timeout = datetime.timedelta(seconds=pkt_send_timeout)
+        self.prev_pkt_id = -1
 
     def open(self):
         """ The handler is run when the websocket
@@ -66,8 +72,9 @@ class WSHandler(tornado.websocket.WebSocketHandler):
             WSHandler.handler_instances.pop()
             self.close()
             return
+
         tornado.ioloop.IOLoop.instance().add_timeout(
-            datetime.timedelta(seconds=pkt_send_timeout), self.send_pkt)
+            self.timeout, self.send_pkt)
         #self.write_message("Hello client")
 
     def on_message(self, message):
@@ -76,6 +83,9 @@ class WSHandler(tornado.websocket.WebSocketHandler):
         the rest of the system """
         self.count += 1
         self.status_queue.put(message)
+        hdrstr = message[0:hdrfmt.size]
+        hdr = hdrfmt.unpack(hdrstr)
+        WSHandler.pkt_id = hdr[1] 
 
     def on_close(self):
         """ This handler deals with when we close a connection
@@ -100,15 +110,21 @@ class WSHandler(tornado.websocket.WebSocketHandler):
         #print "Attempt to send pkt"
         #print "ID in WSHandler %d" % id(self.cmd_queue)
         try:
-            while True:
+
+            if self.prev_pkt_id != WSHandler.pkt_id:
+                starttime = datetime.datetime.now()
                 cmd = self.cmd_queue.get(block=False)
-                #log.debug("CMD:%s" % repr(cmd))
-                log.debug("Wrote %d bytes" % len(str(cmd)))
+                log.debug("CMD:%s", repr(cmd))
+                #log.debug("Wrote %d bytes" % len(str(cmd)))
                 self.write_message(str(cmd))
-                #self.write_message("CMD:%s" % repr(cmd))
-                time.sleep(0.1)
+                log.debug("PKTID:%d", WSHandler.pkt_id)
+                self.prev_pkt_id = WSHandler.pkt_id
+           
         except Empty:
             pass
+            #log.error("Queue empty")
+            #log.debug("PKTID:%d", WSHandler.pkt_id)
+
         tornado.ioloop.IOLoop.instance().add_timeout(
             datetime.timedelta(seconds=pkt_send_timeout), self.send_pkt)
 
@@ -148,11 +164,15 @@ class WSServerProcess(Process):
         self.http_server.listen(8888)
         tornado.ioloop.PeriodicCallback(self.periodic_exit, 50).start()
 
-        try:
-            log.debug("Tornado server IOLoop starting")
-            tornado.ioloop.IOLoop.instance().start()
-        except (KeyboardInterrupt, SystemExit):
-            tornado.ioloop.IOLoop.instance().stop()
+        while True:
+            try:
+                log.debug("Tornado server IOLoop starting")
+                tornado.ioloop.IOLoop.instance().start()
+            except KeyboardInterrupt:
+                continue
+            except SystemExit:
+                log.error("Tornado server going away")
+                tornado.ioloop.IOLoop.instance().stop()
 
 
     @staticmethod

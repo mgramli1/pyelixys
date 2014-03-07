@@ -443,10 +443,6 @@ class LinearActuator(SynthesizerSubObject):
     def __init__(self, id):
         super(LinearActuator, self).__init__(id, "LinearActuators")
 
-        #if not self.GWSTARTRUN:
-            #self.gateway_start()
-            #self.GWSTARTRUN = True
-
     def get_axis_status(self):
         self.status_ = self.status.LinearActuators[self.id_]['error_code']
         return self.status_
