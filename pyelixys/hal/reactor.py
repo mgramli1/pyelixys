@@ -70,3 +70,50 @@ class Reactor(PneumaticActuator):
         """ Turn off f18 valve """
         self.f18.turn_off()
 
+
+    def get_coordinate(self, name):
+        """ Read a coordinate from the config """
+        return self.conf['Positions'].get(name, None)
+
+    def brake_release(self):
+        """ Release the brake """
+        self.actuator.brake_release()
+
+    def home(self):
+        """ Home the reactor """
+        self.actuator.home()
+
+    def move(self, posname):
+        """ Move to named position """
+        coord = self.get_coordinate(posname)
+        if not coord is None:
+            self.actuator.move_and_wait(coord)
+
+    def move_install(self):
+        """ Move to the install position """
+        self.move('install')
+    
+    def move_transfer(self):
+        """ Move to the transfer position """
+        self.move('transfer')
+
+    def move_add(self):
+        """ Move to add position """
+        self.move('add')
+
+    def move_react0(self):
+        """ Move to react 0 position """
+        self.move('react0')
+
+    def move_react1(self):
+        """ Move to react 1 position """
+        self.move('react1')
+
+    def move_evaporate(self):
+        """ Move to evaporate """
+        self.move('evaporate')
+
+    def get_position(self):
+        return self.actuator.actuator.position
+
+    position = property(get_position)

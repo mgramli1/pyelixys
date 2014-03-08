@@ -41,6 +41,41 @@ def command_check(vals):
     return cmdint, fmtchr
     #raise ValidateError('A list was passed when an email address was expected')
 
+def coord2_check(vals):
+    """ Validates that we recieve a pair of robot coordinates """
+    # print "Running list of 3 ints validation"
+    if len(vals) != 2:
+        raise ValidateError("Expecting a list of 2 floats. "
+                "Did not receive 2 floats.")
+    try:
+        coords = [float(val) for val in vals]
+        if coords[0] > 350.00 or coords[0] < 0.00:
+            raise ValueError
+
+        if coords[1] > 100.00 or coords[1] < 0.00:
+            raise ValueError
+
+    except ValueError:
+        raise ValidateError("X coordinate should be less than 350.0mm, "
+                "Y coordinate should be less than 100.0mm")
+
+    return tuple(coords)
+
+def coord1_check(val):
+    """ Validates that we recieve a robot coordinate for reactor """
+    # print "Running list of 1 float validation"
+
+    try:
+        coord = float(val)
+        if coord > 200.0:
+            raise ValueError
+
+    except ValueError:
+        raise ValidateError("Coordinate should be less than or equal to 150.00mm")
+
+    return coord
+
+
 def list3ints_check(vals):
     """ Validates that we recieve a list of 3 ints """
     # print "Running list of 3 ints validation"
@@ -60,8 +95,12 @@ configspec = "pyelixys/hal/hwconfspec.ini"
 configfile = "pyelixys/hal/hwconf.ini"
 config = ConfigObj(configfile, configspec=configspec)
 validator = Validator({'command': command_check,
-                       'list3ints': list3ints_check})
+                       'list3ints': list3ints_check,
+                       'coord1':coord1_check,
+                       'coord2':coord2_check})
+
 results = config.validate(validator, preserve_errors=True)
+
 
 
 if __name__ == '__main__':
