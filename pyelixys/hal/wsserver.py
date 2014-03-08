@@ -19,7 +19,7 @@ hdrfmt = struct.Struct("<iIi")
 exit_event = Event()
 
 #TODO move timeout to config file
-pkt_send_timeout = 0.3
+pkt_send_timeout = 0.1
 
 class WSHandler(tornado.websocket.WebSocketHandler):
     """ This the the main websocket handler that deals with incoming

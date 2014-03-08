@@ -68,10 +68,44 @@ class LinearAxis(SystemObject):
 
     def move(self, posmm):
         self.turn_on()
-        time.sleep(0.1)
+        #time.sleep(0.1)
         self.set_position(posmm)
-        time.sleep(0.1)
+        #time.sleep(0.1)
         self.start()
-        time.sleep(0.1)
+        #time.sleep(0.1)
         self.turn_on()
 
+    def isInPosition(self):
+        # Wait 4/10 of a second for the actuator status to update
+        time.sleep(0.6)
+        return self.actuator.isInPosition()
+
+    def isMoveComplete(self):
+        isPos = self.isInPosition()
+        posErr = self.position_error
+        if posErr < self.conf['MAXERROR'] and isPos:
+            return True
+        else:
+            return False
+    
+    def move_and_wait(self, posmm, timeout=None):
+        if timeout is None:
+            timeout = self.conf['MOVETIMEOUT']
+
+        dtimeout = timedelta(0, timeout)
+        move_start_time = datetime.now()
+        self.move(posmm)
+        while datetime.now() - move_start_time < dtimeout:
+            if self.isMoveComplete():
+                return True
+            log.info("Waiting for complete actuator %d", self.id_)
+
+        log.error("Motion Timeout actuator %d", self.id_ )
+        return False
+        
+
+    def get_position_error(self):
+        return abs(self.actuator.position - 
+                self.actuator.requested_position)
+
+    position_error = property(get_position_error)

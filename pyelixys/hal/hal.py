@@ -510,10 +510,22 @@ class LinearActuator(SynthesizerSubObject):
         self.position_ = self.status.LinearActuators[self.id_]['position']
         log.debug("Get Actuator %d Position -> %s"
                   % (self.id_, self.position_))
-        return self.position_
+        return self.position_ / 100.0
 
     position = property(get_position, set_position,
                         doc="Set Actuator position")
+
+    def get_req_position(self):
+        req_position = self.status.LinearActuators[self.id_]['requested_position']
+        log.debug("Get Actuator %d Requested Position -> %s"
+                  % (self.id_, req_position))
+        return req_position / 100.0
+
+    position = property(get_position, set_position,
+                        doc="Set Actuator position")
+
+    requested_position = property(get_req_position,
+                        doc="Retrieve the requested position from the robot")
 
     def home(self):
         log.debug("Set Actuator %d Home"
