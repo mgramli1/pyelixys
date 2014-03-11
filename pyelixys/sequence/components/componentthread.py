@@ -17,10 +17,10 @@ class ComponentThread(Thread):
     def is_running(self):
         '''
         '''
-        if self._is_complete.isSet():
-            self.join()
-            self._is_complete.clear()
+        if not self._is_complete.isSet():
             return True
+
+        self.join()
         return False
 
     def run(self):

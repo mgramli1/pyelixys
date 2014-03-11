@@ -92,7 +92,8 @@ class PneumaticActuator(SystemObject):
             log.info("Failed to raise actuator %s before timeout, retry %d",
                         repr(self), i)
         log.error("Failed to lower actuator %s after retrys", repr(self))
-        raise ElixysPneumaticError("Failed to lower %s" % repr(self))
+        raise ElixysPneumaticError("Failed to lower %s"
+                " check digital sensors and pressure source"% repr(self))
 
     def lower_no_check(self):
         """ Move the actuator down but don't wait """

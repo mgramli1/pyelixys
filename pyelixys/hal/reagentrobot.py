@@ -133,3 +133,32 @@ class ReagentRobot(SystemObject):
                 self.yactuator.actuator.position
 
     position = property(get_position)
+
+    def grab_reagent(self, reactorid, reagentid):
+        self.move_reagent_position(reactorid, reagentid)
+        self.gripper.open()
+        self.gripper.lower()
+        self.gripper.close()
+        time.sleep(0.5)
+        self.gripper.lift()
+
+    def return_reagent(self, reactorid, reagentid):
+        self.gripper.lift()
+        self.gas_transfer.lift()
+        self.move_reagent_position(reactorid, reagentid)
+        self.gripper.lower()
+        self.gripper.open()
+        self.gripper.lift()
+
+    def drop_add(self, reactorid, addid):
+        self.gripper.close()
+        self.move_add(reactorid, addid)
+        self.gripper.lower()
+        self.gas_transfer.lower()
+
+    def prepare_add_reagent(self,reactorid, reagentid, addid):
+        self.gas_transfer.stop_transfer()
+        self.grab_reagent(reactorid, reagentid)
+        self.drop_add(reagentid, addid)
+
+    

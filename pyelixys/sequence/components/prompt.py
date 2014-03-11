@@ -17,7 +17,7 @@ class Prompt(Component):
         # Set a thread
         self.thread = PromptThread(self)
 
-    def run:
+    def run(self):
         '''
         Executes the 'PROMPT' run thread
         and the Prompt object is passed

@@ -21,6 +21,7 @@ class Component(object):
     def __init__(self, dbcomp):
         self.dbcomp = dbcomp
         self.status = ""
+        self.thread = None
 
     def run(self):
         """ Run this component thread!
@@ -46,4 +47,14 @@ class Component(object):
     component_status = property(
             get_component_status,
             set_component_status)
+
+    def join(self):
+        if self.thread:
+            self.thread.join()
+
+
+    def is_running(self):
+        if self.thread:
+            return self.thread.is_running()
+        return False
 

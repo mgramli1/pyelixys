@@ -75,6 +75,15 @@ class System(SystemObject):
                 start_simulator_thread()
 
 
+    def initialize(self):
+        self.reagent_robot.home()
+        for r in self.reactors:
+            r.home()
+
+        for r in self.reactors:
+            r.move_install()
+
+        self.reagent_robot.move_install(1)
 
 if __name__ == '__main__':
     s = System()

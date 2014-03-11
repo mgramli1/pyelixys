@@ -86,6 +86,7 @@ class Reactor(PneumaticActuator):
     def home(self):
         """ Home the reactor """
         self.actuator.reset()
+        self.actuator.turn_on()
         self.actuator.home()
 
     def move(self, posname):
