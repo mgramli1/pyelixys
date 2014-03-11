@@ -49,3 +49,12 @@ class ElixysLinactError(ElixysHALError):
 
 class ElixysLinactOutOfBoundsError(ElixysLinactError):
     pass
+
+class ElixysReagentRobotError(ElixysHALError):
+    pass
+
+class ElixysGripperError(ElixysReagentRobotError):
+    pass
+
+class ElixysGasTransferError(ElixysReagentRobotError):
+    pass

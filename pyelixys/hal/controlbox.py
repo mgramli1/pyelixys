@@ -14,7 +14,8 @@ from serial import SerialException
 from pyelixys.hal.elixysobject import ElixysObject
 from pyelixys.logs import hallog as log
 from pyelixys.elixysexceptions import ElixysComportError, \
-                                      ElixysCBoxError
+                                      ElixysCBoxError, \
+                                      ElixysPneumaticError
 
 
 class ControlBoxSystem(ElixysObject):

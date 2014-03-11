@@ -578,8 +578,8 @@ c_cmd_source_template = pyelixys/hal/cmdmsg.c.jinja
             reagent11 = 272.15, 81.35
             add0 = 291.74, 20.67
             add1 = 292.97, 40.19
-            elute = 293.84, 16.24
-            evaporate = 271.5, 18.0
+            elute = 292.59, 0.57
+            evaporate = 273.2, 18.35
             transfer = 274.1, 76.46
 
         [[[Reactor1]]]

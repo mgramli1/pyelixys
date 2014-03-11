@@ -103,6 +103,19 @@ class LinearAxis(SystemObject):
         log.error("Motion Timeout actuator %d", self.id_ )
         return False
         
+    def wait(self, timeout=None):
+        if timeout is None:
+            timeout = self.conf['MOVETIMEOUT']
+
+        dtimeout = timedelta(0, timeout)
+        move_start_time = datetime.now()
+        while datetime.now() - move_start_time < dtimeout:
+            if self.isMoveComplete():
+                return True
+            log.info("Waiting for complete actuator %d", self.id_)
+
+        log.error("Motion Timeout actuator %d", self.id_ )
+        return False
 
     def get_position_error(self):
         return abs(self.actuator.position - 

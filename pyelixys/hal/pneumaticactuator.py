@@ -11,6 +11,7 @@ from datetime import datetime
 
 from pyelixys.logs import hallog as log
 from pyelixys.hal.systemobject import SystemObject
+from pyelixys.hal.pressureregulator import PressureRegulator
 from pyelixys.elixysexceptions import ElixysPneumaticError
 
 class PneumaticActuator(SystemObject):
@@ -35,6 +36,14 @@ class PneumaticActuator(SystemObject):
         self._down_sensor_id = self.conf['Sensors']['down']
         self.timeout = timedelta(0, self.conf['timeout'])
 
+
+        self.pressreg_config = self.sysconf['PressureRegulators']
+        self.pressure_regulators = []
+        for pressreg_sec in self.pressreg_config.sections:
+            pressreg_id = self.pressreg_config[pressreg_sec]['id']
+            self.pressure_regulators.append(
+                    PressureRegulator(pressreg_id, synthesizer))
+
     def _get_conf(self):
         """ Anything that inherits from the this class you
         create a function that return the device's real
@@ -45,6 +54,7 @@ class PneumaticActuator(SystemObject):
 
     def lift(self):
         """ Move the actuator up and ensure it gets there """
+        self.prepare_air()
         for i in xrange(self.conf['retry_count']):
             begintime = datetime.now()
             self.lift_no_check()
@@ -57,7 +67,7 @@ class PneumaticActuator(SystemObject):
             log.info("Failed to raise actautor %s before timeout, retry %d",
                         repr(self), i)
         log.error("Failed to raise actuator %s after retrys", repr(self))
-        #raise ElixysPneumaticError("Failed to lift %s" % repr(self))
+        raise ElixysPneumaticError("Failed to lift %s" % repr(self))
 
 
     def lift_no_check(self):
@@ -70,6 +80,7 @@ class PneumaticActuator(SystemObject):
 
     def lower(self):
         """ Lower actuator and unsure it gets there """
+        self.prepare_air()
         for i in xrange(self.conf['retry_count']):
             begintime = datetime.now()
             self.lower_no_check()
@@ -81,7 +92,7 @@ class PneumaticActuator(SystemObject):
             log.info("Failed to raise actuator %s before timeout, retry %d",
                         repr(self), i)
         log.error("Failed to lower actuator %s after retrys", repr(self))
-        #raise ElixysPneumaticError("Failed to lower %s" % repr(self))
+        raise ElixysPneumaticError("Failed to lower %s" % repr(self))
 
     def lower_no_check(self):
         """ Move the actuator down but don't wait """
@@ -101,3 +112,6 @@ class PneumaticActuator(SystemObject):
 
     is_up = property(_is_up)
     is_down = property(_is_down)
+
+    def prepare_air(self):
+        self.pressure_regulators[1].setpoint = self.pressreg_config['min_pneumatic_pressure']

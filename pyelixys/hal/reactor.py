@@ -8,9 +8,12 @@ stopcocks, can all be accessed through this device as well.
 """
 import time
 from pyelixys.logs import hallog as log
+from pyelixys.elixysexceptions import ElixysPneumaticError
 from pyelixys.hal.systemobject import SystemObject
 from pyelixys.hal.pneumaticactuator import \
         PneumaticActuator
+from pyelixys.hal.pressureregulator import \
+        PressureRegulator
 from pyelixys.hal.linearaxis import LinearAxis
 from pyelixys.hal.stopcock import Stopcock
 from pyelixys.hal.tempctrl import TempCtrl
@@ -55,6 +58,7 @@ class Reactor(PneumaticActuator):
         self.actuator = LinearAxis(self._actuator_id,
                                     synthesizer)
 
+
     def _get_conf(self):
         """ Get the reactor config for reactor with this id"""
         return self.sysconf['Reactors']['Reactor%d' % self.id_]
@@ -81,13 +85,16 @@ class Reactor(PneumaticActuator):
 
     def home(self):
         """ Home the reactor """
+        self.actuator.reset()
         self.actuator.home()
 
     def move(self, posname):
         """ Move to named position """
+        self.prepare_move()
         coord = self.get_coordinate(posname)
         if not coord is None:
             self.actuator.move_and_wait(coord)
+        self.brake_release()
 
     def move_install(self):
         """ Move to the install position """
@@ -101,13 +108,17 @@ class Reactor(PneumaticActuator):
         """ Move to add position """
         self.move('add')
 
+    def move_react(self, reactpos):
+        """ Move to react pos """
+        self.move('react%d' % reactpos)
+
     def move_react0(self):
         """ Move to react 0 position """
-        self.move('react0')
+        self.move_react(0)
 
     def move_react1(self):
         """ Move to react 1 position """
-        self.move('react1')
+        self.move_react(1)
 
     def move_evaporate(self):
         """ Move to evaporate """
@@ -117,3 +128,17 @@ class Reactor(PneumaticActuator):
         return self.actuator.actuator.position
 
     position = property(get_position)
+
+    def prepare_cassette(self):
+        self.lower()
+        self.stopcocks[0].turn_clockwise()
+        self.stopcocks[1].turn_counter_clockwise()
+        self.stopcocks[2].turn_counter_clockwise()
+
+
+    def prepare_move(self):
+        self.prepare_air()
+        self.lower()
+        if not self.is_down:
+            raise ElixysPneumaticError
+
