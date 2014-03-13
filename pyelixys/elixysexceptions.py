@@ -7,18 +7,14 @@
 class ElixysError(Exception):
     pass
 
-
 class ElixysHALError(ElixysError):
     pass
-
 
 class ElixysValidationError(ElixysError):
     pass
 
-
 class ElixysValueError(ElixysError, IndexError):
     pass
-
 
 class ElixysPneumaticError(ElixysHALError):
     pass

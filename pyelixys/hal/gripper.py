@@ -11,6 +11,8 @@ from datetime import datetime
 from pyelixys.logs import hallog as log
 from pyelixys.hal.hal import SynthesizerHAL
 from pyelixys.hal.pneumaticactuator import PneumaticActuator
+from pyelixys.hal.utils.retry import retry_routine
+from pyelixys.elixysexceptions import ElixysPneumaticError
 
 class Gripper(PneumaticActuator):
     """ The gripper can go up, down
@@ -36,6 +38,7 @@ class Gripper(PneumaticActuator):
 
     conf = property(_get_conf)
 
+    @retry_routine()
     def open(self):
         """ Open the gripper and make sure it opens """
         for i in xrange(self.conf['retry_count']):
@@ -50,7 +53,7 @@ class Gripper(PneumaticActuator):
             log.info("Failed to open actautor %s before timeout, retry %d",
                         repr(self), i)
         log.error("Failed to open actuator %s after retrys", repr(self))
-        #raise ElixysPneumaticError("Failed to open %s" % repr(self))
+        raise ElixysPneumaticError("Failed to open %s" % repr(self))
 
     def open_no_check(self):
         """ Open the gripper and don't check sensors"""
@@ -61,6 +64,7 @@ class Gripper(PneumaticActuator):
         self.synth.valves[self._open_valve_id].on = True
         time.sleep(0.2)
 
+    @retry_routine()
     def close(self):
         """ Close the gripper and make sure it closes """
         for i in xrange(self.conf['retry_count']):
@@ -74,7 +78,7 @@ class Gripper(PneumaticActuator):
             log.info("Failed to close actuator %s before timeout, retry %d",
                         repr(self), i)
         log.error("Failed to close actuator %s after retrys", repr(self))
-        #raise ElixysPneumaticError("Failed to close %s" % repr(self))
+        raise ElixysPneumaticError("Failed to close %s" % repr(self))
 
     def close_no_check(self):
         """ Close the gripper and don't check the sensors """

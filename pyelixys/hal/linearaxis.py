@@ -11,6 +11,7 @@ from datetime import datetime
 
 from pyelixys.logs import hallog as log
 from pyelixys.hal.systemobject import SystemObject
+from pyelixys.hal.utils.retry import retry_routine
 from pyelixys.elixysexceptions import ElixysLinactError, \
                                       ElixysLinactOutOfBoundsError
 
@@ -88,6 +89,7 @@ class LinearAxis(SystemObject):
         else:
             return False
     
+    @retry_routine()
     def move_and_wait(self, posmm, timeout=None):
         if timeout is None:
             timeout = self.conf['MOVETIMEOUT']
@@ -101,8 +103,9 @@ class LinearAxis(SystemObject):
             log.info("Waiting for complete actuator %d", self.id_)
 
         log.error("Motion Timeout actuator %d", self.id_ )
-        return False
+        raise ElixysLinactError("%s unable to complete move before timeout") 
         
+    @retry_routine()
     def wait(self, timeout=None):
         if timeout is None:
             timeout = self.conf['MOVETIMEOUT']
@@ -115,7 +118,7 @@ class LinearAxis(SystemObject):
             log.info("Waiting for complete actuator %d", self.id_)
 
         log.error("Motion Timeout actuator %d", self.id_ )
-        return False
+        raise ElixysLinactError("%s unable to complete move before timeout") 
 
     def get_position_error(self):
         return abs(self.actuator.position - 

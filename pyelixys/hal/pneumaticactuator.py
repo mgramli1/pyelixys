@@ -12,6 +12,7 @@ from datetime import datetime
 from pyelixys.logs import hallog as log
 from pyelixys.hal.systemobject import SystemObject
 from pyelixys.hal.pressureregulator import PressureRegulator
+from pyelixys.hal.utils.retry import retry_routine
 from pyelixys.elixysexceptions import ElixysPneumaticError
 
 class PneumaticActuator(SystemObject):
@@ -52,6 +53,7 @@ class PneumaticActuator(SystemObject):
 
     conf = property(_get_conf)
 
+    @retry_routine()
     def lift(self):
         """ Move the actuator up and ensure it gets there """
         self.prepare_air()
@@ -78,6 +80,7 @@ class PneumaticActuator(SystemObject):
         time.sleep(0.2)
         self.synth.valves[self._up_valve_id].on = True
 
+    @retry_routine()
     def lower(self):
         """ Lower actuator and unsure it gets there """
         self.prepare_air()

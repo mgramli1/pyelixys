@@ -33,7 +33,7 @@ class Add(Component):
         Begins the run process of the
         Add unit operation.
         '''
-
+        self.system.pressure_regulators[0].setpoint = 0.0
         self.component_status = "Setting Pressure Regulator 1 to %f" % \
                 (self.delivery_pressure)
         self.system.pressure_regulators[0].set_pressure(
