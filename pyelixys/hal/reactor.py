@@ -65,6 +65,10 @@ class Reactor(PneumaticActuator):
 
     conf = property(_get_conf)
 
+    def initialize(self):
+        self.home()
+        self.set_stopcocks_for_install()
+
     def turn_f18_transfer_on(self):
         """ Turn on F18 valve """
         self.f18.turn_on()
@@ -85,6 +89,7 @@ class Reactor(PneumaticActuator):
 
     def home(self):
         """ Home the reactor """
+        self.prepare_move()
         self.actuator.reset()
         self.actuator.turn_on()
         self.actuator.home()
@@ -128,18 +133,29 @@ class Reactor(PneumaticActuator):
     def get_position(self):
         return self.actuator.actuator.position
 
+    def set_stopcocks_for_elute(self):
+        self.stopcocks[0].turn_counter_clockwise()
+        self.stopcocks[1].turn_clockwise()
+        self.stopcocks[2].turn_clockwise()
+
+    def set_stopcocks_for_install(self):
+        self.stopcocks[0].turn_counter_clockwise()
+        self.stopcocks[1].turn_counter_clockwise()
+        self.stopcocks[2].turn_clockwise()
+
+    def set_stopcocks_for_transfer(self):
+        self.stopcocks[0].turn_counter_clockwise()
+        self.stopcocks[1].turn_counter_clockwise()
+        self.stopcocks[2].turn_clockwise()
+
     position = property(get_position)
 
     def prepare_cassette(self):
         self.lower()
-        self.stopcocks[0].turn_clockwise()
-        self.stopcocks[1].turn_counter_clockwise()
-        self.stopcocks[2].turn_counter_clockwise()
-
+        self.set_stopcocks_for_install()
 
     def prepare_move(self):
         self.prepare_air()
         self.lower()
         if not self.is_down:
             raise ElixysPneumaticError
-

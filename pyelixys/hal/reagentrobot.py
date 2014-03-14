@@ -156,9 +156,25 @@ class ReagentRobot(SystemObject):
         self.gripper.lower()
         self.gas_transfer.lower()
 
+    def drop_add0(self, reactorid):
+        self.drop_add(reactorid, 0)
+
+    def drop_add1(self, reactorid):
+        self.drop_add(reactorid, 1)
+
     def prepare_add_reagent(self,reactorid, reagentid, addid):
         self.gas_transfer.stop_transfer()
         self.grab_reagent(reactorid, reagentid)
         self.drop_add(reagentid, addid)
+
+    def drop_elute(self, reactorid):
+        self.gripper.close()
+        self.move_elute(reactorid)
+        self.gripper.lower()
+        self.gas_transfer.lower()
+
+    def prepare_transfer(self, reactorid):
+        self.move_transfer(reactorid)
+        self.gas_transfer.lower()
 
     
