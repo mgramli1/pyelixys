@@ -20,10 +20,7 @@
 *.srec
 *.list
 tags
-fpga/simulation
-fpga/simulation/*
 build
-docs/build/
 examples/build
 utils/build
 .DS_Store
@@ -33,3 +30,8 @@ bin/
 include/
 lib/
 share/
+docs/software/build
+docs/firmware/build
+docs/hardware/build
+
+
