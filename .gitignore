@@ -23,8 +23,7 @@ tags
 fpga/simulation
 fpga/simulation/*
 build
-docs
-doc/build/*
+docs/build/
 examples/build
 utils/build
 .DS_Store
