@@ -29,3 +29,8 @@ examples/build
 utils/build
 .DS_Store
 elixys.db
+.Python
+bin/
+include/
+lib/
+share/
