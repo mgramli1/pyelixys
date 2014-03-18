@@ -94,6 +94,7 @@ class PressureRegulator(SystemObject):
         # Slowly increment the pressure to
         # simulate the increase of pressure
         # until we reach it or timeout
+        self.setpoint = 0.0
         current_pressure = self.pressure
         num_steps = duration / timestep
         press_diff = value - current_pressure
