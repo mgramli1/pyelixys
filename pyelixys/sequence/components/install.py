@@ -12,8 +12,7 @@ class Install(Component):
         self.component_id = dbcomp.details['id']
         self.sequence_id = dbcomp.details['sequenceid']
         self.message = dbcomp.details['message']
-        self.reactor = dbcomp.details['reactor']
-        self.validationerror = dbcomp.details['validationerror']
+        self.reactor = self.reactors[dbcomp.details['reactor']]
         self.note = dbcomp.details['note']
         # Set a thread
         self.thread = InstallThread(self)
@@ -21,11 +20,13 @@ class Install(Component):
     def run(self):
         '''
         Executes the 'Install'
-        run thread and the Install
-        object is passed into the
-        InstallThread.
         '''
-        self.thread.start()
+        self.component_status = "Starting the Install run()"
+        self.system.initialize()
+        self.component_status = "Move to install for reactor %d" % self.reactor.id_
+        self.system.reagent_robot.move_install(self.reactor.id_)
+        self.component_status = "Release the reagent robot brake"
+        self.system.reagent_robot.brake_release()
 
 class InstallThread(ComponentThread):
     '''
@@ -49,56 +50,20 @@ class InstallThread(ComponentThread):
         Runs as a thread
         '''
         self._is_complete.clear()
-
-        self.ins.component_status = "Starting the Install run()"
-
-        self.ins.component_status = "Moving reactor"
-
-        # TODO Move reactor to INSTALL
-        # Check if we already at the correct position
-        # if: reactor position is in the Install position
-        #   Check that the reactor is either up or down
-        #   If all true, then we are in position
-        # Else, we need to setup for the Install op
-        # else:
-        #   needs_pressure_restore = False
-        #   if: reactor position is in either one of the INSTALL positions
-        #       if: reactor is up
-        #           self.ins.system.pressure_regulators[1].set_pressure(30)
-        #           needs_pressure_restore = True
-        #
-        #   self.ins.system.reactors[self.ins.reactor].lower() - Move Reactor down
-        #   Enable reactor robot
-        #
-        #   if needs_pressure_restore:
-        #       self.ins.system.pressure_regulators[1].set_pressure(60)
-        #
-        #   Move reactor to the Install position
-        #   self.ins.system.reactors[self.ins.system.reactors].lift()
-        #   #Moves reactor up/raise reactor
-        #   Disable the reactor robot
-
-        if self.ins.message:
-            self.ins.component_status = "Waiting for user input"
-            # TODO Wait for user input
-
-        self.ins.component_status = "Sucessfully finished " \
-                "running Install operation"
+        self.ins.run()
         self._is_complete.set()
 
 if __name__ == '__main__':
-    a = {"componenttype": "INSTALL",
-            "sequenceid": 14, "reactor": 1,
-            "validationerror": True,
-            "messagevalidation": "type=string; required=true",
+    details = {"sequenceid": 14,
+            "reactor": 2,
             "note": "",
-            "reactorvalidation": "type=enum-number; values=1,2,3; required=true",
-            "message": "", "type": "component", "id": 107}
+            "message": "",
+            "id": 107}
 
 
 
     class db(object):
-        details = a
+        details = details
 
     ins = Install(db)
     from IPython import embed

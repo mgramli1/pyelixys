@@ -450,19 +450,6 @@ class LinearActuator(SynthesizerSubObject):
     axis_status = property(get_axis_status)
 
 
-#def retry_routine(retry_count=3):
-#    """ Decorate fxn and retry """
-#    def wrapper(fxn):
-#        @wraps(fxn)
-#        def wrapped_f(*args, **kwargs):
-#            for i in range(retry_count):
-#                try:
-#                    return fxn(*args, **kwargs)
-#                except ElixysHALError as e:
-#                    exp = e
-#            raise exp
-#        return wrapped_f
-#    return wrapper
     def isMoving(self):
         if self.axis_status & self.INMOVEBIT:
             return True
@@ -552,20 +539,6 @@ class LinearActuator(SynthesizerSubObject):
         cmd = self.cmd_lookup['LinearActuators']['gateway_start'][self.id_]()
         self.comproc.run_cmd(cmd)
 
-
-#def retry_routine(retry_count=3):
-#    """ Decorate fxn and retry """
-#    def wrapper(fxn):
-#        @wraps(fxn)
-#        def wrapped_f(*args, **kwargs):
-#            for i in range(retry_count):
-#                try:
-#                    return fxn(*args, **kwargs)
-#                except ElixysHALError as e:
-#                    exp = e
-#            raise exp
-#        return wrapped_f
-#    return wrapper
     def turn_on(self):
         log.debug("Set Actuator %d Turn on"
                   % self.id_)

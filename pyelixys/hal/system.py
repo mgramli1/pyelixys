@@ -82,6 +82,7 @@ class System(SystemObject):
 
         for r in self.reactors:
             r.move_install()
+            r.lift_no_check()
 
         self.reagent_robot.move_install(0)
 
