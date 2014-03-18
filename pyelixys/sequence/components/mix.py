@@ -10,15 +10,14 @@ class Mix(Component):
     """ Mix """
     def __init__(self, dbcomp):
         super(Mix, self).__init__(dbcomp)
-        self.component_id = dbcomp.details['id']
-        self.sequence_id = dbcomp.details['sequenceid']
-        self.mix_time = dbcomp.details['mixtime']
-        self.reactor = dbcomp.details['reactor']
-        self.validation_error = dbcomp.details['validationerror']
-        self.stir_speed = dbcomp.details['stirspeed']
-        self.note = dbcomp.details['note']
+        details = dbcomp.details
+        self.component_id = details['componentid']
+        self.sequence_id = details['sequenceid']
+        self.mix_time = details['time']
+        self.reactor = self.system.reactors[details['reactor']]
+        self.stir_speed = details['stirspeed']
+        self.note = details['note']
         # Set a thread
-        self.thread = MixThread(self)
 
     def run(self):
         '''
@@ -27,8 +26,31 @@ class Mix(Component):
         object is passed into the
         MixThread.
         '''
-        self.thread.start()
+        self.component_status = "Starting the Mix run()"
 
+        self.component_status = "Mixing"
+
+        self.component_status = "Setting reactor %d to stir speed %f" \
+                % (self.reactor.id_, self.stir_speed)
+        self.reactor.mixer.set_duty_cycle(self.stir_speed)
+        time.sleep(2)
+
+        self.component_status = "Mixing reagent, waiting for completion"
+        starttimer = time.time()
+        while (starttimer + self.mix_time > time.time()):
+            time.sleep(0.1)
+
+        self.component_status = "Setting reactor %d to stir motor off" \
+                % (self.reactor.id_)
+        
+        self.reactor.mixer.set_duty_cycle(0)
+        time.sleep(2)
+
+
+        self.component_status = "Sucessfully finished " \
+                "running Mix operation"
+        
+        
 
 class MixThread(ComponentThread):
     '''
@@ -53,41 +75,23 @@ class MixThread(ComponentThread):
         '''
         self._is_complete.clear()
 
-        self.mix.component_status = "Starting the Mix run()"
-
-        self.mix.component_status = "Mixing"
-
-        self.mix.component_status = "Setting reactor %s to stir speed %s" \
-                % (self.mix.reactor, self.mix.stir_speed)
-        self.mix.system.reactors[self.mix.reactor].mixer.set_duty_cycle(
-                self.mix.stir_speed)
-        time.sleep(2)
-
-        self.mix.component_status = "Mixing reagent, waiting for completion"
-        starttimer = time.time()
-        while (starttimer + self.mix.mix_time > time.time()):
-            pass
-
-        self.mix.component_status = "Setting reactor %s to stir motor off" \
-                % (self.mix.reactor)
-        self.mix.system.reactors[self.mix.reactor].mixer.set_duty_cycle(0)
-        time.sleep(2)
-
-
-        self.mix.component_status = "Sucessfully finished " \
-                "running Mix operation"
+        self.mix.run()
+        
         self._is_complete.set()
+        
 
 if __name__ == '__main__':
-    a = {"mixtimevalidation": "type=number; min=0; max=7200; required=true",
-            "mixtime": 0, "componenttype": "MIX",
-            "reactor": 0, "validationerror": True,
-            "stirspeed": 500, "sequenceid": 14, "note": "",
-            "reactorvalidation": "type=enum-number; values=1,2,3; required=true",
-            "type": "component", "id": 112,
-            "stirspeedvalidation": "type=number; min=0; max=5000; required=true"}
+    details = {   "time": 10,
+            "componenttype": "MIX",
+            "reactor": 0, 
+            "stirspeed": 100.0, 
+            "sequenceid": 14, 
+            "note": "",
+            "type": "component", 
+            "componentid": 112}
+            
     class db(object):
-        details = a
+        details = details
 
     m = Mix(db)
     from IPython import embed
