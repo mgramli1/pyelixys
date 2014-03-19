@@ -47,7 +47,7 @@ class PressureRegulator(SystemObject):
     def _get_conf(self):
         """ Return the config this pressure regulator """
         self.press_conf = self.sysconf['PressureRegulators']
-        
+
         return self.press_conf['PressureRegulator%d' % self.id_]
 
     def set_setpoint(self, value):
@@ -59,7 +59,7 @@ class PressureRegulator(SystemObject):
         value = value * self.conf['PSICONV']
         log.debug("Set pressure regulator %d to %f", self.id_, value)
         self.synth.cbox.set_dac(self.id_, value)
-        
+
         log.debug("Checking for pressure to equal setpoint")
         # Loop until the pressure reaches the setpoint
         begintime = datetime.now()
@@ -83,7 +83,8 @@ class PressureRegulator(SystemObject):
                 self.id_, value)
         return value
 
-    setpoint = property(get_setpoint, set_setpoint)
+    setpoint = property(get_setpoint, set_setpoint,
+            doc="Get or set the pressure setpoint")
 
     def set_pressure(self, value, duration=5.0, timestep=0.5):
         '''

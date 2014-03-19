@@ -1,13 +1,25 @@
 """
-This file shall create a dictionary
-object to be reference from the 
-sequence manager class.
+The sequence submodule contains
+the unit operations of the Elixys Synthesizer
+These operations include:
 
-Import each component from the components/
-directory. Then map each component class
-to a dictionary to be used by the sequence
-manager class.
+    * Add
+    * Cassette
+    * Comment
+    * Evaporate
+    * Transfer
+    * React
+    * Prompt
+    * Install
+    * TrapF18
+    * EluteF18
+    * Initialize
+    * Mix
+    * Move
+    * ExternalAdd
+
 """
+
 from components.add import Add
 from components.cassette import Cassette
 from components.comment import Comment

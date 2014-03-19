@@ -62,14 +62,23 @@ class SynthesizerSubObject(SynthesizerObject):
 
 
     def set_id(self, id_):
+        """ Set the device id
+        we use "id" with an underscore
+        since id is a python operator
+        """
         self.id_ = id_
 
     def get_config(self):
+        """ Return the configuration for the device
+        with this configname """
         return self.sysconf.get(self.configname, None)
 
     config = property(get_config)
+    """ The configuration for a HAL object """
 
     def get_unit_config(self):
+        """ If our config has sub system
+        configs, return them """
         if not self.config is None:
             cfg = self.config.get('Units', None)
             if not cfg is None:
@@ -79,14 +88,18 @@ class SynthesizerSubObject(SynthesizerObject):
     unit_conf = property(get_unit_config)
 
     def __repr__(self):
+        """ Return the representation of this
+        subsystem as a pretty string """
         return "<%s(%s)>" % (self.__class__.__name__, str(self.id_))
 
 
 class StateMessageParser(ElixysObject):
+    """ Unused? """
     pass
 
 
 class State(ElixysObject):
+    """ Unused? """
     pass
 
 
@@ -95,12 +108,14 @@ class Mixer(SynthesizerSubObject):
     the contents of the reactors.
     """
     def __init__(self, id):
+        """ Construct the Mixer """
         super(Mixer, self).__init__(id, "Mixers")
         self.duty_ = 0
         self.period_ = 0
         self.on_ = False
 
     def set_duty_cycle(self, value):
+        """ Set the mixer duty cycle """
         log.debug("Set Mixer %d duty cycle -> %f" % (self.id_, value))
         if value >= 0.0 and value <= 100.0:
             self.duty_ = value
@@ -111,6 +126,7 @@ class Mixer(SynthesizerSubObject):
             log.error("Mixer %d duty cycle -> %f out of range" % (self.id_, value))
 
     def get_duty_cycle(self):
+        """ Return the mixer duty cycle """
         log.debug("Get Mixer %d duty cycle -> %f" % (self.id_, self.duty_))
         return self.duty_
 
@@ -118,10 +134,12 @@ class Mixer(SynthesizerSubObject):
                           doc="Set duty cycle of mixer motor")
 
     def set_period(self, value):
+        """ Set the period of the mixer """
         log.debug("Set Mixer %d period -> %f" % (self.id_, value))
         self.period_ = value
 
     def get_period(self):
+        """ Get the period of the mixer """
         log.debug("Get Mixer %d period -> %f" % (self.id_, self.period_))
         return self.period_
 
@@ -129,6 +147,7 @@ class Mixer(SynthesizerSubObject):
                       doc="Period of mixer motor signal")
 
     def set_on(self, value):
+        """ Set the mixer to 100.0% """
         log.debug("Set Mixer %d on -> %s" % (self.id_, value))
         self.on_ = value
         if value is True:
@@ -137,6 +156,7 @@ class Mixer(SynthesizerSubObject):
             self.set_duty_cycle(0.0)
 
     def get_on(self):
+        """ Return whether the mixer is on """
         log.debug("Get Mixer %d on -> %s" % (self.id_, self.on_))
         return self.on_
 
@@ -150,6 +170,7 @@ class Valve(SynthesizerSubObject):
     turn them on or off an monitor the status
     """
     def __init__(self, id):
+        """ Construct a valve """
         super(Valve, self).__init__(id, "Valves")
         self.on_ = False
         Valve.valve_state0 = 0
@@ -157,6 +178,7 @@ class Valve(SynthesizerSubObject):
         Valve.valve_state2 = 0
 
     def set_on(self, value):
+        """ Set the valve state """
         if not hasattr(self,'valve_state0') or not hasattr(self,'valve_state1') \
             or not hasattr(self,'valve_state2'):
             self.load_states()
@@ -190,6 +212,7 @@ class Valve(SynthesizerSubObject):
 
 
     def get_on(self):
+        """ Return whether we are on or not """
         if not hasattr(self,'valve_state0') or not hasattr(self,'valve_state1') \
             or not hasattr(self,'valve_state2'):
             self.load_states()
@@ -224,16 +247,19 @@ class Thermocouple(SynthesizerSubObject):
     of the collet temperatures
     """
     def __init__(self, id, configname="Thermocouples"):
+        """ Contruct ad thermocouple """
         super(Thermocouple, self).__init__(id, configname)
         self.temperature_ = 25.0
 
     def get_temperature(self):
+        """ Return the current temperature """
         log.debug("Get Thermocouple %d temperature -> %f"
                   % (self.id_, self.temperature_))
         self.temperature_ = self.status['Thermocouples'][self.id_]['temperature']
         return self.temperature_  # Checks temp and returns value
 
-    temperature = property(get_temperature)
+    temperature = property(get_temperature,
+                            doc="Get the thermocouple temperature")
 
 
 class AuxThermocouple(Thermocouple):
@@ -242,15 +268,18 @@ class AuxThermocouple(Thermocouple):
     as thermocouples place with in the vials
     """
     def __init__(self, id):
+        """ Construct an AuxThermocouple """
         super(AuxThermocouple, self).__init__(id,  "AuxThermocouples")
 
     def get_temperature(self):
+        """ Get the current temperature reading """
         log.debug("Get AuxThermocouple %d temperature -> %f"
                   % (self.id_, self.temperature_))
         self.temperature_ = self.status['AuxThermocouples'][self.id_]['temperature']
         return self.temperature_  # Checks temp and returns value
 
-    temperature = property(get_temperature)
+    temperature = property(get_temperature,
+                            doc="Return the temperature")
 
 class Heater(SynthesizerSubObject):
     """ Each collet has a separate AC heater
@@ -263,16 +292,22 @@ class Heater(SynthesizerSubObject):
     accidentally generating a 'run away' heater.
     """
     def __init__(self, id):
+        """ Construct a Heater """
         super(Heater, self).__init__(id, "Heaters")
         self.on_ = False
 
     def get_on(self):
+        """ Determine if we are on or not.
+        Heaters can ONLY be queried for their state
+        temperature controller are used to turn them on or off
+        """
         self.state_ = self.status['Heaters']['state']
         self.on_ = bool(self.state_ >> self.id_ & 1)
         log.debug("Get Heater %d on -> %s" % (self.id_, self.on_))
         return self.on_
 
-    on = property(get_on)
+    on = property(get_on,
+                doc="Return the heater state")
 
 
 class TemperatureController(SynthesizerSubObject):
@@ -590,12 +625,18 @@ class DigitalInput(SynthesizerSubObject):
                        doc="Check if position sensor tripped")
 
     def __nonzero__(self):
+        """ The bool return value
+        Allows a DigitalInput to be used in
+        an if statement """
+
         return self.tripped
 
     def __bool__(self):
         return self.__nonzero__()
 
     def all(self):
+        """ Return the state of ALL the
+        Digital inputs """
         self.state_ = self.status.DigitalInputs['state']
         self.all_state_ = [not bool(self.state_ >> sensorbit & 1)
             for sensorbit in range(self.sysconf['DigitalInputs']['count'])]
@@ -604,6 +645,8 @@ class DigitalInput(SynthesizerSubObject):
         return self.all_state_
 
     def __repr__(self):
+        """ Pretty representation of the
+        digitalinput, prints the status """
         r = super(DigitalInput, self).__repr__()
         return "%s=%s" % (r, self.tripped)
 
@@ -617,6 +660,8 @@ class LiquidSensor(SynthesizerSubObject):
         self.analog_out_ = 0
 
     def get_analog_out(self):
+        """ Return the analog Liquid Sensor value
+        """
         self.analog_out_ = self.status.LiquidSensors[self.id_]['analog_in'] / 4095.0
         log.debug("Get Liquid Sensor Analog in %d on -> %s"
                   % (self.id_, self.analog_out_))
@@ -627,10 +672,36 @@ class LiquidSensor(SynthesizerSubObject):
 
 
 class SynthesizerHAL(SynthesizerObject):
-    """ The is the Synthesizer object giving
-    access to all the sub systems.
+    """ Construct a Synthesizer Board Abstraction.
+    Upon construction we also start the communication
+    process which maintains the sysnthesizer status
+    and ships the commands to the synthesizer board
+    via the websocket protocol.
+
+    The Synthesizer Contains:
+
+    * mixer_motors (List of Mixer(s))
+    * valves (List of Valve(s))
+    * thermocouples (List of Thermocouple(s))
+    * aux_thermocouples (List of AuxThermocouple(s))
+    * heaters (List of Heater(s))
+    * temperature_controllers (List of TemperatureController(s))
+    * smc_interfaces (List of SMCInterface(s))
+    * fans (List of Fan(s))
+    * digital_inputs (List of DigitalInput(s))
+    * liquid_sensors (List of LiquidSensor(s))
+    * linear_axis (List of LinearActuator(s))
+
+    It is an abstraction of the synthesizer board.
+    And while a component in the Elixys System
+    could be used separately via this interface.
     """
     def __init__(self):
+        """ The is the Synthesizer object giving
+        access to all the sub systems.
+        Here we construct all the subsystems, and
+        attach them to our "system"
+        """
 
         super(SynthesizerHAL, self).__init__()
 
@@ -670,4 +741,6 @@ class SynthesizerHAL(SynthesizerObject):
         self.start_com_proc()
 
 if __name__ == '__main__':
+    from IPython import embed
     s = SynthesizerHAL()
+    embed()

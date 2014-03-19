@@ -7,12 +7,26 @@ from component import Component
 from componentthread import ComponentThread
 
 class Add(Component):
-    """ Add """
+    """The Add component:
+    Expects a dbcomp (database component) with a member
+    details dictionary.
+
+    The details must contain:
+
+    * componentid - integer
+    * sequenceid - integer
+    * reagentpos - integer
+    * reactor - integer
+    * deliverytime - float, secs
+    * deliveryposition - integer (0,1)
+    * deliverypressure - float, psi
+    * note - str
+    """
     def __init__(self, dbcomp):
 
         super(Add, self).__init__(dbcomp)
         details = dbcomp.details
-        self.component_id = details['id']
+        self.component_id = details['componentid']
         self.sequence_id = details['sequenceid']
         self.reagent_pos = details['reagentpos']
         self.reactor = self.system.reactors[details['reactor']]
@@ -43,7 +57,7 @@ class Add(Component):
                 "to the ADD position" % self.reactor
         self.reactor.move_add()
 
-        self.component_status = "Lift Reactor %s" % self.reactor 
+        self.component_status = "Lift Reactor %s" % self.reactor
         self.reactor.lift()
 
 
@@ -84,11 +98,11 @@ class AddThread(ComponentThread):
         self.add = add_component
 
     def run(self):
-        
+
         self._is_complete.clear()
 
         self.add.run()
-        
+
         self._is_complete.set()
         '''
         Executes the 'ADD' run thread
@@ -98,14 +112,14 @@ class AddThread(ComponentThread):
 
 
 if __name__ == '__main__':
-    
+
 
     details = {}
 
     details['reactor'] = 0
     details['sequenceid'] = 0
     details['reagentpos'] = 5
-    details['id'] = 0
+    details['componentid'] = 0
     details['deliverytime'] = 5.0
     details['deliveryposition'] = 0.0
     details['deliverypressure'] = 3.0

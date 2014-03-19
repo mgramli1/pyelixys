@@ -149,19 +149,26 @@ class StatusMessageFormatFactory(object):
     repeatfmtsection = "Repeat"
 
     def __init__(self, config=config):
+        """ Construct a StatusMessageFormatFactory
+        """
         self.conf = config
 
     def get_struct(self):
-        """ Returns a struct to pack or unpack a status packet """
+        """ Returns a struct to pack or unpack a status packet
+        """
         fmt = self.parse_config_fmt_str()
         return struct.Struct(fmt)
 
     def get_subsystems(self):
+        """ Return a tuple of all subsystems, including
+        name count and message format section """
         return [(name, sub.get('count', 1), sub[self.messagefmtsection])
                 for name, sub in self.conf.items()
                 if(self.messagefmtsection in sub)]
 
     subsystems = property(get_subsystems)
+    """ List of substystems and there respective format
+    expectations from the hwconf """
 
     def parse_config_fmt_str(self):
         """ Reads the configuration dictionary and constructs the format string
@@ -191,6 +198,7 @@ class StatusMessageFormatFactory(object):
         return "".join(msg)
 
     def generate_c_header(self, filename=None):
+        """ Generate a C header for use on the MCU """
         template_loader = jinja2.FileSystemLoader(searchpath=".")
         template_env = jinja2.Environment(loader=template_loader,
                                           trim_blocks=True,
@@ -209,6 +217,7 @@ class StatusMessageFormatFactory(object):
 
 
     def generate_c_src(self, filename=None):
+        """ Generate a C source file for use on the MCU """
         template_loader = jinja2.FileSystemLoader(searchpath=".")
         template_env = jinja2.Environment(loader=template_loader,
                                           trim_blocks=True,

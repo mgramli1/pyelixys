@@ -13,6 +13,7 @@ class Command(ElixysObject):
     the synthesizer hardware """
 
     def __init__(self, sub_system, cmd_name, cmd_id, device_id=None, parameter="\x00"):
+        """ Construct the Command """
         self.sub_system = sub_system
         self.cmd_name = cmd_name
         self.cmd_id = cmd_id
@@ -141,6 +142,7 @@ class CommandLookup(ElixysObject, dict):
         return '%s(%s)' % (type(self).__name__, dictrepr)
 
     def update(self, *args, **kwargs):
+        """ Update the command lookup table """
         for k, v in self.parse_cmds().iteritems():
             self[k] = v
 

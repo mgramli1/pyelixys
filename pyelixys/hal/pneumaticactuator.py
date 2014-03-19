@@ -82,7 +82,7 @@ class PneumaticActuator(SystemObject):
 
     @retry_routine()
     def lower(self):
-        """ Lower actuator and unsure it gets there """
+        """ Lower actuator and ensure it gets there """
         self.prepare_air()
         for i in xrange(self.conf['retry_count']):
             begintime = datetime.now()

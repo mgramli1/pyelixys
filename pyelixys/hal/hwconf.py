@@ -9,6 +9,7 @@ validate the config. It should only be
 modified by developers who are willing to accept
 the consequences!
 """
+import os
 from configobj import ConfigObj
 from validate import Validator
 from validate import ValidateError
@@ -91,8 +92,14 @@ def list3ints_check(vals):
     return idxs
 
 
-configspec = "pyelixys/hal/hwconfspec.ini"
-configfile = "pyelixys/hal/hwconf.ini"
+dirpath = os.path.dirname(os.path.realpath(__file__))
+
+#configspec = "pyelixys/hal/hwconfspec.ini"
+configspec = os.path.join(dirpath, "hwconfspec.ini")
+#configfile = "pyelixys/hal/hwconf.ini"
+configfile = os.path.join(dirpath, "hwconf.ini")
+
+
 config = ConfigObj(configfile, configspec=configspec)
 validator = Validator({'command': command_check,
                        'list3ints': list3ints_check,

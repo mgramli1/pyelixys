@@ -25,6 +25,10 @@ from pyelixys.logs import statlog as log
 
 
 class ElixysReadOnlyError(ElixysValueError):
+    """ Exception raised if a user trys to write
+    to a value of the dictionary, the status dictionary
+    is read-only!
+    """
     pass
 
 
@@ -133,17 +137,30 @@ class Status(ElixysObject, collections.MutableMapping):
         return data_dict
 
     def update_from_queue(self, queue):
+        """ Start a thread to pop messages of the queue
+        and parse them at a frequent interval, updating all
+        dictionary values to reflect the state of the hardware
+        """
         self.thread = StatusThread(self, queue)
         self.thread.start()
 
     def stop_update(self):
+        """ Disable the update thread
+        """
         log.debug("Starting update thread")
         self.thread.stop()
 
     def as_json(self):
+        """ Return the status of the hardware
+        as a json object, useful for displaying
+        the results in a web app """
         return json.dumps(self.store, indent=2)
 
     def as_dict(self):
+        """ Copy all the data from the status object
+        and return a dictionary, this "freezes" the state
+        of the synthesizer hardware
+        """
         return copy.deepcopy(self.store)
 
 status = Status()

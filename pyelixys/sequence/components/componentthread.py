@@ -3,7 +3,9 @@ from threading import Thread
 from threading import Event
 
 class ComponentThread(Thread):
-    '''
+    ''' All components have threads that allow them
+    to run in the background.  All
+    of these threads inherit from this class
     '''
     # Thread list to maintain the
     # number of threads created.
@@ -15,8 +17,7 @@ class ComponentThread(Thread):
         self._is_complete = Event()
 
     def is_running(self):
-        '''
-        '''
+        ''' Determine if we are running '''
         if not self._is_complete.isSet():
             return True
 
@@ -24,7 +25,9 @@ class ComponentThread(Thread):
         return False
 
     def run(self):
-        '''
+        ''' Run the Component
+        and let the developer know when it is
+        complete.
         '''
         # Clear event
         self._is_complete.clear()

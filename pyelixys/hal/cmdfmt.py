@@ -18,12 +18,16 @@ class CommandFormatFactory(ElixysObject):
     for parsing commands from the Elixys INI
     """
     def parse_fmt_str(self):
+        """ Parse the command format string from the hw config ini """
         fmt_str = "<"  # Little endian
         for key, value in self.sysconf['Commands']['Command Format'].items():
             fmt_str = fmt_str + value
         return fmt_str
 
     def parse_c_struct_def(self):
+        """ Parse the hw config and for generation of the C struct file for
+        use on the MCU
+        """
         struct_val_list = []
         for key, value in self.sysconf['Commands']['Command Format'].items():
             struct_val_list.append((fmt_chr[value], key))
@@ -31,6 +35,8 @@ class CommandFormatFactory(ElixysObject):
         return struct_val_list
 
     def parse_for_cmds(self):
+        """ Parse the hardware config for the command names
+        """
         cmds = [(vals["short_name"] if vals["short_name"] else sec, vals["Commands"])
                  for sec, vals in
                  self.sysconf.items() if "Commands" in
@@ -38,6 +44,9 @@ class CommandFormatFactory(ElixysObject):
         return dict(cmds)
 
     def generate_c_header(self,filename=None):
+        """ Generate a C header file from the
+        hwconfig, used for setting up the callbacks on the MCU
+        """
         template_loader = jinja2.FileSystemLoader(searchpath=".")
         template_env = jinja2.Environment(loader=template_loader,
                                           trim_blocks=True,
@@ -58,6 +67,9 @@ class CommandFormatFactory(ElixysObject):
         return output_text
 
     def generate_c_src(self, filename=None):
+        """ Generate a C source file the hwconf
+        for use on the MCU
+        """
         template_loader = jinja2.FileSystemLoader(searchpath=".")
         template_env = jinja2.Environment(loader=template_loader,
                                           trim_blocks=True,

@@ -6,11 +6,23 @@ from component import Component
 from componentthread import ComponentThread
 
 class Cassette(Component):
-    """ Cassette """
+    """ Cassette Component
+    here we store the
+    details for the reagents installed in the
+    cassette
+    TODO: Store the reagent from the dbcomp.details!
+    """
     def __init__(self, dbcomp):
         super(Cassette, self).__init__(dbcomp)
         # Set a thread
         self.thread = CassetteThread()
+        self.details = dbcomp.details
+
+    def run(self):
+        """ Do nothing """
+
+        # TODO We *might* want to wait for user input here? Or not
+        return
 
 class CassetteThread(ComponentThread):
     '''
@@ -18,5 +30,11 @@ class CassetteThread(ComponentThread):
     Inherits from ComponentThread which
     inherits from Thread.
     '''
-    def __init__(self):
+    def __init__(self, cassete):
         super(CassetteThread, self).__init__()
+        self.cass = cassete
+
+    def run(self):
+        self._is_complete.clear()
+        self.cass.run()
+        self._is_complete.set()

@@ -28,6 +28,7 @@ class System(SystemObject):
     Gas Transfer, Gripper, Reagent Delivery, and etc.
     """
     def __init__(self):
+        """ Construct the System Object """
 
         # Initialize the hw api
         synthesizer = SynthesizerHAL()
@@ -76,6 +77,7 @@ class System(SystemObject):
 
 
     def initialize(self):
+        """ Initialize the robot """
         self.reagent_robot.home()
         for r in self.reactors:
             r.initialize()
@@ -87,6 +89,7 @@ class System(SystemObject):
         self.reagent_robot.move_install(0)
 
     def install_cassette(self, reactorid):
+        """ Initialize the robot and then move to an install position """
         self.initialize()
         self.reagent_robot.move_install(reactorid)
 

@@ -143,7 +143,7 @@ class ControlBoxSystem(ElixysObject):
         if val < dacmin:
             log.warn("Attempt to set DAC %d to "
                     "%d, setting to MIN %d", devid, val, dacmin)
-        
+
         tmpstr = tmpstr % (devid, val)
         log.debug("Set DAC: sent %s", tmpstr)
         self.write(tmpstr)
@@ -158,8 +158,9 @@ class ControlBoxSystem(ElixysObject):
         self.set_dac(1, value)
 
     dac0 = property(get_dac0, set_dac0)
+    """ Return or set value of DAC0 """
     dac1 = property(get_dac1, set_dac1)
-
+    """ Return or set value of DAC1 """
 
     def get_ssr(self):
         """ Return the state of the solid state relays """
@@ -212,7 +213,9 @@ class ControlBoxSystem(ElixysObject):
         self.set_ssr(1, value)
 
     ssr0 = property(get_ssr0, set_ssr0)
+    """ Return or set the value of the SSR 0 """
     ssr1 = property(get_ssr1, set_ssr1)
+    """ Return or set the value of the SSR 1 """
 
     def set_leds(self, value):
         """ Set the LED Ring """
@@ -230,6 +233,8 @@ class ControlBoxSystem(ElixysObject):
         return self._leds
 
     leds = property(get_leds, set_leds)
+    """ Return or set the value of the LEDs on the
+    Controlbox board """
 
     def reconnect(self):
         """ Attempt to reconnect the elixys control box """
