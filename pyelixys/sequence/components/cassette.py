@@ -38,3 +38,16 @@ class CassetteThread(ComponentThread):
         self._is_complete.clear()
         self.cass.run()
         self._is_complete.set()
+
+
+if __name__ == '__main__':
+
+    details = {}
+
+    class db:
+        details=details
+
+    cass = Cassette(db)
+
+    from IPython import embed
+    embed()

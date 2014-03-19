@@ -21,7 +21,7 @@ class Comment(Component):
         You would use an Event here
         """
         self.comment.component_status = self.comment
-        pass
+        # TODO Wait for user input
 
 class CommentThread(ComponentThread):
     '''
@@ -51,6 +51,7 @@ if __name__ == "__main__":
     details['comment'] = "This is comment"
     details['broadcastflag'] = 0
     details['note'] = "This a note about this comment"
+
     class db:
         details = details
 

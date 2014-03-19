@@ -30,16 +30,16 @@ class EluteF18(Component):
 
         self.system.pressure_regulators[0].set_pressure(
                 self.elute_pressure)
-        
+
         time.sleep(1.0)
 
         self.component_status = "Moving Reactor %s " \
                 "to the ADD position" % self.reactor
         self.reactor.move_add()
 
-        self.component_status = "Lift Reactor %s" % self.reactor 
+        self.component_status = "Lift Reactor %s" % self.reactor
         self.reactor.lift()
-    
+
         self.component_status = "Grab reagent %d" % self.reagent_pos
         self.system.reagent_robot.grab_reagent(self.reactor.id_, self.reagent_pos)
 
@@ -63,7 +63,7 @@ class EluteF18(Component):
 
         self.component_status = "Returning reagent vial %d" % self.reagent_pos
         self.system.reagent_robot.return_reagent(self.reactor.id_, self.reagent_pos)
-         
+
 
 class EluteF18Thread(ComponentThread):
     '''
