@@ -7,13 +7,18 @@ from component import Component
 from componentthread import ComponentThread
 
 class EluteF18(Component):
-    """ Elute F18 """
+    """ Elute F18 
+    
+    I. Pressure Regulator 1 is set to the elute pressure
+    II. 
+    
+    """
     def __init__(self, dbcomp):
         super(EluteF18, self).__init__(dbcomp)
         self.component_id = dbcomp.details['id']
         self.sequence_id = dbcomp.details['sequenceid']
         self.elute_time = dbcomp.details['elutetime']
-        self.reagent_pos = details['reagentpos']
+        self.reagent_pos = dbcomp.details['reagentpos']
         self.reactor = self.system.reactors[dbcomp.details['reactor']]
         self.elute_pressure = dbcomp.details['elutepressure']
         self.note = dbcomp.details['note']

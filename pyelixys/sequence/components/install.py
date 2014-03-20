@@ -6,7 +6,16 @@ from component import Component
 from componentthread import ComponentThread
 
 class Install(Component):
-    """ Install """
+    """ Install 
+    
+    The Install Command runs as follows:
+    
+    I. Reactors move to Install position (if they are raised, they lower first)
+    II. The reagent robot moves to its origin (home position)
+    III. The reactors lift
+    IV. Brake release is enabled for the reagent robot
+    
+    """
     def __init__(self, dbcomp):
         super(Install, self).__init__(dbcomp)
         self.component_id = dbcomp.details['id']

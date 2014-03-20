@@ -21,6 +21,18 @@ class Add(Component):
     * deliveryposition - integer (0,1)
     * deliverypressure - float, psi
     * note - str
+    
+    The Add sequence begins by:
+    
+    I. Setting pressure regulator 1 to the delivery pressure
+    II. Moving the reactor to the Add position of the cassette
+    III. The reagent robot grabs the reagent vial from the specified reagent position in the cassette
+    IV. The reagent robot moves the grabbed vial to the add position (either Add 1 or 2)
+    V. Lowering the gas transfer arm and starting gas transfer
+    VI. Once the duration of the add is complete, the gas transfer arm lifts
+    VII. The reagent robot returns the grabbed vial to its reagent position
+    VIII. The reactor moves to the install position
+    
     """
     def __init__(self, dbcomp):
 
@@ -85,6 +97,8 @@ class Add(Component):
         self.component_status = "Returning reagent vial %d" % self.reagent_pos
 
         self.system.reagent_robot.return_reagent(self.reactor.id_, self.reagent_pos)
+        
+        self.system.reagent_robot.move_install(self.reactor.id_)
 
 
 class AddThread(ComponentThread):

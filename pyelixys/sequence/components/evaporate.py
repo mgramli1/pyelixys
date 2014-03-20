@@ -144,16 +144,18 @@ class EvaporateThread(ComponentThread):
         self._is_complete.set()
 
 if __name__ == '__main__':
-    details = {'duration': 15,
-             'evaporationpressure': 10,
-             'evaporationtemperature': 55,
-             'finaltemperature': 50.0,
-             'note': '',
-             'reactor': 0,
-             'stirspeed': 50.0,
-             'coolduration': 5.0,
-             'sequenceid': 14,
-             'componentid': 0}  
+    details = {}
+    
+    details['duration'] = 15
+    details['evaporationpressure'] = 10
+    details['evaporationtemperature'] = 55
+    details['finaltemperature'] = 50.0
+    details['reactor'] = 0
+    details['stirspeed'] = 50.0
+    details['coolduration'] = 5.0
+    details['sequenceid'] = 14
+    details['componentid'] = 0
+    details['note'] = '' 
                      
     class db(object):
         details = details
