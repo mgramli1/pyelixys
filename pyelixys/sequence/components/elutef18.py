@@ -10,7 +10,12 @@ class EluteF18(Component):
     """ Elute F18 
     
     I. Pressure Regulator 1 is set to the elute pressure
-    II. 
+    II. The target reactor moves to the Add position
+    III. The target reactor lifts
+    IV. The reagent robot grabs the reagent from the cassette
+    V. The casette stopcocks are set to elute
+    VI. The reagent robot adds the reagent
+    VII. The reagent is returned
     
     """
     def __init__(self, dbcomp):

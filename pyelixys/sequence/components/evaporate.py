@@ -7,7 +7,24 @@ from component import Component
 from componentthread import ComponentThread
 
 class Evaporate(Component):
-    """ Evaporate """
+    """ Evaporate
+    
+    The evaporate operation:
+    
+    I. Sets pressure regulator 1 to the user defined pressure
+    II. Moves the reactor to the Evaporation position on the cassette
+    III. Starts the mixer motor
+    IV. Moves the reagent robot to the evaporation position on the cassette
+    V. Starts the gas transfer
+    VI. Starts the vacuum
+    VII. Turns on the heaters to the user defined set point
+    VIII. Evaporates for a duration of time
+    IX. Turns off the mixer once the set point temperatue has been reached
+    X. Turns off the heaters once the duration of time is over
+    XI. Turns on the cooling system for a user defined duration of time
+    XII. Returns the reactor to the install position
+    
+    """
     def __init__(self, dbcomp):
         super(Evaporate, self).__init__(dbcomp)
         details = dbcomp.details

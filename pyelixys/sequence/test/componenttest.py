@@ -61,6 +61,31 @@ db.details = initialize_details
 
 initialize = comp_lookup['INITIALIZE'](db)
 
+install_details["sequenceid"] = 14
+install_details[["reactor"] = 2
+install_details[["note"] = ""
+install_details[["message"] = ""
+install_details[["id"] = 107
+
+db.details = install_details
+
+install = comp_lookup['INSTALL'](db)
+
+mix_details["time"] = 10,
+mix_details["componenttype"] = "MIX"
+mix_details["reactor"] = 0 
+mix_details["stirspeed"] = 100.0 
+mix_details["sequenceid"] = 14
+mix_details["note"] = "",
+mix_details["type"] = "component" 
+mix_details["componentid"] = 112
+
+db.details = mix_details
+
+mix = comp_lookup['MIX'](db)
+
+
+
 if __name__ == '__main__': 
     from IPython import embed
     embed()

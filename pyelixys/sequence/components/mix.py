@@ -7,7 +7,12 @@ from component import Component
 from componentthread import ComponentThread
 
 class Mix(Component):
-    """ Mix """
+    """ Mix 
+    
+    The mix operation controls the mixer motor, in which the user sets a duty cycle (0 to 100) 
+    a duration of time to mix at.
+    
+    """
     def __init__(self, dbcomp):
         super(Mix, self).__init__(dbcomp)
         details = dbcomp.details
@@ -81,14 +86,15 @@ class MixThread(ComponentThread):
         
 
 if __name__ == '__main__':
-    details = {   "time": 10,
-            "componenttype": "MIX",
-            "reactor": 0, 
-            "stirspeed": 100.0, 
-            "sequenceid": 14, 
-            "note": "",
-            "type": "component", 
-            "componentid": 112}
+    details = {}
+    details["time"] = 10,
+    details["componenttype"] = "MIX"
+    details["reactor"] = 0 
+    details["stirspeed"] = 100.0 
+    details["sequenceid"] = 14
+    details["note"] = "",
+    details["type"] = "component" 
+    details["componentid"] = 112
             
     class db(object):
         details = details
