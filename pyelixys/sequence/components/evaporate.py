@@ -132,7 +132,6 @@ class Evaporate(Component):
 
         self.system.coolant_pump.on = False
         self.component_status = "Returning reactor %d to install" % self.reactor.id_
-        self.reactor.move_install()
         
 
 

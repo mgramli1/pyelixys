@@ -84,6 +84,19 @@ db.details = mix_details
 
 mix = comp_lookup['MIX'](db)
 
+react0_details['reactor'] = 0
+react0_details['sequenceid'] = 0
+react0_details['componentid'] = 0
+react0_details['stirpeed'] = 50
+react0_details['duration'] = 10 
+react0_details['reactiontemperature'] = 55
+react0_details['coolduration'] = 120
+react0_details['coolingdelay'] = True
+react0_details['note'] = ""
+
+db.details = react0_details
+
+react = comp_lookup['react0'](db)
 
 
 if __name__ == '__main__': 

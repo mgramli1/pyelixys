@@ -63,11 +63,13 @@ class InstallThread(ComponentThread):
         self._is_complete.set()
 
 if __name__ == '__main__':
-    details = {"sequenceid": 14,
-            "reactor": 2,
-            "note": "",
-            "message": "",
-            "id": 107}
+    details = {}
+    
+    details["sequenceid"] = 14
+    details["reactor"] = 2
+    details["note"] = ""
+    details["message"] = ""
+    details["id"] = 107
 
 
 

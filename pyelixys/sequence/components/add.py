@@ -99,6 +99,8 @@ class Add(Component):
         self.system.reagent_robot.return_reagent(self.reactor.id_, self.reagent_pos)
         
         self.system.reagent_robot.move_install(self.reactor.id_)
+        
+        
 
 
 class AddThread(ComponentThread):
