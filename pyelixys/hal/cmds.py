@@ -6,6 +6,8 @@ from pyelixys.hal.elixysobject import ElixysObject
 from pyelixys.elixysexceptions import ElixysValueError
 
 
+
+
 class Command(ElixysObject):
     """ The command object allows the system to create
     correctly formatted hardware commands and send them
