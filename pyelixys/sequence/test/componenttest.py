@@ -84,19 +84,35 @@ db.details = mix_details
 
 mix = comp_lookup['MIX'](db)
 
-react0_details['reactor'] = 0
-react0_details['sequenceid'] = 0
-react0_details['componentid'] = 0
-react0_details['stirpeed'] = 50
-react0_details['duration'] = 10 
-react0_details['reactiontemperature'] = 55
-react0_details['coolduration'] = 120
-react0_details['coolingdelay'] = True
-react0_details['note'] = ""
+react_details['reactor'] = 0
+react_details['sequenceid'] = 0
+react_details['componentid'] = 0
+react_details['stirpeed'] = 50
+react_details['duration'] = 10 
+react_details['reactiontemperature'] = 55
+react_details['coolduration'] = 120
+react_details['coolingdelay'] = True
+react_details['note'] = ""
 
-db.details = react0_details
+db.details = react_details
 
-react = comp_lookup['react0'](db)
+react = comp_lookup['react'](db)
+
+transfer_details['componentid'] = 0
+transfer_details['sequenceid'] = 0
+transfer_details['sourcereactor'] = 0
+transfer_details['targetreactor'] = 1
+transfer_details['duration'] = 5.0
+transfer_details['deliveryposition'] = 0
+transfer_details['pressure'] = 3.0
+transfer_details['mode'] = None
+transfer_details['note'] = "Transferring from Reactor 1 to Reactor 2"
+
+db.details = transfer_details
+
+transfer - comp_lookup['transfer'](db)
+
+
 
 
 if __name__ == '__main__': 

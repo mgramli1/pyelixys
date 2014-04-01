@@ -8,7 +8,19 @@ from component import Component
 from componentthread import ComponentThread
 
 class Transfer(Component):
-    """ Transfer """
+    """ Transfer 
+    
+    The transfer unit operation executes as follows:
+    
+    I. The source reactor moves to the transfer position
+    II. The target reactor moves to the add position
+    III. Pressure Regulator 1 is set to the target pressure
+    IV. Gas Transfer Starts
+    V. Gas Transfer occurs for a set amount of time
+    VI. Source Reactor moves to install
+    VII. Target Reactor moves to install
+    
+    """
     def __init__(self, dbcomp):
         super(Transfer, self).__init__(dbcomp)
         self.component_id = dbcomp.details['componentid']
