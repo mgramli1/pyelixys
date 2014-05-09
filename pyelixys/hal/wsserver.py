@@ -19,7 +19,7 @@ hdrfmt = struct.Struct("<iIi")
 exit_event = Event()
 
 #TODO move timeout to config file
-pkt_send_timeout = 0.1
+pkt_send_timeout = 1.0
 
 class WSHandler(tornado.websocket.WebSocketHandler):
     """ This the the main websocket handler that deals with incoming
@@ -57,7 +57,7 @@ class WSHandler(tornado.websocket.WebSocketHandler):
         if any commands have been place in the outbound
         cmd_queue, and then sends any that are avalaible
         """
-
+       
         self.count = 0
         if self in WSHandler.handler_instances:
             WSHandler.handler_instances.remove(self)
@@ -81,11 +81,14 @@ class WSHandler(tornado.websocket.WebSocketHandler):
         """ Upon receiving a message we place these
         objects onto the status queue for consumption by
         the rest of the system """
+        
         self.count += 1
         self.status_queue.put(message)
+        
         hdrstr = message[0:hdrfmt.size]
         hdr = hdrfmt.unpack(hdrstr)
-        WSHandler.pkt_id = hdr[1] 
+        WSHandler.pkt_id = hdr[1]
+    
 
     def on_close(self):
         """ This handler deals with when we close a connection
@@ -104,8 +107,9 @@ class WSHandler(tornado.websocket.WebSocketHandler):
         the cmd_queue.  If we have commands, pop them off the queue
         and send them, till none are left. Finally, reschedule
         this handler to be run again in the near future """
-
+        
         if len(WSHandler.handler_instances) == 0:
+            
             return
         #print "Attempt to send pkt"
         #print "ID in WSHandler %d" % id(self.cmd_queue)
@@ -115,18 +119,19 @@ class WSHandler(tornado.websocket.WebSocketHandler):
                 starttime = datetime.datetime.now()
                 cmd = self.cmd_queue.get(block=False)
                 log.debug("CMD:%s", repr(cmd))
+                
                 #log.debug("Wrote %d bytes" % len(str(cmd)))
                 self.write_message(str(cmd))
                 log.debug("PKTID:%d", WSHandler.pkt_id)
                 self.prev_pkt_id = WSHandler.pkt_id
            
         except Empty:
+           
             pass
             #log.error("Queue empty")
             #log.debug("PKTID:%d", WSHandler.pkt_id)
 
-        tornado.ioloop.IOLoop.instance().add_timeout(
-            datetime.timedelta(seconds=pkt_send_timeout), self.send_pkt)
+        tornado.ioloop.IOLoop.instance().add_timeout(datetime.timedelta(seconds=pkt_send_timeout), self.send_pkt)
 
 
 class WSServerProcess(Process):
@@ -137,6 +142,7 @@ class WSServerProcess(Process):
     with to communicate directly with the hardware.
     Since it is a process we must use queues for all communication.
     """
+    
 
     stop_event = Event()
 
@@ -149,6 +155,15 @@ class WSServerProcess(Process):
         # Create a status object that parses the status packets
         # on the queue
 
+    #This function was added 5/5/2014 by joshua.thompson@sofiebio.com
+    def stop_server(self):
+        """ Helper function to stop the server """
+        
+        log.debug("Stopping wsserver")
+        self.stop_event.set()
+        tornado.ioloop.IOLoop.instance().stop()
+        self.terminate()
+    
     def run(self):
         """ Setup the tornado websocket server
         setup a periodic callback to see if the
@@ -166,8 +181,13 @@ class WSServerProcess(Process):
 
         while True:
             try:
-                log.debug("Tornado server IOLoop starting")
-                tornado.ioloop.IOLoop.instance().start()
+                #added if else statement, prev no if else just log.debug and tornado.ioloop...etc
+    
+                if self.stop_event.is_set():
+                    print 'wscomproc.stop_event.is_set() == True'
+                else:
+                    log.debug("Tornado server IOLoop starting (wsserver.py)")
+                    tornado.ioloop.IOLoop.instance().start()
             except KeyboardInterrupt:
                 continue
             except SystemExit:
@@ -186,6 +206,7 @@ class WSServerProcess(Process):
             tornado.ioloop.IOLoop.instance().stop()
 
     def run_cmd(self, cmd):
+        log.debug("Cmd(%s,%s,%s,%s)" % (cmd.sub_system,cmd.cmd_name,cmd.device_id,cmd.param))
         self.cmd_queue.put(cmd)
 
     def stop(self):

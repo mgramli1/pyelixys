@@ -18,14 +18,20 @@ import Queue
 import websocket
 from websocket import ABNF
 
+from multiprocessing import Event
+
 from pyelixys.logs import hwsimlog as log
 from pyelixys.hal.status import Status
 from pyelixys.hal.elixysobject import ElixysObject
 from threading import Timer
-
+import time
 
 import collections
 
+
+###Added 5/5/2014 by: joshua.thompson@sofiebio.com
+stop_event = Event() #ws client will stop when stop_event is set (see on_close function)
+###
 
 class AxisStatus(object):
 
@@ -45,6 +51,8 @@ class AxisStatus(object):
 
     def __init__(self, status_value=0):
         self.status = status_value
+        #debug
+        print "__init__ self.status = status_value: " + str(self.status)
 
     def isMoving(self):
         if self.status & self.INMOVEBIT:
@@ -52,10 +60,15 @@ class AxisStatus(object):
         return False
 
     def setMoving(self):
+        
         self.status |= self.INMOVEBIT
+        #debug
+        print "setMoving: self.status |= self.INMOVEBIT: " + str(self.status)
 
     def clearMoving(self):
         self.status &= ~self.INMOVEBIT
+        #debug
+        print "clearMoving: self.status &= ~self.INMOVEBIT: " + str(self.status)
 
     def isAlarm(self):
         if self.status & self.INALMBIT:
@@ -64,9 +77,13 @@ class AxisStatus(object):
 
     def setAlarm(self):
         self.status |= self.INALMBIT
+        #debug
+        print "setAlarm: self.status |= self.INALMBIT: " + str(self.status)
 
     def clearAlarm(self):
         self.status &= ~self.INALMBIT
+        #debug
+        print "clearAlarm: self.status &= ~self.INALMBIT: " + str(self.status)
 
     def isHome(self):
         if self.status & self.INHOMENDBIT:
@@ -75,9 +92,13 @@ class AxisStatus(object):
 
     def setHome(self):
         self.status |= self.INHOMENDBIT
+        #debug
+        print "setHome: self.status |= self.INHOMENBIT: " + str(self.status)
 
     def clearHome(self):
         self.status &= ~self.INHOMENDBIT
+        #debug
+        print "clearHome: self.status &= ~self.INHOMENBIT: " + str(self.status)
 
     def isInPosition(self):
         if self.status & self.INPOSENDBIT:
@@ -86,9 +107,13 @@ class AxisStatus(object):
 
     def setInPosition(self):
         self.status |= self.INPOSENDBIT
+        #debug
+        print "setInPosition: self.status |= self.INPOSENBIT: " + str(self.status)
 
     def clearInPosition(self):
         self.status &= ~self.INPOSENDBIT
+        #debug
+        print "clearInPosition: self.status &= ~self.INPOSENBIT: " + str(self.status)
 
     def isServoOn(self):
         if self.status & self.INSVONBIT:
@@ -97,9 +122,13 @@ class AxisStatus(object):
 
     def setServoOn(self):
         self.status |= self.INSVONBIT
+        #debug
+        print "setServoOn: self.status |= self.INSVONBIT: " + str(self.status)
 
     def clearServoOn(self):
         self.status &= ~self.INSVONBIT
+        #debug
+        print "clearServoOn: self.status &= ~self.INSVONBIT: " + str(self.status)
 
     def isPosLoad(self):
         if self.status & self.INWENDBIT:
@@ -108,9 +137,13 @@ class AxisStatus(object):
 
     def setPosLoad(self):
         self.status |= self.INWENDBIT
+        #debug
+        print "setPosLoad: self.status |= self.INWENDBIT: " + str(self.status)
 
     def clearPosLoad(self):
         self.status &= ~self.INWENDBIT
+        #debug
+        print "clearPosLoad: self.status &= ~self.INWENDBIT: " + str(self.status)
 
     def isPosZone(self):
         if self.status & self.INPZONEBIT:
@@ -119,9 +152,13 @@ class AxisStatus(object):
 
     def setPosZone(self):
         self.status |= self.INPZONEBIT
+        #debug
+        print "setPosZone: self.status |= self.INPZONEBIT: " + str(self.status)
 
     def clearPosZone(self):
         self.status &= ~self.INPZONEBIT
+        #debug
+        print "clearPosZone: self.status &= ~self.INPZONEBIT: " + str(self.status)
 
     def isZone1(self):
         if self.status & self.INZONE1BIT:
@@ -130,9 +167,13 @@ class AxisStatus(object):
 
     def setZone1(self):
         self.status |= self.INZONE1BIT
+        #debug
+        print "setZone1: self.status |= self.INZONE1BIT: " + str(self.status)
 
     def clearZone1(self):
         self.status &= ~self.INZONE1BIT
+        #debug
+        print "clearZone1: self.status &= ~self.INZONE1BIT: " + str(self.status)
 
     def isZone2(self):
         if self.status & self.INZONE2BIT:
@@ -141,9 +182,13 @@ class AxisStatus(object):
 
     def setZone2(self):
         self.status |= self.INZONE2BIT
+        #debug
+        print "setZone2: self.status |= self.INZONE2BIT: " + str(self.status)
 
     def clearZone2(self):
         self.status &= ~self.INZONE2BIT
+        #debug
+        print "setZone2: self.status &= ~self.INZONE2BIT: " + str(self.status)
 
     def isCtrlReady(self):
         if self.status & self.INCRDYBIT:
@@ -152,6 +197,8 @@ class AxisStatus(object):
 
     def setCtrlReady(self):
         self.status |= self.INCRDYBIT
+        #debug
+        print "setCtrlReady: self.status |= self.INCRDYBIT: " + str(self.status)
 
     def clear(self):
         self.status = 0
@@ -374,14 +421,16 @@ class StatusSimulator(Status):
             ## print "TOPPARAMS", topparams
             if not topparams is None:
                 for topparam in topparams:
-                    ## print subname,":",topparam
+                    
+                    #print subname,":",topparam
                     vals.append(self.store[subname][topparam])
 
             if "Repeat" in subvals:
                 for i in range(subcount):
                     for subparam in subvals['Repeat'].keys():
                         vals.append(self.store[subname][i][subparam])
-                    ## print subname,i,":", subcount, subvals['Repeat'].keys()
+                      
+                        #print subname,i,":", subcount, subvals['Repeat'].keys()
 
 
 
@@ -420,7 +469,7 @@ class ElixysSimulator(ElixysObject):
         """
         self.status = StatusSimulator()
         self.cb_map = {}
-
+        log.debug("This is Josh!!!!!!!!!Sim")
         log.debug("Initialize the ElixysSimulator, register callbacks")
 
         # Setup Callbacks for Mixer commands
@@ -521,6 +570,7 @@ class ElixysSimulator(ElixysObject):
             the proper state variable (or start a thread that will simulate
             some HW change)
         """
+        log.debug("Josh: Parsing some commands from parse_cmd in ElixysSimulator")
         # Create struct for unpacking the cmd_id and dev_id
         cmd_id_struct = struct.Struct("<ii")
 
@@ -576,6 +626,8 @@ class ElixysSimulator(ElixysObject):
         cmdfxn, dev_id, param = self.parse_cmd(cmdpkt)
         # Execute the callback
         cmdfxn(dev_id, *param)
+    
+    
 
     def mixers_set_period(self, devid, period):
         """ Mixer set period callback """
@@ -638,14 +690,17 @@ class ElixysSimulator(ElixysObject):
         state &= ~(1 << devid)
         self.status.Fans['state'] = state
 
+    ''' this function is already define (see below) -- take out once confirmed with Henry
     def linacts_set_requested_position(self, devid, position):
         """ Linear Actuator set requested position """
         log.debug("Set the linear actuator %d requested position = %d",
                     devid, position)
-
+    '''
+        
     def linacts_home_axis(self, devid, value=None):
         """ Linear Actuator home axis """
         log.debug("Home the linear actuator %d", devid)
+        self.status.LinearActuators[devid]['requested_position'] = 0 #Added 5/7/2014 by joshua.thompson@sofiebio.com
 
         def fxn():
             self.status.linact_stats[devid].clearHome()
@@ -659,8 +714,10 @@ class ElixysSimulator(ElixysObject):
 
             self.status.linact_stats[devid].clear()
 
-        Timer(0.5, fxn).start()
-
+        #Timer(0.5, fxn).start() #taken out 5/8/2014 by joshua.thompson@sofiebio.com
+        time.sleep(0.5) #added
+        fxn()#added
+        
 
     def linacts_gateway_start(self, devid, value=None):
         log.debug("Set the gateway start bit")
@@ -674,8 +731,7 @@ class ElixysSimulator(ElixysObject):
         log.debug("Axis %d turn on" % devid)
 
         self.status.linact_stats[devid].setServoOn()
-        if (self.status.LinearActuators[devid]['position'] ==
-            self.status.LinearActuators[devid]['requested_position']):
+        if (self.status.LinearActuators[devid]['position'] == self.status.LinearActuators[devid]['requested_position']):
             self.status.linact_stats[devid].setInPosition()
 
 
@@ -692,19 +748,16 @@ class ElixysSimulator(ElixysObject):
             self.status.linact_stats[devid].clearInPosition()
             self.status.linact_stats[devid].setMoving()
 
-            while not (self.status.LinearActuators[devid]['position'] ==
-                        self.status.LinearActuators[devid]['requested_position']):
+            while not (self.status.LinearActuators[devid]['position'] == self.status.LinearActuators[devid]['requested_position']):
+                print 'linacts_start() running: pos = ' + str(self.status.LinearActuators[devid]['position']) #debug
 
                 # If our error less than 5mm set them equal
-                if abs(self.status.LinearActuators[devid]['position'] -
-                        self.status.LinearActuators[devid]['requested_position']) < 500 :
-                    self.status.LinearActuators[devid]['position'] = \
-                        self.status.LinearActuators[devid]['requested_position']
+                if abs(self.status.LinearActuators[devid]['position'] - self.status.LinearActuators[devid]['requested_position']) < 500 :
+                    self.status.LinearActuators[devid]['position'] = self.status.LinearActuators[devid]['requested_position']
                     break;
 
                 # If position is greater than req position deincrement
-                if (self.status.LinearActuators[devid]['position'] >
-                        self.status.LinearActuators[devid]['requested_position']):
+                if (self.status.LinearActuators[devid]['position']  > self.status.LinearActuators[devid]['requested_position']):
                     step = -100
 
                 # Else increment
@@ -717,7 +770,9 @@ class ElixysSimulator(ElixysObject):
             self.status.linact_stats[devid].clearMoving()
             self.status.linact_stats[devid].setInPosition()
 
-        Timer(0.5, fxn).start()
+        #Timer(0.5, fxn).start()
+        time.sleep(0.5) #added
+        fxn()#added
 
     def linacts_brake_release(self, devid, value=None):
         log.debug("Axis %d brake release" % devid)
@@ -739,7 +794,9 @@ class ElixysSimulator(ElixysObject):
             log.debug("Reactor 0 will go down. DI0=True")
             def fxn():
                 self.status['DigitalInputs']['state'] &= ~(1 << 0)
-            Timer(2.0, fxn).start()
+            #Timer(2.0, fxn).start()
+            time.sleep(0.5) #added
+            fxn()#added
             self.status['DigitalInputs']['state'] |= (1 << 1)
 
 
@@ -750,7 +807,9 @@ class ElixysSimulator(ElixysObject):
             log.debug("Reactor 0 will go up. DI1=True")
             def fxn():
                 self.status['DigitalInputs']['state'] &= ~(1 << 1)
-            Timer(2.0,fxn).start()
+            #Timer(2.0,fxn).start()
+            time.sleep(2.0) #added
+            fxn()#added
             self.status['DigitalInputs']['state'] |= (1 << 0)
 
 
@@ -760,7 +819,9 @@ class ElixysSimulator(ElixysObject):
             log.debug("Reactor 1 will go down. DI3=True")
             def fxn():
                 self.status['DigitalInputs']['state'] &= ~(1 << 3)
-            Timer(2.0, fxn).start()
+            #Timer(2.0, fxn).start()
+            time.sleep(2.0) #added
+            fxn()#added
             self.status['DigitalInputs']['state'] |= (1 << 2)
 
 
@@ -771,7 +832,9 @@ class ElixysSimulator(ElixysObject):
             log.debug("Reactor 1 will go up. DI2=True")
             def fxn():
                 self.status['DigitalInputs']['state'] &= ~(1 << 2)
-            Timer(2.0,fxn).start()
+            #Timer(2.0,fxn).start()
+            time.sleep(2.0) #added
+            fxn()#added
             self.status['DigitalInputs']['state'] |= (1 << 3)
 
 
@@ -781,7 +844,9 @@ class ElixysSimulator(ElixysObject):
             log.debug("Reactor 1 will go down. DI3=True")
             def fxn():
                 self.status['DigitalInputs']['state'] &= ~(1 << 5)
-            Timer(2.0, fxn).start()
+            #Timer(2.0, fxn).start()
+            time.sleep(2.0) #added
+            fxn()#added
             self.status['DigitalInputs']['state'] |= (1 << 4)
 
 
@@ -792,7 +857,9 @@ class ElixysSimulator(ElixysObject):
             log.debug("Reactor 1 will go up. DI2=True")
             def fxn():
                 self.status['DigitalInputs']['state'] &= ~(1 << 4)
-            Timer(2.0,fxn).start()
+            #Timer(2.0,fxn).start()
+            time.sleep(2.0) #added
+            fxn()#added
             self.status['DigitalInputs']['state'] |= (1 << 5)
 
         # Check for Gripper up (DI 6)
@@ -801,7 +868,9 @@ class ElixysSimulator(ElixysObject):
             log.debug("Gripper will go up. DI6=True")
             def fxn():
                 self.status['DigitalInputs']['state'] &= ~(1 << 6)
-            Timer(1.0,fxn).start()
+            #Timer(1.0,fxn).start()
+            time.sleep(1.0) #added
+            fxn()#added
             self.status['DigitalInputs']['state'] |= (1 << 7)
 
         # Check for Gripper lower (DI 7)
@@ -810,7 +879,9 @@ class ElixysSimulator(ElixysObject):
             log.debug("Gripper will go down. DI7=True")
             def fxn():
                 self.status['DigitalInputs']['state'] &= ~(1 << 7)
-            Timer(1.0,fxn).start()
+            #Timer(1.0,fxn).start()
+            time.sleep(1.0) #added
+            fxn()#added
             self.status['DigitalInputs']['state'] |= (1 << 6)
 
         # Check for GasTransfer up (DI 9)
@@ -819,7 +890,9 @@ class ElixysSimulator(ElixysObject):
             log.debug("GasTransfer will go up. DI9=True")
             def fxn():
                 self.status['DigitalInputs']['state'] &= ~(1 << 9)
-            Timer(1.0,fxn).start()
+            #Timer(1.0,fxn).start()
+            time.sleep(1.0) #added
+            fxn()#added
             self.status['DigitalInputs']['state'] |= (1 << 8)
 
         # Check for GasTransfer lower (DI 8)
@@ -828,7 +901,9 @@ class ElixysSimulator(ElixysObject):
             log.debug("GasTransfer will go down. DI9=True")
             def fxn():
                 self.status['DigitalInputs']['state'] &= ~(1 << 8)
-            Timer(1.0,fxn).start()
+            #Timer(1.0,fxn).start()
+            time.sleep(1.0) #added
+            fxn()#added
             self.status['DigitalInputs']['state'] |= (1 << 9)
 
         # Check for Gripper Open  (DI 10)
@@ -837,7 +912,9 @@ class ElixysSimulator(ElixysObject):
             log.debug("Gripper will open. DI10=True")
             def fxn():
                 self.status['DigitalInputs']['state'] &= ~(1 << 10)
-            Timer(0.2, fxn).start()
+            #Timer(0.2, fxn).start()
+            time.sleep(0.2) #added
+            fxn()#added
             self.status['DigitalInputs']['state'] |= (1 << 11)
 
         # Check for Gripper Close (DI 11)
@@ -846,7 +923,9 @@ class ElixysSimulator(ElixysObject):
             log.debug("Gripper will close. DI11=True")
             def fxn():
                 self.status['DigitalInputs']['state'] &= ~(1 << 11)
-            Timer(0.2, fxn).start()
+            #Timer(0.2, fxn).start()
+            time.sleep(0.2) #added
+            fxn()#added
             self.status['DigitalInputs']['state'] |= (1 << 10)
 
     def run_tempctrls(self):
@@ -878,20 +957,25 @@ cmds = Queue.Queue()
 
 def on_message(ws, message):
     """ When test client receives a command print it to console """
-
-    print "FROM SERVER: %s" % repr(message)
+   
+    print "FROM SERVER (sim talking): %s" % repr(message)
     #cmds.put(message)
+    
     e.run_callback(message)
+    #increment packet id after callback returns
+    e.status['Header']['packet_id'] = e.status['Header']['packet_id'] + 1 #increment packet_id so host knows command completed
+    print 'Incrementing packet id! from run_callback (client)'
+
 
 def on_error(ws, error):
     """ If we have a communication error print it to console """
-
     print error
 
 
 def on_close(ws):
     """ If websocket hardware server closes the connection print to console """
-    print "### closed ###"
+    stop_event.set() #set stop_event so that while loop in on_open() stops
+    print 'simulator websocket closed'
 
 
 def on_open(ws):
@@ -900,11 +984,12 @@ def on_open(ws):
     a status packet.  This is done in a thread so the main thread
     can still receive the incoming command packets and print them to
     the console """
-    i = 0
+    # i = 0 -- josh took this out
     def run(*args):
         i = 0
-        while True:
+        while (stop_event.is_set() == False): #Added 5/5/2014 by joshua.thompson@sofiebio.com previously while (True)
             #log.debug("Sent packet id: #%d", i)
+            
             pkt = e.status.generate_packet()
             ws.send(pkt, ABNF.OPCODE_BINARY)
             time.sleep(.2)
@@ -927,12 +1012,16 @@ class Simulator(threading.Thread):
         """ (Constructor) """
         #websocket.enableTrace(True) # Enable for websocket trace!
         super(Simulator, self).__init__()
+       
+      
         self.ws = websocket.WebSocketApp("ws://localhost:8888/ws",
                                 on_message=on_message,
                                 on_error=on_error,
                                 on_close=on_close)
+        
         self.ws.on_open = on_open
-
+        
+            
     def run(self):
         self.ws.run_forever()
 
@@ -951,6 +1040,7 @@ def start_simulator_thread():
     #hwthread = thread.start_new_thread(ws.run_forever,())
     sim = Simulator()
     sim.start()
+    
     return e, sim
 
 

@@ -40,11 +40,11 @@ class Stopcock(SystemObject):
 
     def _is_counter_clockwise(self):
         """ Check if the stopcock is clockwise """
-        return self.synth.valves[self._cw_valve_id].on
+        return self.synth.valves[self._cw_valve_id].on #should this be switched to ccw?
 
     def _is_clockwise(self):
         """ Check if the stopcock is counter clockwise """
-        return self.synth.valves[self._ccw_valve_id].on
+        return self.synth.valves[self._ccw_valve_id].on #should this be switched to cw?
 
     is_counter_clockwise = property(_is_counter_clockwise)
     is_clockwise = property(_is_clockwise)
