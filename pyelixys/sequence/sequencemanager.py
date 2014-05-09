@@ -61,11 +61,8 @@ class SequenceManager(object):
 
 if __name__ == '__main__':
     try:
-        print 'Starting Sequence Manager!!'
         sm = SequenceManager(1)
     except ElixysInvalidSequenceID:
         print "No Seqence with that id"
-
-    print 'Importing Embed from IPython'
     from IPython import embed
     embed()

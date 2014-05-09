@@ -102,7 +102,7 @@ class ReactThread(ComponentThread):
         and the Add object is passed
         into the AddThread
         '''        
-if __name__ == '__main__':
+f __name__ == '__main__':
 
 
     details = {}

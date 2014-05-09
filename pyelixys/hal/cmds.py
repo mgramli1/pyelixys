@@ -154,7 +154,10 @@ class CommandLookup(ElixysObject, dict):
         objects.  These objects are directly accessible from this object
         using the standard dictionary interface
         """
-        secs = ((name, value['Commands']) for name, value in self.sysconf.iteritems() if isinstance(value, dict) if "Commands" in value)
+        secs = ((name, value['Commands']) for
+                name, value in self.sysconf.iteritems()
+                if isinstance(value, dict)
+                if "Commands" in value)
         cmddict = dict()
         for key, val in secs:
             secdict = dict()

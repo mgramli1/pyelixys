@@ -15,7 +15,7 @@ class Cassette(Component):
     def __init__(self, dbcomp):
         super(Cassette, self).__init__(dbcomp)
         # Set a thread
-        self.thread = CassetteThread(self)
+        self.thread = CassetteThread()
         self.details = dbcomp.details
 
     def run(self):
