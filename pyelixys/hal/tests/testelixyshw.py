@@ -52,7 +52,7 @@ class AxisStatus(object):
     def __init__(self, status_value=0):
         self.status = status_value
         #debug
-        print "__init__ self.status = status_value: " + str(self.status)
+        #print "__init__ self.status = status_value: " + str(self.status)
 
     def isMoving(self):
         if self.status & self.INMOVEBIT:
@@ -63,12 +63,12 @@ class AxisStatus(object):
         
         self.status |= self.INMOVEBIT
         #debug
-        print "setMoving: self.status |= self.INMOVEBIT: " + str(self.status)
+        #print "setMoving: self.status |= self.INMOVEBIT: " + str(self.status)
 
     def clearMoving(self):
         self.status &= ~self.INMOVEBIT
         #debug
-        print "clearMoving: self.status &= ~self.INMOVEBIT: " + str(self.status)
+        #print "clearMoving: self.status &= ~self.INMOVEBIT: " + str(self.status)
 
     def isAlarm(self):
         if self.status & self.INALMBIT:
@@ -78,12 +78,12 @@ class AxisStatus(object):
     def setAlarm(self):
         self.status |= self.INALMBIT
         #debug
-        print "setAlarm: self.status |= self.INALMBIT: " + str(self.status)
+        #print "setAlarm: self.status |= self.INALMBIT: " + str(self.status)
 
     def clearAlarm(self):
         self.status &= ~self.INALMBIT
         #debug
-        print "clearAlarm: self.status &= ~self.INALMBIT: " + str(self.status)
+        #print "clearAlarm: self.status &= ~self.INALMBIT: " + str(self.status)
 
     def isHome(self):
         if self.status & self.INHOMENDBIT:
@@ -93,12 +93,12 @@ class AxisStatus(object):
     def setHome(self):
         self.status |= self.INHOMENDBIT
         #debug
-        print "setHome: self.status |= self.INHOMENBIT: " + str(self.status)
+        #print "setHome: self.status |= self.INHOMENBIT: " + str(self.status)
 
     def clearHome(self):
         self.status &= ~self.INHOMENDBIT
         #debug
-        print "clearHome: self.status &= ~self.INHOMENBIT: " + str(self.status)
+        #print "clearHome: self.status &= ~self.INHOMENBIT: " + str(self.status)
 
     def isInPosition(self):
         if self.status & self.INPOSENDBIT:
@@ -108,12 +108,12 @@ class AxisStatus(object):
     def setInPosition(self):
         self.status |= self.INPOSENDBIT
         #debug
-        print "setInPosition: self.status |= self.INPOSENBIT: " + str(self.status)
+        #print "setInPosition: self.status |= self.INPOSENBIT: " + str(self.status)
 
     def clearInPosition(self):
         self.status &= ~self.INPOSENDBIT
         #debug
-        print "clearInPosition: self.status &= ~self.INPOSENBIT: " + str(self.status)
+        #print "clearInPosition: self.status &= ~self.INPOSENBIT: " + str(self.status)
 
     def isServoOn(self):
         if self.status & self.INSVONBIT:
@@ -123,12 +123,12 @@ class AxisStatus(object):
     def setServoOn(self):
         self.status |= self.INSVONBIT
         #debug
-        print "setServoOn: self.status |= self.INSVONBIT: " + str(self.status)
+        #print "setServoOn: self.status |= self.INSVONBIT: " + str(self.status)
 
     def clearServoOn(self):
         self.status &= ~self.INSVONBIT
         #debug
-        print "clearServoOn: self.status &= ~self.INSVONBIT: " + str(self.status)
+        #print "clearServoOn: self.status &= ~self.INSVONBIT: " + str(self.status)
 
     def isPosLoad(self):
         if self.status & self.INWENDBIT:
@@ -138,12 +138,12 @@ class AxisStatus(object):
     def setPosLoad(self):
         self.status |= self.INWENDBIT
         #debug
-        print "setPosLoad: self.status |= self.INWENDBIT: " + str(self.status)
+        #print "setPosLoad: self.status |= self.INWENDBIT: " + str(self.status)
 
     def clearPosLoad(self):
         self.status &= ~self.INWENDBIT
         #debug
-        print "clearPosLoad: self.status &= ~self.INWENDBIT: " + str(self.status)
+        #print "clearPosLoad: self.status &= ~self.INWENDBIT: " + str(self.status)
 
     def isPosZone(self):
         if self.status & self.INPZONEBIT:
@@ -153,12 +153,12 @@ class AxisStatus(object):
     def setPosZone(self):
         self.status |= self.INPZONEBIT
         #debug
-        print "setPosZone: self.status |= self.INPZONEBIT: " + str(self.status)
+        #print "setPosZone: self.status |= self.INPZONEBIT: " + str(self.status)
 
     def clearPosZone(self):
         self.status &= ~self.INPZONEBIT
         #debug
-        print "clearPosZone: self.status &= ~self.INPZONEBIT: " + str(self.status)
+        #print "clearPosZone: self.status &= ~self.INPZONEBIT: " + str(self.status)
 
     def isZone1(self):
         if self.status & self.INZONE1BIT:
@@ -168,12 +168,12 @@ class AxisStatus(object):
     def setZone1(self):
         self.status |= self.INZONE1BIT
         #debug
-        print "setZone1: self.status |= self.INZONE1BIT: " + str(self.status)
+        #print "setZone1: self.status |= self.INZONE1BIT: " + str(self.status)
 
     def clearZone1(self):
         self.status &= ~self.INZONE1BIT
         #debug
-        print "clearZone1: self.status &= ~self.INZONE1BIT: " + str(self.status)
+        #print "clearZone1: self.status &= ~self.INZONE1BIT: " + str(self.status)
 
     def isZone2(self):
         if self.status & self.INZONE2BIT:
@@ -183,12 +183,12 @@ class AxisStatus(object):
     def setZone2(self):
         self.status |= self.INZONE2BIT
         #debug
-        print "setZone2: self.status |= self.INZONE2BIT: " + str(self.status)
+        #print "setZone2: self.status |= self.INZONE2BIT: " + str(self.status)
 
     def clearZone2(self):
         self.status &= ~self.INZONE2BIT
         #debug
-        print "setZone2: self.status &= ~self.INZONE2BIT: " + str(self.status)
+        #print "setZone2: self.status &= ~self.INZONE2BIT: " + str(self.status)
 
     def isCtrlReady(self):
         if self.status & self.INCRDYBIT:
@@ -198,7 +198,7 @@ class AxisStatus(object):
     def setCtrlReady(self):
         self.status |= self.INCRDYBIT
         #debug
-        print "setCtrlReady: self.status |= self.INCRDYBIT: " + str(self.status)
+        #print "setCtrlReady: self.status |= self.INCRDYBIT: " + str(self.status)
 
     def clear(self):
         self.status = 0
@@ -469,7 +469,6 @@ class ElixysSimulator(ElixysObject):
         """
         self.status = StatusSimulator()
         self.cb_map = {}
-        log.debug("This is Josh!!!!!!!!!Sim")
         log.debug("Initialize the ElixysSimulator, register callbacks")
 
         # Setup Callbacks for Mixer commands
@@ -570,7 +569,7 @@ class ElixysSimulator(ElixysObject):
             the proper state variable (or start a thread that will simulate
             some HW change)
         """
-        log.debug("Josh: Parsing some commands from parse_cmd in ElixysSimulator")
+        log.debug("Testelixyshw client parse_cmd")
         # Create struct for unpacking the cmd_id and dev_id
         cmd_id_struct = struct.Struct("<ii")
 
