@@ -66,6 +66,7 @@ class Reactor(PneumaticActuator):
     conf = property(_get_conf)
 
     def initialize(self):
+        log.debug("Initializing reactor") #just a test line
         self.home()
         self.set_stopcocks_for_install()
 

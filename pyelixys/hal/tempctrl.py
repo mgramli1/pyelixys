@@ -71,6 +71,8 @@ class TempCtrl(SystemObject):
         for tc in self.tempctrls:
             tc.on = value
 
+        self._on = value #Added 5/7/2014 by joshua.thompson@sofiebio.com
+
     def get_on(self):
         return self._on
 

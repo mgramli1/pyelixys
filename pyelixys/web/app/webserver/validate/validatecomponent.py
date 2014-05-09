@@ -245,12 +245,12 @@ def reagent_check(params):
 
     for key, value in params.iteritems():
     # Check valid string
-    if key in valid_str_keys:
-        comp_vtor.check("string(min=0, max=255)", value)
+        if key in valid_str_keys:
+            comp_vtor.check("string(min=0, max=255)", value)
 
-    # Check valid integers
-    if key in valid_int_keys:
-        comp_vtor.check("integer(min=0)", value)
+        # Check valid integers
+        if key in valid_int_keys:
+            comp_vtor.check("integer(min=0)", value)
 
 comp_vtor.functions['check_component'] = component_check
 comp_vtor.functions['check_user'] = user_check

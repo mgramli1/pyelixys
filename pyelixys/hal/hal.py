@@ -371,9 +371,12 @@ class TemperatureController(SynthesizerSubObject):
                   % (self.id_, value))
         self.on_ = value
         if self.on_ is True:
+            log.debug("self.on_ is True!")
             cmd = self.cmd_lookup['TemperatureControllers']['turn_on'][self.id_]()
         else:
             cmd = self.cmd_lookup['TemperatureControllers']['turn_off'][self.id_]()
+    
+        
         self.comproc.run_cmd(cmd)
     on = property(get_on, set_on,
                   doc="Turn temperature controller on/off")
@@ -502,6 +505,8 @@ class LinearActuator(SynthesizerSubObject):
 
     def isInPosition(self):
         if self.axis_status & self.INPOSENDBIT:
+            #debug
+            print 'self.axis_status: ' + str(self.axis_status)
             return True
         return False
 
