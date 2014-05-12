@@ -1,0 +1,425 @@
+Pyelixys Change Log
+----------------------
+Date Created: 4/22/2014
+Author: Joshua Thompson
+----------------------
+Edited By: 
+Date Edited:
+
+
+-------------------
+-------------------
+Bugs Found / Fixed:
+-------------------
+-------------------
+
+NOTE:
+-In all bug reports 'source bin/activate' was initialized in the Pyelixys directory first when running in Python Virtualenv. 
+-Originally, the baseline Pyelixys code was pulled from the CrumpUCLA pyelixys clone on 4/22/2014 (https://github.com/CrumpUCLA/pyelixys)
+-Current GitHub Pyelixys Admins include: Mike Vandam, Joshua Thompson and Henry Herman (no longer working with Sofie Bio)
+
+------
+Bug 1: 
+------
+Fixed by: joshua.thompson@sofeibio.com
+Date Found: 4/22/2014
+Desc: Indentation error reported when running 'sudo python -m pyelixys.web.database.model'
+Details:
+
+	-------------
+	“ File "pyelixys/web/app/webserver/validate/validatecomponent.py", line 248
+    	if key in valid_str_keys:
+     	^
+	IndentationError: expected an indented block”
+	--------------
+Date Fixed: 4/22/2014
+Fix Desc: Added indentation to if statements under for loop
+
+------
+Bug 2: 
+------
+Fixed by: joshua.thompson@sofiebio.com
+Desc: Error when running 'sudo python -m pyelixys.web.database.populatedb'
+Details:
+	-----------
+	 “   from pyelixys.web.database.model import Session,\
+		ImportError: cannot import name Session”
+	-----------
+Fixed On: 4/23/2014
+
+Fix Desc:
+	-found that model.py was calling module from validate folder in web / app / 	webserver
+	-this lead to calling __init__.py in the app folder
+	- this lead to modules being called in __init__.py which tried to import from 	module.py creating a circular import (leads to error)
+	-the only thing that needed the code in web/app __init__.py was runserver.py (I think)
+	-so, comment out code in __init__.py and put in file called app.py in web / app
+	-runserver.py calls this file
+	-ran >> 'sudo python -m pyelixys.web.database.populatedb' SUCCESSFULLY!
+
+-------
+Bug 3: 
+-------
+Fixed by: joshua.thompson@sofiebio.com
+Date Found: 4/23/2014
+Desc: Error running 'sudo python -m pyelixys.sequence.sequencemanager'
+Details:
+
+	-----------
+		“ from components.react import React
+  	File "pyelixys/sequence/components/react.py", line 105
+    	f __name__ == '__main__':
+         ^
+		SyntaxError: invalid syntax”
+
+	-----------
+
+Date Fixed: 4/23/2014
+Fix Desc:
+	-removed 'f' and replaced with 'if' on line 105 in react.py
+	-must also used 'sudo' for this command (not mentioned in Pyelixys README doc on GitHub)
+
+------
+Bug 4:
+------
+Fixed by: joshua.thompson@sofeibio.com
+Date Found: 4/23/2014
+Desc: Error running “sudo python -m pyelixys.sequence.sequencemanager”
+Details:
+
+	--------------
+		“File "pyelixys/web/app/webserver/validate/validatecomponent.py", line 248
+    	if key in valid_str_keys:
+    	 ^”
+	--------------
+
+Date Fixed: 4/23/2014
+Fix Desc: Indented both if statements (and children) before for loop in file
+
+
+------		
+Bug 5:
+------ 
+Fixed by: joshua.thompson@sofeibio.com
+Date Found: 4/23/2014
+Desc: Error running “sudo python -m pyelixys.sequence.sequencemanager”
+Details:
+	
+	--------------
+		“sockets = bind_sockets(port, address=address)
+  	File "/Users/sofiebio/Desktop/pyelixys/lib/python2.7/site-packages/tornado/netutil.py", line 104, in bind_sockets
+    	sock.bind(sockaddr)
+  File "/usr/local/Cellar/python/2.7.5/Frameworks/Python.framework/Versions/2.7/lib/python2.7/socket.py", line 224, in meth
+    return getattr(self._sock,name)(*args)
+	error: [Errno 48] Address already in use
+	Traceback (most recent call last):
+  	File "/usr/local/Cellar/python/2.7.5/Frameworks/Python.framework/Versions/2.7/lib/python2.7/runpy.py", line 162, in _run_module_as_main
+    	"__main__", fname, loader, pkg_name)
+  	File "/usr/local/Cellar/python/2.7.5/Frameworks/Python.framework/Versions/2.7/lib/python2.7/runpy.py", line 72, in _run_code
+    	exec code in run_globals
+  	File "/Users/sofiebio/Desktop/pyelixys/pyelixys/pyelixys/sequence/sequencemanager.py", line 4, in <module>
+    	from pyelixys.web.database.model import Sequence
+  	File "pyelixys/web/database/model.py", line 15, in <module>
+    	from pyelixys.web.app.webserver.validate.validatecomponent import comp_vtor
+  	File "pyelixys/web/app/__init__.py", line 17, in <module>
+    	from webserver.elixys_web_index import elixys_web_index
+  	File "pyelixys/web/app/webserver/elixys_web_index.py", line 17, in <module>
+    	from pyelixys.web.app.userauth.basicauth import requires_auth
+  	File "pyelixys/web/app/userauth/basicauth.py", line 8, in <module>
+    	from pyelixys.web.database.model import Session,\
+	ImportError: cannot import name Session
+	FROM SERVER: 'Too many connections! Closing yours.'
+	Execute PKT: 'Too many connections! Closing yours.'
+	CMDID:#544173908|DEVID:#2037277037
+	No handlers could be found for logger "root"
+	### closed ###”
+	
+	-------------------
+Notes:
+	-seems to result from multiple problems: 
+		-circular import of model.py
+		-opening multiple sessions –- via session = Session() in model.py and basicauth.py (maybe others?)
+	-question: is it ok to call session=Session() more than once? Or should you only have one session open?
+
+Date Fixed: 4/20/2014
+Fix Desc:
+	-It looks like runserver.py is the only one using the app class defined in the web/app __init__.py file
+	
+	In (OLD) runserver.py
+
+		----------
+		if __name__ == '__main__':
+    		from pyelixys.web.app import app
+    		#from pyelixys.sequence.sequencemanager import SequenceManager
+    		app.run(host='0.0.0.0', debug=True, port=80)
+
+
+	Fix: Take out the code from web/app __init__.py that leads to calling model.py and put that in a separate file called app.py.
+	In (NEW) runserver.py
+		if __name__ == '__main__':
+    		from pyelixys.web.app.app import app
+    		#from pyelixys.sequence.sequencemanager import SequenceManager
+    		app.run(host='0.0.0.0', debug=True, port=80)
+
+
+------
+Bug 6:
+------ 
+Fixed by: joshua.thompson@sofeibio.com
+Date Found: 4/23/2014
+Desc: Error running 'sudo python -m pyelixys.sequence.sequencemanager'
+Details:
+
+	-------------
+	  	“File "pyelixys/sequence/components/cassette.py", line 18, in __init__
+  	  	self.thread = CassetteThread()
+		TypeError: __init__() takes exactly 2 arguments (1 given)”
+	-------------
+
+	
+Date Fixed: 4/23/2014
+Fix Desc: replace self.thread = CassetteThread() with self.thread = CassetteThread(self) 
+
+------
+Bug 7:
+------ 
+Fixed by: joshua.thompson@sofeibio.com
+Date Found: 4/24/2014
+Desc: Initializing reactor times out when running pyelixys.hal.system (simulation mode)
+Details:
+		--------------------
+		-run >> sudo python -m pyelixys.hal.system
+		-r = s.reactors[0]
+		-r.initialize()
+		-tries to move reactor actuators (in simulator)
+		“ElixysPneumaticError: Failed to lower <Elixys:Reactor(2)> check digital sensors and pressure source”
+		--------------------
+
+Note: This time out happens when you try to use any move function on the reactor object and is caused by a web socket issue that affects all comm with the simulator
+Fix Desc: See Bug 8
+
+------
+Bug 8:
+------
+
+Fixed by: joshua.thompson@sofeibio.com
+Date Found:4/24/2014
+Desc: system.f18 state not updating in simulation mode
+Details:
+	   -------------------------		
+	    -run>>sudo python -m pyelixys.hal.system
+	    ->> f18 = s.f18
+	    ->> In [67]: f18.turn_on()
+	    ->> Turn on F18 transfer valve
+	    ->> Set Valve 41 on -> True
+	    ->> Set Valve 41 (state2) on -> 0b1000000000
+	    ->> In [68]: f18._is_on()
+	    ->> Get Valve 41 on -> False
+	    ->> Out[68]: False
+	   --------------------------
+
+Note: This problem stems from the websocket bug Henry mentioned (4/23/2014)
+Date Fixed: 5/1/2014 
+Note: This also fixes the bug having to do with reactor.initialize() (prev bug)
+
+Fix Desc:  The problem is that in the client side (testelixyshw.py) that runs the synthesizer simulator there is no code that updates the pkt_id parameter in self.status['Header']['packet_id']. To fix this add a line that updates this parameter everytime a command is received from the host (wsserver.py) side of pyelixys.
+
+
+Old code (testelixyshw.py):
+---------------------
+def on_message(ws, message):
+    """ When test client receives a command print it to console ""
+    print "FROM SERVER (sim talking): %s" % repr(message)
+    #cmds.put(message)
+    
+    e.run_callback(message)
+
+New code
+----------------------
+def on_message(ws, message):
+    """ When test client receives a command print it to console """
+    
+    print "FROM SERVER (sim talking): %s" % repr(message)
+    #cmds.put(message)
+    
+    e.run_callback(message)
+	e.status['Header']['packet_id'] = e.status['Header']['packet_id'] + 1 #increment packet_id so that host will know that a new command has been recieved
+
+
+------
+Bug 9:
+------
+
+Fixed by: joshua.thompson@sofeibio.com
+Date Found: 5/1/2014
+Desc: When running pyelixys simulator, trying to stop the comproc server results in never ending debug output loop
+Details:
+
+		----------------------
+		>>sudo python -m pyelixys.hal.system
+ 		>>....#a bunch of initialization debug output is printed
+		>>#press enter after everything done printing to screen 
+		>> #should now be in Ipython mode
+		>> com = s.synth #copy server communication object 
+ 		>> com.stop() #should stop the server
+		>> #results in never ending output loop
+		>> #to stop loop type com.terminate() #this will also result in error but at least stop the program / output 
+		----------------------
+
+Date Fixed: 5/5/2014
+Fix Desc:
+	In wsserver.py
+        ---------------
+		
+
+	Added method in WSServerProcess
+	--------------------------------
+
+    	def stop_server(self):
+        	""" Helper function to stop the server """
+        
+       	 log.debug("Stopping wsserver")
+         self.stop_event.set()
+         tornado.ioloop.IOLoop.instance().stop()
+         self.terminate()
+
+	In testelixyshw.py
+	------------------------
+	stop_event = Event() #testing to see if client will stop when stop_event is set (see on_close function)
+
+
+   	In on_close method Added:
+   	------------------
+	stop_event.set() #set stop_event so that while loop in on_open() stops
+
+    	In on_open method Updated:
+	------------------	
+	while (stop_event.is_set() == False): #previously was while (True)
+
+Details of fix:
+- >> com = s.synth.comproc
+- >> com.stop_server()
+Summary: Fix stopped the server and the client without any errors
+
+
+-------
+Bug 10:
+-------
+
+Fixed by: joshua.thompson@sofeibio.com
+Date Fixed: 5/7/2014
+Desc: Counter clockwise and clockwise stopcock status functions are not reporting correctly
+Details: Looking into stopcock.py reveals that cw_valve_id and ccw_valvle_id are used in the wrong functions (should be switched?). See code from file below:
+	
+	
+	def _is_counter_clockwise(self):
+        	""" Check if the stopcock is clockwise """
+        	return self.synth.valves[self._cw_valve_id].on #should this be switched to ccw?
+
+    	def _is_clockwise(self):
+        	""" Check if the stopcock is counter clockwise """
+        	return self.synth.valves[self._ccw_valve_id].on #should this be switched to cw?
+
+Date Fixed: 5/8/2014
+Fix Desc: Replace ccw_valve_id with _cw_valve_id and vice versa
+					
+
+-------
+Bug 11:
+-------
+
+Fixed by: Not Fixed
+Date Fixed: 5/7/2014
+Desc: Temperature Controller only increases temperature. Reactor hal object cannot set setpoint to lower temperature only higher. Only way to lower temp is by turning off temperature controller (from reactor object). There is a coolanpump object but I do not see this implemented in the reactor. It is only implemented in the sequence / components code.
+Fix Date: NOT FIXED YET (hw or fw update ?)
+
+-------
+Bug 12:
+-------
+
+Fixed by: joshua.thompson@sofeibio.com
+Date Found: 5/7/2014
+Desc: Temperature Controller tempctrl object set_on(value) function does not update the object on/off value state but it does update the simulator state.
+Details:
+
+	----------------------
+	->>reactor0 = s.reactors[0]
+	->>temp_controller0 = reactor0.temperature_controller
+	->>temp_controller0.on
+	->> False
+	->>temp_controller0.on = True
+	->> #some stuff happens (sends commands to simulator...etc)
+	->>temp_controller0.on
+	->> False #does not change state....however
+	->>temp_controller0.tempctrls[0].on
+	->> True #it does change this state and also updates 
+	----------------------
+
+Date Fixed: 5/7/2014
+Fix Desc:
+	-just add: tempctrol._on = value in the set_on function
+
+
+-------
+Bug 13: 
+-------
+
+Fixed by: joshua.thompson@sofeibio.com
+Date Found: 5/8/2014
+Desc: Actuator requested_position is not updated to 0 when actuator.home() function called (problem is in testelixyshw.py under the linacts_home_axis function).
+Details:
+
+	------------------
+	->>LinAxis  = s.reactors[0].actuator
+	->>LinAxis.set_position(40)
+	->>LinAxis.start() #moves and does some stuff
+	->>LinAxis.get_position_error() #returns 0 if moved successfully
+	->>LinAxis.home() moves and does some stuff
+	->>LinAxis.get_position_error() #eventually position = 0 but requested pos still = 40
+	-------------------
+	
+	
+Date Fixed: 5/8/2014
+Fix Desc: 
+	-Just add: self.status.LinearActuators[devid]['requested_position'] = value to linacts_home_axis function
+
+
+
+-------
+Bug 14: 
+-------
+
+Fixed by: joshua.thompson@sofeibio.com
+Date Found: 5/8/2014
+Desc: testelixyhw.py client is updating and sending the packet id and status message back to the server (wsserver.py) before it completes a simulated command
+Details: When the server sends the client a command, the client is supposed to send a status message with an incremented packet id when it executes a command send by the server. The 	server then knows it's ready to send the next command (since the client is finished with the prev one). However, if the client sends an updated status message before the 	command is executed then the server will send another command to the client while the prev command is still (potentially) being executed. This means the client will be 	executing mutlitple commands at once (not the way the system works in real life). 
+
+	------------
+	->>robot = s.reagent_robot	
+	->>robot.home()
+	->>#does some stuff
+	->>robot.move_coord(10,80) #moves x then y axis linear actuator.home
+	->>#successfully move x axis 10 mm
+	->>#starts moving y axis 80 mm, gets half way there when the turn_on routine starts! This routine should not start till after the move is complete
+	------------
+
+Date Fixed: 10/9/2014
+Fix Desc: Had to remove ALL the Timer(0.5,fxn).start() lines from the functions in testelixyshw.py.  Replace with time.sleep(0.5); fxn() #must import time module
+          -some function has numbers other than 0.5 so just used the ones that were mentioned
+
+
+-------
+Bug 15:
+------- 
+Fixed by: Not Fixed
+Date Fixed: 5/8/2014
+Desc: When running robot.yactuator.actuator.isInPosition() it returns True even though the y axis actuator simulator is still moving.
+Details:
+	------------------
+	->>sudo python -m pyelixys.hal.system
+	->>robot = s.reagent_robots
+	->>robot.move_coord(10,80) 
+	->>robot.yactuator.actuator.isInPostion() #takes robot some some to move 80 mm (about 1 min) so check position before it finished
+	->>True #should be false while still moving, but is always True
+	------------------
+
+Date Fixed: NOT FIXED YET
